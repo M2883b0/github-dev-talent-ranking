@@ -13,6 +13,7 @@ import time
 # 爬取所有的topic
 """
 
+
 class GetTopic(scrapy.Spider):
     name = "GetTopic"
     start_urls = ['https://github.com/topics']  # 填 topic URL
@@ -46,15 +47,16 @@ class GetTopic(scrapy.Spider):
                 title_cleaned = ' '.join(title_cleaned.split())  # 去掉多余空格
                 if title_cleaned not in self.titles_set:
                     self.titles_set.add(title_cleaned)
-                    yield {'title': title_cleaned}      # 仅输出新数据
+                    yield {'title': title_cleaned}  # 仅输出新数据
 
             try:
-                #找到load more按钮
-                load_more_button = self.driver.find_element("xpath", "/html/body/div[1]/div[4]/main/div[4]/div[1]/form/button")  # 替换为实际的按钮文本的xpath
+                # 找到load more按钮
+                load_more_button = self.driver.find_element("xpath",
+                                                            "/html/body/div[1]/div[4]/main/div[4]/div[1]/form/button")  # 替换为实际的按钮文本的xpath
                 load_more_button.click()
             except Exception as e:
                 self.logger.info("没有更多内容了，停止爬取。")
                 break
 
     def closed(self, reason):
-        self.driver.quit()  #当爬虫运行结束时，调用 self.driver.quit() 可以关闭 Selenium 的 WebDriver 实例。这有助于释放系统资源，如内存和进程
+        self.driver.quit()  # 当爬虫运行结束时，调用 self.driver.quit() 可以关闭 Selenium 的 WebDriver 实例。这有助于释放系统资源，如内存和进程

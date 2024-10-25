@@ -8,5 +8,5 @@
 """
 from scrapy import cmdline
 
-cmdline.execute("scrapy crawl UserSpider".split())
-# cmdline.execute("scrapy crawl GetTopic".split())
+# cmdline.execute("scrapy crawl UserSpider".split())
+cmdline.execute("scrapy crawl GetTopic".split())
