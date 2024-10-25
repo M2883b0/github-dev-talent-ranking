@@ -11,7 +11,7 @@ import time
 
 class NewsSpider(scrapy.Spider):
     name = "topic_spider"
-    start_urls = ['https://github.com/topics']  # topic URL
+    start_urls = ['https://github.com/topics']  # 填 topic URL
 
     def __init__(self, *args, **kwargs):
         super(NewsSpider, self).__init__(*args, **kwargs)
@@ -28,12 +28,13 @@ class NewsSpider(scrapy.Spider):
         while True:
             time.sleep(2)  # 等待时间
             sel = Selector(text=self.driver.page_source)
-            titles = sel.css('p.f3 lh-condensed mb-0 mt-1 Link--primary::text').getall()  # 替换为topic文本所在的类的名字，作为选择器
+            titles = sel.css('p.f3 lh-condensed mb-0 mt-1 Link--primary::text').getall()  # 替换为topic文本，所在的class的名字，作为选择器
 
             for title in titles:
                 yield {'title': title}
 
             try:
+                #找到load more按钮
                 load_more_button = self.driver.find_element("xpath", "/html/body/div[1]/div[5]/main/div[4]/div[1]/form/button']")  # 替换为实际的按钮文本的xpath
                 load_more_button.click()
             except Exception as e:
