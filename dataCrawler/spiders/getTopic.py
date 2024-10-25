@@ -11,7 +11,7 @@ import time
 
 class NewsSpider(scrapy.Spider):
     name = "topic_spider"
-    start_urls = ['https://github.com/topics']  # 替换为实际的新闻列表页面 URL
+    start_urls = ['https://github.com/topics']  # topic URL
 
     def __init__(self, *args, **kwargs):
         super(NewsSpider, self).__init__(*args, **kwargs)
@@ -26,7 +26,7 @@ class NewsSpider(scrapy.Spider):
         self.driver.get(response.url)
         # 循环点击“加载更多”按钮
         while True:
-            time.sleep(1)  # 等待时间
+            time.sleep(2)  # 等待时间
             sel = Selector(text=self.driver.page_source)
             titles = sel.css('p.f3.lh-condensed.mb-0.mt-1.Link--primary::text').getall()  # 替换为实际的选择器
 
@@ -41,4 +41,4 @@ class NewsSpider(scrapy.Spider):
                 break
 
     def closed(self, reason):
-        self.driver.quit()
+        self.driver.quit()  #当爬虫运行结束时，调用 self.driver.quit() 可以关闭 Selenium 的 WebDriver 实例。这有助于释放系统资源，如内存和进程
