@@ -5,7 +5,7 @@ import scrapy
 """
 
 class NewsSpider(scrapy.Spider):
-    name = "news_spider"
+    name = "news_spider111"
     start_urls = ['https://example.com/news']  # 替换为实际的新闻列表页面 URL
 
     def parse(self, response):
