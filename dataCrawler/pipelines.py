@@ -9,5 +9,5 @@
 
 
 class UserInfoPipeline:
-    def __init__(self):
-        self.settings = None
+    def process_item(self, item, spider):
+        return item
