@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from scrapy.selector import Selector
 import time
+from dataCrawler.config import Topic_url, Topic_css, Topic_button_Xpath
 
 """
 # 爬取所有的topic
@@ -16,7 +17,7 @@ import time
 
 class GetTopic(scrapy.Spider):
     name = "GetTopic"
-    start_urls = ['https://github.com/topics']  # 填 topic URL
+    start_urls = [Topic_url]  # 填 topic URL
 
     def __init__(self, *args, **kwargs):
         super(GetTopic, self).__init__(*args, **kwargs)
@@ -40,7 +41,7 @@ class GetTopic(scrapy.Spider):
         while True:
             time.sleep(3)  # 等待时间
             sel = Selector(text=self.driver.page_source)
-            titles = sel.css('p.f3.lh-condensed.mb-0.mt-1.Link--primary::text').getall()  # 替换为topic文本，所在的class的名字，作为选择器
+            titles = sel.css(Topic_css + '::text').getall()  # 替换为topic文本，所在的class的名字，作为选择器
             for title in titles:
                 # 清理换行符和多余空白
                 title_cleaned = title.strip().replace('\n', '').replace('  ', ' ')
@@ -51,8 +52,7 @@ class GetTopic(scrapy.Spider):
 
             try:
                 # 找到load more按钮
-                load_more_button = self.driver.find_element("xpath",
-                                                            "/html/body/div[1]/div[4]/main/div[4]/div[1]/form/button")  # 替换为实际的按钮文本的xpath
+                load_more_button = self.driver.find_element("xpath", Topic_button_Xpath)  # 替换为实际的按钮文本的xpath
                 load_more_button.click()
             except Exception as e:
                 self.logger.info("没有更多内容了，停止爬取。")
