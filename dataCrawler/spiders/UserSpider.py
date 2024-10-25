@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 """
-@File    :   userSpider.py    
+@File    :   UserSpider.py
 @Author  :   m2883b0
 @Modify Time      @Version    @Desciption
 ------------      --------    -----------
@@ -17,10 +17,7 @@ from dataCrawler.config import user_info_api_template
 class UserSpider(scrapy.Spider):
     name = "UserSpider"
     allowed_domains = ["github.com"]
-    start_urls = [user_info_api_template % (0, 1000)]
-    custom_settings = {
-        'ITEM_PIPELINES': {'.piplines.'}
-    }
+    start_urls = [user_info_api_template.format(0, 1000)]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
