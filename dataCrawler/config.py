@@ -11,3 +11,5 @@
 
 # 用户信息接口
 user_info_api_template = "https://api.github.com/users?since={}&per_page={}"
+user_list_step = 1000
+user_number = 5000

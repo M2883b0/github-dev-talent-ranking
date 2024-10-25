@@ -10,4 +10,6 @@
 
 class UserInfoPipeline:
     def process_item(self, item, spider):
+
+        print(type(item))
         return item

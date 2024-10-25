@@ -10,7 +10,7 @@ import scrapy
 
 
 # GitHub 提供了访问开发者的接口 https://api.github.com/users?since=0&per_page=1000
-class UserInfo(scrapy.Item):
+class DeveloperInfo(scrapy.Item):
     ID = scrapy.Field()
     user_name = scrapy.Field()
     avatar_url = scrapy.Field()
