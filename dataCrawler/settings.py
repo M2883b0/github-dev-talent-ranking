@@ -35,6 +35,8 @@ DEFAULT_REQUEST_HEADERS = {
 ITEM_PIPELINES = {
     "dataCrawler.pipelines.UserInfoPipeline": 300
 }
+
+LOG_LEVEL = 'WARNING'
 # 爬虫中间件
 # SPIDER_MIDDLEWARES = {
 #    'mySpider.middlewares.MyspiderSpiderMiddleware': 543,

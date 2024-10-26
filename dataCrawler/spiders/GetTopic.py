@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from scrapy.selector import Selector
 import time
-from dataCrawler.config import Topic_url, Topic_css, Topic_button_Xpath
+from config import Topic_url, Topic_css, Topic_button_Xpath
 
 """
 # 爬取所有的topic
