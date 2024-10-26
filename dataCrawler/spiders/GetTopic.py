@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from scrapy.selector import Selector
 import time
-from dataCrawler.config import Topic_url, Topic_css, Topic_button_Xpath, Topic_image, Topic_summary
+from config import Topic_url, Topic_css, Topic_button_Xpath
 
 """
 # 爬取所有的topic
@@ -41,30 +41,14 @@ class GetTopic(scrapy.Spider):
         while True:
             time.sleep(3)  # 等待时间
             sel = Selector(text=self.driver.page_source)
-
-            articles = sel.css('div.py-4.border-bottom.d-flex.flex-justify-between')  # 替换为每个item的选择器
-
-            for article in articles:
-                title = article.css(Topic_css + '::text').get()  # 替换为topic文本，所在的class的名字，作为选择器
-
-                # 检查这个topic是否有图像
-                img_element = article.css(Topic_image+' img')  # 选择图像元素
-                if img_element:
-                    image_url = img_element.attrib.get('src')  # 获取 src 属性
-                else:
-                    image_url = None  # 没有图像的情况
-                summary = article.css(Topic_summary + '::text').get()  # 替换为topic文本，所在的class的名字，作为选择器
-
-                if title:
-                    # 清理换行符和多余空白
-                    title_cleaned = title.strip().replace('\n', '').replace('  ', ' ')
-                    title_cleaned = ' '.join(title_cleaned.split())     # 去掉多余空格
-                    if title_cleaned not in self.titles_set:
-                        self.titles_set.add(title_cleaned)
-                        yield {'title': title_cleaned,
-                               'image_url': image_url,
-                               'summary': summary
-                               }  # 仅输出新数据
+            titles = sel.css(Topic_css + '::text').getall()  # 替换为topic文本，所在的class的名字，作为选择器
+            for title in titles:
+                # 清理换行符和多余空白
+                title_cleaned = title.strip().replace('\n', '').replace('  ', ' ')
+                title_cleaned = ' '.join(title_cleaned.split())  # 去掉多余空格
+                if title_cleaned not in self.titles_set:
+                    self.titles_set.add(title_cleaned)
+                    yield {'title': title_cleaned}  # 仅输出新数据
 
             try:
                 # 找到load more按钮

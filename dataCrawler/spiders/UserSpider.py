@@ -11,7 +11,7 @@ from typing import Any
 
 import scrapy
 from scrapy.http import Response
-from dataCrawler.config import user_info_api_template, user_number, user_list_step
+from config import user_info_api_template, user_number, user_list_step
 from dataCrawler.item.UserInfo import UserInfo
 
 
@@ -40,10 +40,11 @@ class UserSpider(scrapy.Spider):
         if isinstance(userLi, list):
             for user in userLi:
                 assert isinstance(user, dict)
-                item = UserInfo(user.get("id"), user.get("login"), user.get("avatar_url"), user.get("url"))
+                print(user.get("id"), user.get("login"), user.get("avatar_url"), user.get("url"))
+                item = UserInfo(ID=user.get("id"), user_name=user.get("login"), avatar_url=user.get("avatar_url"),
+                                url=user.get("url"))
                 yield item
         else:
             return None
-        url = next(urls)
-        if url:
+        for url in urls:
             yield scrapy.Request(url)
