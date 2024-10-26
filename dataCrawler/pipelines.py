@@ -11,5 +11,5 @@
 class UserInfoPipeline:
     def process_item(self, item, spider):
 
-        print(type(item))
+        print(item)
         return item
