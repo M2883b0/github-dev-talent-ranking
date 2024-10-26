@@ -3,7 +3,7 @@ from typing import Any
 import scrapy
 from scrapy.http import Response
 
-from config import topic_list_url, topic_descript_xpath, topic_image_xpath_template, topic_name_xpath, topic_page_count, \
+from dataCrawler.config import topic_list_url, topic_descript_xpath, topic_image_xpath_template, topic_name_xpath, topic_page_count, \
     topic_url_xpath, base_url
 from dataCrawler.item.TopicInfo import TopicInfo
 
