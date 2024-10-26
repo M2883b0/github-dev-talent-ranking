@@ -1,0 +1,91 @@
+# pip install --upgrade spark_ai_python
+
+from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
+from sparkai.core.messages import ChatMessage
+
+#星火认知大模型Spark Max的URL值，其他版本大模型URL值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
+
+# Spark4.0 Ultra 请求地址，对应的domain参数为4.0Ultra：
+# wss://spark-api.xf-yun.com/v4.0/chat
+
+# Spark Max-32K请求地址，对应的domain参数为max-32k
+# wss://spark-api.xf-yun.com/chat/max-32k
+
+# Spark Max请求地址，对应的domain参数为generalv3.5
+# wss://spark-api.xf-yun.com/v3.5/chat
+
+# Spark Pro-128K请求地址，对应的domain参数为pro-128k：
+#  wss://spark-api.xf-yun.com/chat/pro-128k
+
+# Spark Pro请求地址，对应的domain参数为generalv3：
+# wss://spark-api.xf-yun.com/v3.1/chat
+
+# Spark Lite请求地址，对应的domain参数为lite：（免费）
+# wss://spark-api.xf-yun.com/v1.1/chat
+
+
+# 账户api key
+SPARKAI_URL = 'wss://spark-api.xf-yun.com/v1.1/chat'
+#星火认知大模型调用秘钥信息，请前往讯飞开放平台控制台（https://console.xfyun.cn/services/bm35）查看
+SPARKAI_APP_ID = '97c319c8'
+SPARKAI_API_SECRET = 'MmM4MWQyNmE4Yjc5OTQ3N2Y1YjgyN2Mx'
+SPARKAI_API_KEY = 'cd82673c0fa28173962de388b84146c9'
+#星火认知大模型Spark Max的domain值，其他版本大模型domain值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
+SPARKAI_DOMAIN = 'lite'
+
+
+# topic_list=get_topic()
+
+
+def test_non_stream():
+    spark = ChatSparkLLM(
+        spark_api_url=SPARKAI_URL,
+        spark_app_id=SPARKAI_APP_ID,
+        spark_api_key=SPARKAI_API_KEY,
+        spark_api_secret=SPARKAI_API_SECRET,
+        spark_llm_domain=SPARKAI_DOMAIN,
+        streaming=False,
+    )
+    messages = [
+        ChatMessage(
+            role="system",
+            content='你是一个对Github项目进行判断分类的专家，给定一个类别列表和一个Github项目简介。请你从类别列表中，选出与该项目内容最相关的2个类别。只需返回所选的类别，输出格式为列表格式。'
+        ),
+        ChatMessage(
+            role="user",
+            content='类别列表:[linux,3D,Google,Web,C,Database,python,transformers]。Github项目简介:Linux kernel source tree and code。请用列表格式输出：'
+        )
+    ]
+    handler = ChunkPrintHandler()
+    a = spark.generate([messages], callbacks=[handler])
+    print(a.generations[0][0].text)
+
+
+def test_stream():
+    """
+    还没修好
+    :return:
+    """
+    from sparkai.core.callbacks import StdOutCallbackHandler
+    spark = ChatSparkLLM(
+        spark_api_url=SPARKAI_URL,
+        spark_app_id=SPARKAI_APP_ID,
+        spark_api_key=SPARKAI_API_KEY,
+        spark_api_secret=SPARKAI_API_SECRET,
+        spark_llm_domain=SPARKAI_DOMAIN,
+        request_timeout=30, #
+        streaming=True,
+
+    )
+    messages = [ChatMessage(
+        role="user",
+        content='编写一个贪吃蛇游戏的开发流程',
+        )]
+    handler = ChunkPrintHandler()
+    a = spark.generate([messages], callbacks=[handler])
+    print(a)
+
+
+
+if __name__ == '__main__':
+    test_non_stream()
