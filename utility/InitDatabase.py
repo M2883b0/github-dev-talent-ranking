@@ -47,7 +47,8 @@ def initialize_table(db_manager):
                             'subscribers_count INT, importance DECIMAL(2,2)',
 
         # topic表
-        'repos_topic': 'id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), avi VARCHAR(255)'
+        'repos_topic': 'id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50), descript VARCHAR(255), '
+                       'avi VARCHAR(255), url VARCHAR(255)'
 
     }
 
