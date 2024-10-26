@@ -7,7 +7,21 @@ import mysql.connector
 from mysql.connector import Error
 import pandas as pd
 
+class DatabaseConnection:
+    # 初始化连接池
+    def __init__(self, host, user, password, database):
+        self.pool = mysql.connector.pooling.MySQLConnectionPool(
+            pool_name="mypool",
+            pool_size=5,
+            host=host,
+            user=user,
+            password=password,
+            database=database
+        )
 
+    # 获取连接
+    def get_connection(self):
+        return self.pool.get_connection()
 
 class DatabaseManager:
     def __init__(self, host, database, user, passwd):
@@ -44,12 +58,10 @@ class DatabaseManager:
                 # 创建游标
                 self.cursor = self.connection.cursor()
 
-                # 检查数据库是否存在，不存在则创建
-                self.cursor.execute(f"CREATE DATABASE IF NOT EXISTS {self.database}")
-                print(f"数据库 {self.database} 创建成功")
-
-                # 关闭当前连接，重新连接到创建好的数据库
+                # 关闭当前连接
                 self.connection.close()
+
+                # 重新连接到指定数据库
                 self.connection = mysql.connector.connect(
                     host=self.host,
                     database=self.database,
@@ -72,6 +84,38 @@ class DatabaseManager:
             self.connection.close()
             print("MySQL 连接已关闭")
 
+    def create_database(self):
+        """
+        创建数据库
+        :return: 无返回值
+        """
+        try:
+            # 连接到MySQL服务器
+            self.connection = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.passwd
+            )
+            if self.connection.is_connected():
+                self.cursor = self.connection.cursor()
+                # 检查数据库是否已存在
+                self.cursor.execute("SHOW DATABASES LIKE %s", (self.database,))
+                result = self.cursor.fetchone()
+
+                if result:
+                    print(f"数据库 {self.database} 已存在")
+                else:
+                    # 创建数据库
+                    self.cursor.execute(f"CREATE DATABASE {self.database}")
+                    print(f"数据库 {self.database} 创建成功")
+        except Error as e:
+            print("创建数据库时发生错误：", e)
+        finally:
+            if self.connection.is_connected():
+                self.cursor.close()
+                self.connection.close()
+
+
     def create_table(self, table_name, columns):
         """
 
@@ -80,10 +124,18 @@ class DatabaseManager:
         :return:
         """
         try:
-            self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})")
-            print(f"表 {table_name} 创建成功")
+            # 检查表是否已存在
+            self.cursor.execute("SHOW TABLES LIKE %s", (table_name,))
+            result = self.cursor.fetchone()
+
+            if result:
+                print(f"表 {table_name} 已存在")
+            else:
+                # 创建表
+                self.cursor.execute(f"CREATE TABLE {table_name} ({columns})")
+                print(f"表 {table_name} 创建成功")
         except Error as e:
-            print(e)
+            print("创建表时发生错误：", e)
 
     def insert_data(self, table_name, columns, values):
         try:
