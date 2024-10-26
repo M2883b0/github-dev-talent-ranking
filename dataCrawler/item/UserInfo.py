@@ -16,3 +16,6 @@ class UserInfo(scrapy.Item):
     avatar_url = scrapy.Field()
     url = scrapy.Field()
 
+    def insert_to_database(self):
+        pass
+

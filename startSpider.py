@@ -6,7 +6,18 @@
 ------------      --------    -----------
 2024/10/25 23:10    1.0         None
 """
-from scrapy import cmdline
+from scrapy.crawler import CrawlerProcess
+from dataCrawler.spiders.TopicSpider import TopicSpider
+from dataCrawler.spiders.UserSpider import UserSpider
 
-cmdline.execute("scrapy crawl UserSpider".split())
-# cmdline.execute("scrapy crawl GetTopic".split())
+
+if __name__ == "__main__":
+    process = CrawlerProcess(
+        settings={
+            "LOG_LEVEL": "WARNING"
+                                       }
+    )
+
+    process.crawl(TopicSpider)
+    process.start()
+

@@ -11,7 +11,7 @@ from typing import Any
 
 import scrapy
 from scrapy.http import Response
-from config import user_info_api_template, user_number, user_list_step
+from dataCrawler.config import user_info_api_template, user_number, user_list_step
 from dataCrawler.item.UserInfo import UserInfo
 
 
