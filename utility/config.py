@@ -1,9 +1,15 @@
 # 数据库相关信息
 host = '172.22.229.6'
-database_name = 'data'
-user_name = 'root'
+database = 'data'
+user = 'root'
 passwd = '123456'
 
+init_info = {
+    'host': '172.22.229.6',
+    'database': 'data',
+    'user': 'root',
+    'passwd': '123456'
+}
 # 表名
 # users部分
 # 用户信息表

@@ -6,6 +6,8 @@
 import mysql.connector
 from mysql.connector import Error
 import pandas as pd
+import config
+
 
 class DatabaseConnection:
     # 初始化连接池
@@ -23,8 +25,10 @@ class DatabaseConnection:
     def get_connection(self):
         return self.pool.get_connection()
 
+
 class DatabaseManager:
-    def __init__(self, host, database, user, passwd):
+    def __init__(self, host=config.init_info['host'], database=config.init_info['database'],
+                 user=config.init_info['user'], passwd=config.init_info['passwd']):
         """
 
         :param host: 数据库主机地址
@@ -115,7 +119,6 @@ class DatabaseManager:
                 self.cursor.close()
                 self.connection.close()
 
-
     def create_table(self, table_name, columns):
         """
 
@@ -137,15 +140,26 @@ class DatabaseManager:
         except Error as e:
             print("创建表时发生错误：", e)
 
-    def insert_data(self, table_name, columns, values):
+    def insert_data(self, table_name, columns, values, check_column, check_value):
         try:
+            # 检查数据是否已存在
+            check_sql = f"SELECT * FROM {table_name} WHERE {check_column} = %s"
+            self.cursor.execute(check_sql, (check_value,))
+            result = self.cursor.fetchone()
+
+            # 如果数据已存在，返回提示
+            if result:
+                print("记录已存在，未插入数据")
+                return
+
+            # 插入新数据
             placeholders = ', '.join(['%s'] * len(values))
             sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
             self.cursor.execute(sql, values)
             self.connection.commit()
             print(self.cursor.rowcount, "记录插入成功")
         except Error as e:
-            print(e)
+            print("错误:", e)
 
     def delete_data(self, table_name, condition):
         """
@@ -161,7 +175,6 @@ class DatabaseManager:
             print(self.cursor.rowcount, "记录删除成功")
         except Error as e:
             print(e)
-
 
     def update_data(self, table_name, set_values, condition):
         """
@@ -203,8 +216,7 @@ class DatabaseManager:
 
 
 if __name__ == "__main__":
-
-    db_manager = DatabaseManager('localhost', 'testdb123', 'root', 'Sql147369')
+    db_manager = DatabaseManager(**config.init_info)
     db_manager.connect()
 
     db_manager.create_table('users', 'id INT, name VARCHAR(255), score INT')
@@ -217,7 +229,7 @@ if __name__ == "__main__":
     db_manager.delete_data('users', 'id = 1')
     json_result = db_manager.query_data('users')
     print(json_result)
-    db_manager.update_data('users',"name='王五'",'id=2')
+    db_manager.update_data('users', "name='王五'", 'id=2')
     json_result = db_manager.query_data('users')
     print(json_result)
     db_manager.close()

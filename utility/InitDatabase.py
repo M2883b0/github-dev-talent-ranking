@@ -63,7 +63,7 @@ def initialize_table(db_manager):
 if __name__ == "__main__":
     # 创建DatabaseManager对象并连接数据库
     # db_manager = DatabaseConnection(config.host, config.database_name, config.user_name, config.passwd)
-    db_manager = DatabaseManager(config.host, config.database_name, config.user_name, config.passwd)
+    db_manager = DatabaseManager(**config.init_info)
 
     # 初始化数据库
     initialize_database(db_manager)
