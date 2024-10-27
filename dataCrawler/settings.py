@@ -21,9 +21,9 @@ SPIDER_MODULES = [
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 32  # 最大并发量 默认16
+CONCURRENT_REQUESTS = 80  # 最大并发量 默认16
 
-# DOWNLOAD_DELAY = 3 # 下载延迟 3秒
+DOWNLOAD_DELAY = 1  # 下载延迟 3秒
 
 # Override the default request headers: # 请求报头,我们打开
 DEFAULT_REQUEST_HEADERS = {
@@ -35,7 +35,9 @@ ITEM_PIPELINES = {
     "dataCrawler.pipelines.UserInfoPipeline": 300
 }
 
+# LOG_LEVEL = 'INFO'
 LOG_LEVEL = 'WARNING'
+
 # 爬虫中间件
 # SPIDER_MIDDLEWARES = {
 #    'mySpider.middlewares.MyspiderSpiderMiddleware': 543,
@@ -44,7 +46,7 @@ LOG_LEVEL = 'WARNING'
 # 下载中间件
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddleware.useragent.UserAgentMiddleware': None,
-    'dataCrawler.middlewares.UserAgentRandom.UserAgentRandom': 400,
+    'dataCrawler.middlewares.HeaderRandom.HeaderRandom': 400,
     'dataCrawler.middlewares.Proxy.Proxy': 543,
 }
 
@@ -99,3 +101,21 @@ USER_AGENT_LIST = [
 ]
 
 PROXIES_LIST = ['http://127.0.0.1:7890']
+
+TOKEN = [
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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",
+    "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"
+]

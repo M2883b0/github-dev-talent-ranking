@@ -11,6 +11,7 @@ from typing import Any
 
 import scrapy
 from scrapy.http import Response
+import logging
 from dataCrawler.config import user_info_config as config
 from dataCrawler.item.UserInfo import UserInfo
 
@@ -22,9 +23,6 @@ def url_list(user_number):
     """
     for i in range(2, user_number, config["user_list_step"]):
         yield config["user_info_api_template"].format(config["user_list_step"], 1)
-
-
-urls = None
 
 
 class UserSpider(scrapy.Spider):
@@ -39,20 +37,34 @@ class UserSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         result = json.loads(response.text)
-        total_count = result["total_count"]
-        for user in result["items"]:
-            assert isinstance(user, dict)
-            print(user.get("id"), user.get("login"), user.get("avatar_url"), user.get("url"))
-            item = UserInfo(ID=user.get("id"), user_name=user.get("login"), avatar_url=user.get("avatar_url"),
-                            url=user.get("url"))
+        print(result)
+        assert isinstance(result, dict)
+        # 判断是否为用户基本信息列表
+        if result.get("total_count"):
+            logging.info(f"爬取第{self.page}页用户详细信息接口列表")
+            total_count = result["total_count"]
+            for user in result["items"]:
+                assert isinstance(user, dict)
+                yield scrapy.Request(url=user["url"])
+
+            # 基本信息页面 Url 请求生成
+            while True:
+                self.page += 1
+                if total_count // self.step < self.page:
+                    if total_count % self.step:
+                        yield scrapy.Request(url=config["user_info_api_template"].format(self.step, self.page))
+                    break
+                yield scrapy.Request(url=config["user_info_api_template"].format(self.step, self.page))
+        # 如果不是那只能是详细用户信息接口
+        else:
+            logging.info(f"解析用户{result['id']}详细信息字段")
+            # 提取项目所需要的字段
+            required_key = (
+                "id", "avatar_url", "html_url", "name", "followers", "followers_url", "following_url",
+                "organizations_url",
+                "company", "location", "blog", "repos_url")
+
+            item = UserInfo(
+                **{key: value for key, value in result.items() if key in required_key}
+            )
             yield item
-
-        # 基本信息页面 Url 请求生成
-        while True:
-            self.page += 1
-            if total_count // self.step < self.page:
-                if total_count % self.step:
-                    yield scrapy.Request(url=config["user_info_api_template"].format(self.step, self.page))
-                break
-            yield scrapy.Request(url=config["user_info_api_template"].format(self.step, self.page))
-

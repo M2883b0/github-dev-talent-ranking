@@ -18,7 +18,7 @@ if __name__ == "__main__":
         settings=settings
     )
 
-    process.crawl(FeaturedTopicSpider)
+    # process.crawl(FeaturedTopicSpider)
     # process.crawl(RepoSpider)
-    # process.crawl(UserSpider)
+    process.crawl(UserSpider)
     process.start()

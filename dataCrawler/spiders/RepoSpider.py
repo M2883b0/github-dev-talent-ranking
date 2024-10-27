@@ -20,7 +20,7 @@ def url_list():
     迭代器 生成要爬取的 url
     :return:
     """
-    for i in range(1, 3):
+    for i in range(1, 25):
         # yield topic_list_url.format(i)
         yield "https://api.52vmy.cn/api/query/itad"
 
@@ -36,8 +36,10 @@ class RepoSpider(scrapy.Spider):
     }
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        print(response.text)
+
+        print(response.request.headers["Authorization"])
 
         for url in urls:
-            yield scrapy.Request(url)
+            # print(url)
+            yield scrapy.Request(url, dont_filter=True)
 

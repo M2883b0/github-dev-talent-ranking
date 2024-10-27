@@ -17,14 +17,15 @@ class TopicInfo(scrapy.Item):
     topic_image = scrapy.Field()
     topic_url = scrapy.Field()
     is_featured = scrapy.Field()
+
     database = DatabaseManager()
     database.connect()
 
     def insert_to_database(self):
-        self.database.insert_data(repos_topic, [self["topic_name"], self["topic_descript"],
-                                           self["topic_image"], self["topic_url"], self["is_featured"]])
-        # with open("./topicList.txt", "a+") as f:
-        #     f.write(self["topic_name"] + "\n")
+        self.database.insert_data(
+            repos_topic,
+            [self["topic_name"], self["topic_descript"], self["topic_image"], self["topic_url"], self["is_featured"]]
+        )
 
     def close_spider(self, spider):
         self.database.close()

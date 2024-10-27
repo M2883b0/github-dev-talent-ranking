@@ -6,3 +6,5 @@
 ------------      --------    -----------
 2024/10/25 22:31    1.0         None
 """
+from dataCrawler.item.TopicInfo import TopicInfo as TopicItem
+from dataCrawler.item.UserInfo import UserInfo as UserItem
