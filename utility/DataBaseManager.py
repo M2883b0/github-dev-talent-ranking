@@ -7,7 +7,7 @@ import mysql.connector
 from mysql.connector import Error
 import pandas as pd
 import utility.config as config
-
+import logging
 
 class DatabaseConnection:
     # 初始化连接池
@@ -27,8 +27,8 @@ class DatabaseConnection:
 
 
 class DatabaseManager:
-    def __init__(self, host=config.init_info['host'], database=config.init_info['database'],
-                 user=config.init_info['user'], passwd=config.init_info['passwd']):
+    def __init__(self, host=config.INIT_DATABASE_INFO['host'], database=config.INIT_DATABASE_INFO['database'],
+                 user=config.INIT_DATABASE_INFO['user'], passwd=config.INIT_DATABASE_INFO['passwd']):
         """
 
         :param host: 数据库主机地址
@@ -57,7 +57,7 @@ class DatabaseManager:
             )
             if self.connection.is_connected():
                 db_info = self.connection.get_server_info()
-                print("已连接到 MySQL Server 版本：", db_info)
+                logging.info("已连接到 MySQL Server 版本：%s", db_info)
 
                 # 创建游标
                 self.cursor = self.connection.cursor()
@@ -73,10 +73,10 @@ class DatabaseManager:
                     password=self.passwd
                 )
                 if self.connection.is_connected():
-                    print("已连接到数据库:", self.database)
+                    logging.info("已连接到数据库: %s", self.database)
                     self.cursor = self.connection.cursor()
         except Error as e:
-            print("连接过程中发生错误：", e)
+            logging.error("连接过程中发生错误:%s ", e)
 
     def close(self):
         """
@@ -86,7 +86,7 @@ class DatabaseManager:
         if self.connection.is_connected():
             self.cursor.close()
             self.connection.close()
-            print("MySQL 连接已关闭")
+            logging.info("MySQL 连接已关闭")
 
     def create_database(self):
         """
@@ -107,13 +107,13 @@ class DatabaseManager:
                 result = self.cursor.fetchone()
 
                 if result:
-                    print(f"数据库 {self.database} 已存在")
+                    logging.info("数据库 %s 已存在", self.database)
                 else:
                     # 创建数据库
                     self.cursor.execute(f"CREATE DATABASE {self.database}")
-                    print(f"数据库 {self.database} 创建成功")
+                    logging.info("数据库 %s 创建成功", self.database)
         except Error as e:
-            print("创建数据库时发生错误：", e)
+            logging.error("创建数据库时发生错误：%s", e)
         finally:
             if self.connection.is_connected():
                 self.cursor.close()
@@ -132,13 +132,13 @@ class DatabaseManager:
             result = self.cursor.fetchone()
 
             if result:
-                print(f"表 {table_name} 已存在")
+                logging.info("表 %s 已存在", table_name)
             else:
                 # 创建表
                 self.cursor.execute(f"CREATE TABLE {table_name} ({columns})")
-                print(f"表 {table_name} 创建成功")
+                logging.info("表 %s 创建成功", table_name)
         except Error as e:
-            print("创建表时发生错误：", e)
+            logging.error("创建表时发生错误：%s", e)
 
     def insert_data(self, table_name, values):
         """
@@ -151,16 +151,16 @@ class DatabaseManager:
         """
         try:
             # 取出表结构字典
-            table_field = config.all_table_field[table_name]
+            table_field = config.ALL_TABLE_FIELD[table_name]
             columns = ', '.join(table_field['columns'])
             # 插入新数据
             placeholders = ', '.join(['%s'] * len(values))
             sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
             self.cursor.execute(sql, values)
             self.connection.commit()
-            print(self.cursor.rowcount, "记录插入成功")
+            logging.info("%d 记录插入成功", self.cursor.rowcount)
         except Error as e:
-            print("错误:", e)
+            logging.error("错误: %s", e)
 
     def delete_data(self, table_name, condition):
         """
@@ -173,9 +173,9 @@ class DatabaseManager:
             sql = f"DELETE FROM {table_name} WHERE {condition}"
             self.cursor.execute(sql)
             self.connection.commit()
-            print(self.cursor.rowcount, "记录删除成功")
+            logging.info("%d 记录删除成功", self.cursor.rowcount)
         except Error as e:
-            print(e)
+            logging.error("删除数据时发生错误: %s", e)
 
     def update_data(self, table_name, set_values, condition):
         """
@@ -189,35 +189,53 @@ class DatabaseManager:
             sql = f"UPDATE {table_name} SET {set_values} WHERE {condition}"
             self.cursor.execute(sql)
             self.connection.commit()
-            print(self.cursor.rowcount, "记录更新成功")
+            logging.info("%d 记录更新成功", self.cursor.rowcount)
         except Error as e:
-            print(e)
+            logging.error("更新数据时发生错误: %s", e)
 
-    def query_data(self, table_name):
+    import pandas as pd
+    from sqlite3 import Error
+
+    def query_data(self, table_name, primary_key=None, primary_key_value=None):
         """
         查询数据，并返回JSON格式的结果
         :param table_name: 表名
-        :return: JSON格式的字符串
+        :param primary_key: 主键字段名（可选）
+        :param primary_key_value: 主键对应的值（可选）
+        :return: 字典列表
         """
         try:
-            self.cursor.execute(f"SELECT * FROM {table_name}")
+            if primary_key and primary_key_value is not None:
+                # 根据主键查询
+                query = f"SELECT * FROM {table_name} WHERE {primary_key} = %s"
+                self.cursor.execute(query, (primary_key_value,))
+            else:
+                # 查询所有记录
+                query = f"SELECT * FROM {table_name}"
+                self.cursor.execute(query)
+
             result = self.cursor.fetchall()
 
             # 获取列名
             column_names = [desc[0] for desc in self.cursor.description]
 
-            # 将查询结果转换为DataFrame
-            df = pd.DataFrame(result, columns=column_names)
+            # 将查询结果转换为字典列表
+            dict_results = [dict(zip(column_names, row)) for row in result]
+            return dict_results
 
-            # 将DataFrame转换为JSON格式的字符串
-            json_result = df.to_json(orient='records', force_ascii=False)
-            return json_result
+            # # 将查询结果转换为DataFrame
+            # df = pd.DataFrame(result, columns=column_names)
+            #
+            # # 将DataFrame转换为JSON格式的字符串
+            # json_result = df.to_json(orient='records', force_ascii=False)
+            # return json_result
         except Error as e:
-            print(e)
+            logging.error("查询数据时发生错误: %s", e)
+            return None
 
 
 if __name__ == "__main__":
-    db_manager = DatabaseManager(**config.init_info)
+    db_manager = DatabaseManager(**config.INIT_DATABASE_INFO)
     db_manager.connect()
 
     db_manager.create_table('users', 'id INT, name VARCHAR(255), score INT')
