@@ -33,8 +33,14 @@ SPARKAI_API_KEY = 'cd82673c0fa28173962de388b84146c9'
 #星火认知大模型Spark Max的domain值，其他版本大模型domain值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
 SPARKAI_DOMAIN = 'lite'
 
+#从数据库拿
 
-# topic_list=get_topic()
+topic_list = []
+with open("../topicList.txt", "r") as f:
+    t = f.read().strip().split()
+topic_list = list(t)
+print(topic_list)
+project_description = 'hugg'
 
 
 def test_non_stream():
@@ -49,11 +55,11 @@ def test_non_stream():
     messages = [
         ChatMessage(
             role="system",
-            content='你是一个对Github项目进行判断分类的专家，给定一个类别列表和一个Github项目简介。请你从类别列表中，选出与该项目内容最相关的2个类别。只需返回所选的类别，输出格式为列表格式。'
+            content='你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出五个最相关的技术元素。'
         ),
         ChatMessage(
             role="user",
-            content='类别列表:[linux,3D,Google,Web,C,Database,python,transformers]。Github项目简介:Linux kernel source tree and code。请用列表格式输出：'
+            content='技术名称列表:{}。项目文本描述:"{}"。用列表格式输出：'.format(topic_list, project_description)
         )
     ]
     handler = ChunkPrintHandler()
