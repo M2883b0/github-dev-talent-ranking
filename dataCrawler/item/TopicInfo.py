@@ -14,6 +14,9 @@ class TopicInfo(scrapy.Item):
     topic_descript = scrapy.Field()
     topic_image = scrapy.Field()
     topic_url = scrapy.Field()
+    is_featured = scrapy.Field()
 
     def insert_to_database(self):
-        pass
+
+        with open("./topicList.txt", "a+") as f:
+            f.write(self["topic_name"] + "\n")
