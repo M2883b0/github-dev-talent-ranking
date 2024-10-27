@@ -143,7 +143,7 @@ class DatabaseManager:
     def insert_data(self, table_name, values):
         """
 
-        # 在数据库中插入数据
+        在数据库中插入数据
         :param table_name: 表名
         :param columns: 列的字典
         :param values: 插入的值 tuple
@@ -152,7 +152,7 @@ class DatabaseManager:
         try:
             # 取出表结构字典
             table_field = config.all_table_field[table_name]
-
+            columns = ', '.join(table_field['columns'])
             # 插入新数据
             placeholders = ', '.join(['%s'] * len(values))
             sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
