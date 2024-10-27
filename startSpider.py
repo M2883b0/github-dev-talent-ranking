@@ -7,12 +7,10 @@
 2024/10/25 23:10    1.0         None
 """
 from scrapy.crawler import CrawlerProcess
-from dataCrawler.spiders.FeaturedTopicSpider import TopicSpider
+from dataCrawler.spiders.FeaturedTopicSpider import FeaturedTopicSpider
 from dataCrawler.spiders.UserSpider import UserSpider
 from dataCrawler.spiders.RepoSpider import RepoSpider
 from scrapy.utils.project import get_project_settings
-
-
 
 if __name__ == "__main__":
     settings = get_project_settings()
@@ -20,8 +18,6 @@ if __name__ == "__main__":
         settings=settings
     )
 
-
-    process.crawl(TopicSpider)
+    process.crawl(FeaturedTopicSpider)
     # process.crawl(RepoSpider)
     process.start()
-

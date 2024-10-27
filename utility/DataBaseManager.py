@@ -7,6 +7,7 @@ import mysql.connector
 from mysql.connector import Error
 import pandas as pd
 
+
 class DatabaseConnection:
     # 初始化连接池
     def __init__(self, host, user, password, database):
@@ -22,6 +23,7 @@ class DatabaseConnection:
     # 获取连接
     def get_connection(self):
         return self.pool.get_connection()
+
 
 class DatabaseManager:
     def __init__(self, host, database, user, passwd):
@@ -115,7 +117,6 @@ class DatabaseManager:
                 self.cursor.close()
                 self.connection.close()
 
-
     def create_table(self, table_name, columns):
         """
 
@@ -162,7 +163,6 @@ class DatabaseManager:
         except Error as e:
             print(e)
 
-
     def update_data(self, table_name, set_values, condition):
         """
         更新数据
@@ -203,7 +203,6 @@ class DatabaseManager:
 
 
 if __name__ == "__main__":
-
     db_manager = DatabaseManager('localhost', 'testdb123', 'root', 'Sql147369')
     db_manager.connect()
 
@@ -217,7 +216,7 @@ if __name__ == "__main__":
     db_manager.delete_data('users', 'id = 1')
     json_result = db_manager.query_data('users')
     print(json_result)
-    db_manager.update_data('users',"name='王五'",'id=2')
+    db_manager.update_data('users', "name='王五'", 'id=2')
     json_result = db_manager.query_data('users')
     print(json_result)
     db_manager.close()

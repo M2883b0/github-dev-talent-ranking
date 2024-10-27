@@ -13,7 +13,8 @@ BOT_NAME = 'github-dev-talent-ranking-spider'  # scrapy项目名
 
 SPIDER_MODULES = [
     'dataCrawler.spiders.UserSpider',
-    "dataCrawler.spiders.TopicSpider"
+    "dataCrawler.spiders.FeaturedTopicSpider",
+    'dataCrawler.spiders.RepoSpider'
 ]
 
 # Obey robots.txt rules
