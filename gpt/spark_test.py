@@ -4,71 +4,49 @@ from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
 from sparkai.core.messages import ChatMessage
 import re
 import json
-
-#星火认知大模型Spark Max的URL值，其他版本大模型URL值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
-
-# Spark4.0 Ultra 请求地址，对应的domain参数为4.0Ultra：
-# wss://spark-api.xf-yun.com/v4.0/chat
-
-# Spark Max-32K请求地址，对应的domain参数为max-32k
-# wss://spark-api.xf-yun.com/chat/max-32k
-
-# Spark Max请求地址，对应的domain参数为generalv3.5
-# wss://spark-api.xf-yun.com/v3.5/chat
-
-# Spark Pro-128K请求地址，对应的domain参数为pro-128k：
-#  wss://spark-api.xf-yun.com/chat/pro-128k
-
-# Spark Pro请求地址，对应的domain参数为generalv3：
-# wss://spark-api.xf-yun.com/v3.1/chat
-
-# Spark Lite请求地址，对应的domain参数为lite：（免费）
-# wss://spark-api.xf-yun.com/v1.1/chat
+import requests
+from config import SPARKAI_URL,SPARKAI_APP_ID,SPARKAI_API_SECRET,SPARKAI_API_KEY,SPARKAI_DOMAIN,SPARKAI_Authorization,SPARKAI_HTTP_URL
 
 
-# 账户api key
-SPARKAI_URL = 'wss://spark-api.xf-yun.com/v1.1/chat'
-#星火认知大模型调用秘钥信息，请前往讯飞开放平台控制台（https://console.xfyun.cn/services/bm35）查看
-SPARKAI_APP_ID = '97c319c8'
-SPARKAI_API_SECRET = 'MmM4MWQyNmE4Yjc5OTQ3N2Y1YjgyN2Mx'
-SPARKAI_API_KEY = 'cd82673c0fa28173962de388b84146c9'
-#星火认知大模型Spark Max的domain值，其他版本大模型domain值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
-SPARKAI_DOMAIN = 'lite'
-
-#从数据库拿
-
+#topic_list从数据库拿（只需要拿一次）
 topic_list = []
 with open("../topicList.txt", "r") as f:
     t = f.read().strip().split("\n")
 topic_list = list(t)
 print(topic_list)
-project_description = 'huggingface\Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.'
+
+#项目的描述，从数据库里拿（对所有没有topic的项目，都需要爬取）
+# project_description = 'huggingface\Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.'
+project_description = 'Visual Instruction Tuning (LLaVA) built towards GPT-4V level capabilities and beyond.'
+
+
+
 
 
 def output_to_topic(output):
     """
 
-    :param output:
+    :param output:大模型的输出文本
     :return:
     """
+    #通过正则匹配，提取大模型输出文本的feature tpoic
     pattern = r'\b(' + '|'.join(re.escape(tech) for tech in topic_list) + r')\b'
-    # 查找文本中提到的技术
+    # 查找大模型输出文本中，提到的技术
     matches = re.findall(pattern, output, flags=re.IGNORECASE)
     # 去重并排序
     unique_matches = []
     seen = set()
-
     for match in matches:
         match_lower = match.lower()
         if match_lower not in seen:
             seen.add(match_lower)
             unique_matches.append(match)
-    print(unique_matches)
+    return unique_matches
 
 
 
 
-def test_non_stream():
+def test_no_stream(topic_list,project_description):
     """
 
     :return:
@@ -84,7 +62,7 @@ def test_non_stream():
     messages = [
         ChatMessage(
             role="system",
-            content='你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出5个最相关的技术元素。'
+            content='你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出5个最相关的技术元素。'     #ws的话，返回5个即可
         ),
         ChatMessage(
             role="user",
@@ -95,7 +73,8 @@ def test_non_stream():
     a = spark.generate([messages], callbacks=[handler])
     output = a.generations[0][0].text
     print(output)
-    output_to_topic(output)
+    predict_topic = output_to_topic(output)
+    return predict_topic
 
 
 # def test_stream():
@@ -123,19 +102,18 @@ def test_non_stream():
 #     print(a)
 
 
-def http_no_stream():
-    import requests
-    url = "https://spark-api-open.xf-yun.com/v1/chat/completions"
+def http_no_stream(topic_list,project_description):
+    url = SPARKAI_HTTP_URL
     data = {
         "max_tokens": 512,
-        "top_p": 0.8,
-        "top_k": 2,
+        "top_p": 0.6,
+        "top_k": 3,
         "temperature": 0.3,
         "presence_penalty": 1,
         "messages": [
             {
                 "role": "system",
-                "content": "你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出10个最相关的技术元素。"
+                "content": "你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出10个最相关的技术元素。"    ##http的话，返回10个
             },
             {
                 "role": "user",
@@ -147,30 +125,40 @@ def http_no_stream():
     data["stream"] = False
     #我的鉴权信息
     header = {
-        "Authorization": "Bearer pgURxdRsxExPPZsDiqCn:ewVOvLzaHXWzqivyWlJy"
+        "Authorization": SPARKAI_Authorization
     }
-    response = requests.post(url, headers=header, json=data, stream=True)
+    response = requests.post(url, headers=header, json=data)
 
-    # 流式响应解析示例
+    # 大模型流式响应解析示例，data["stream"] = True
     # response.encoding = "utf-8"
     # for line in response.iter_lines(decode_unicode="utf-8"):
     #     print(line)
 
-    # 非流式
+    # 非流式:大模型生成完，再一次性返回
     output_json = json.loads(response.text)
 
-    code = output_json['code']  #状态码，为0表示正确
+    code = output_json['code']  #大模型接口返回的状态码，0表示正确，非0表示出错
     if code != 0:
-        print(f'请求错误: {code},{output_json}')
+        print(f'请求错误: {code},{output_json}')        # 接入log   #====
+        return []                                     #大模型非正常输出，返回空     #====
     else:
         output = output_json['choices'][0]['message']['content']
         print(output)
-        output_to_topic(output)
+        predict_topic = output_to_topic(output)     #提取大模型的回答内容，提取出符合feature topic list
+        threshold = 4                                  #设置给项目最多打4个标签
+        if len(predict_topic) > threshold:
+            return predict_topic[:threshold]           #给项目上topic，保守一点，最多预测threshold个topic
+        else:
+            return predict_topic
+
 
 
 if __name__ == '__main__':
-    # Websocket的方式
-    # test_non_stream()
+    # # Websocket的方式
+    # predict_topic = test_no_stream(topic_list, project_description)
 
-    # http的方式
-    http_no_stream()
+    # # http的方式
+    predict_topic = http_no_stream(topic_list, project_description)
+
+    #输出结果
+    print(predict_topic)
