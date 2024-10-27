@@ -11,5 +11,5 @@
 class UserInfoPipeline:
     def process_item(self, item, spider):
 
-        print(item)
+        item.insert_to_database()
         return item

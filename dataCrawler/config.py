@@ -21,7 +21,7 @@ topic_descript_xpath = "/html/body/div[1]/div//div[1]/div/div/a[2]/p[2]/text()"
 topic_image_xpath_template = '/html/body/div[1]/div[4]/main/div[4]/div[1]/div/div[{}]/a[1]/img/@src'
 topic_url_xpath = "/html/body/div[1]/div[4]/main/div[4]/div[1]/div/div/a[2]/@href"
 
-topic_page_count = 5
+topic_page_count = 9
 
 
 # useragent list

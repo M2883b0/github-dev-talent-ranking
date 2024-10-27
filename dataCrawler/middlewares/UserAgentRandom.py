@@ -23,5 +23,6 @@ class UserAgentRandom(UserAgentMiddleware):
         )
 
     def process_request(self, request, spider):
+
         agent = random.choice(self.user_agent)
         request.headers["User-Agent"] = agent
