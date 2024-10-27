@@ -1,8 +1,8 @@
 # 数据库相关信息
-host = 'localhost'
-database_name = 'rank_db'
+host = '172.22.229.6'
+database_name = 'data'
 user_name = 'root'
-passwd = 'cy010124'
+passwd = '123456'
 
 # 表名
 # users部分
