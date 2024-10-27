@@ -14,6 +14,8 @@ init_info = {
 # users部分
 # 用户信息表
 users_info = 'users_info'
+
+
 # 国家表
 nations = 'nations'
 # 能力表
@@ -26,3 +28,17 @@ repos_info = 'repos_info'
 repos_importance = 'repos_importance'
 # topic表
 repos_topic = 'repos_topic'
+# topic表结构
+topic_field = {
+    'name': 'name',
+    'descript': 'descript',
+    'avi': 'avi',
+    'url': 'url',
+    'is_featured': 'is_featured'
+}
+
+
+all_table_field = {
+    'repos_topic': topic_field
+
+}
