@@ -20,4 +20,5 @@ if __name__ == "__main__":
 
     process.crawl(FeaturedTopicSpider)
     # process.crawl(RepoSpider)
+    # process.crawl(UserSpider)
     process.start()
