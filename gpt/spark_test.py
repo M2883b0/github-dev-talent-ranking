@@ -3,6 +3,7 @@
 from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
 from sparkai.core.messages import ChatMessage
 import re
+import json
 
 #星火认知大模型Spark Max的URL值，其他版本大模型URL值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
 
@@ -122,6 +123,54 @@ def test_non_stream():
 #     print(a)
 
 
+def http_no_stream():
+    import requests
+    url = "https://spark-api-open.xf-yun.com/v1/chat/completions"
+    data = {
+        "max_tokens": 512,
+        "top_p": 0.8,
+        "top_k": 2,
+        "temperature": 0.3,
+        "presence_penalty": 1,
+        "messages": [
+            {
+                "role": "system",
+                "content": "你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出10个最相关的技术元素。"
+            },
+            {
+                "role": "user",
+                "content": "技术名称列表:{}。项目文本描述:{}。用列表格式输出：".format(topic_list, project_description)
+            }
+        ],
+        "model": "lite"
+    }
+    data["stream"] = False
+    #我的鉴权信息
+    header = {
+        "Authorization": "Bearer pgURxdRsxExPPZsDiqCn:ewVOvLzaHXWzqivyWlJy"
+    }
+    response = requests.post(url, headers=header, json=data, stream=True)
+
+    # 流式响应解析示例
+    # response.encoding = "utf-8"
+    # for line in response.iter_lines(decode_unicode="utf-8"):
+    #     print(line)
+
+    # 非流式
+    output_json = json.loads(response.text)
+
+    code = output_json['code']  #状态码，为0表示正确
+    if code != 0:
+        print(f'请求错误: {code},{output_json}')
+    else:
+        output = output_json['choices'][0]['message']['content']
+        print(output)
+        output_to_topic(output)
+
 
 if __name__ == '__main__':
-    test_non_stream()
+    # Websocket的方式
+    # test_non_stream()
+
+    # http的方式
+    http_no_stream()
