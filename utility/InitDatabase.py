@@ -39,16 +39,16 @@ def initialize_table(db_manager):
         # 基本信息表
         'repos_info': 'rid INT PRIMARY KEY, owner_url VARCHAR(255), languages_url VARCHAR(100), '
                       'contributors_url VARCHAR(255),'
-                      'forks_count INT, stargazers_count INT, importance DECIMAL(2,2), commit VARCHAR(255)',
+                      'forks_count INT, stargazers_count INT, importance DECIMAL(5,2), commit VARCHAR(255)',
 
         # 项目重要程度表
-        'repos_importance': 'rid INT PRIMARY KEY PRIMARY KEY, forks_count INT,stargazers_count INT, '
+        'repos_importance': 'rid INT PRIMARY KEY, forks_count INT,stargazers_count INT, '
                             'topics VARCHAR(255),'
-                            'subscribers_count INT, importance DECIMAL(2,2)',
+                            'subscribers_count INT, importance DECIMAL(5,2)',
 
         # topic表
-        'repos_topic': 'id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50), descript VARCHAR(255), '
-                       'avi VARCHAR(255), url VARCHAR(255)'
+        'repos_topic': 'name VARCHAR(50) PRIMARY KEY, descript VARCHAR(255), '
+                       'avi VARCHAR(255), url VARCHAR(255), is_featured TINYINT(1)'
 
     }
 
