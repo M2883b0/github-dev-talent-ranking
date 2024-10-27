@@ -2,6 +2,7 @@
 
 from sparkai.llm.llm import ChatSparkLLM, ChunkPrintHandler
 from sparkai.core.messages import ChatMessage
+import re
 
 #星火认知大模型Spark Max的URL值，其他版本大模型URL值请前往文档（https://www.xfyun.cn/doc/spark/Web.html）查看
 
@@ -37,13 +38,40 @@ SPARKAI_DOMAIN = 'lite'
 
 topic_list = []
 with open("../topicList.txt", "r") as f:
-    t = f.read().strip().split()
+    t = f.read().strip().split("\n")
 topic_list = list(t)
 print(topic_list)
-project_description = 'hugg'
+project_description = 'huggingface\Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.'
+
+
+def output_to_topic(output):
+    """
+
+    :param output:
+    :return:
+    """
+    pattern = r'\b(' + '|'.join(re.escape(tech) for tech in topic_list) + r')\b'
+    # 查找文本中提到的技术
+    matches = re.findall(pattern, output, flags=re.IGNORECASE)
+    # 去重并排序
+    unique_matches = []
+    seen = set()
+
+    for match in matches:
+        match_lower = match.lower()
+        if match_lower not in seen:
+            seen.add(match_lower)
+            unique_matches.append(match)
+    print(unique_matches)
+
+
 
 
 def test_non_stream():
+    """
+
+    :return:
+    """
     spark = ChatSparkLLM(
         spark_api_url=SPARKAI_URL,
         spark_app_id=SPARKAI_APP_ID,
@@ -55,7 +83,7 @@ def test_non_stream():
     messages = [
         ChatMessage(
             role="system",
-            content='你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出五个最相关的技术元素。'
+            content='你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。请你根据项目文本描述，从技术列表中选出5个最相关的技术元素。'
         ),
         ChatMessage(
             role="user",
@@ -64,32 +92,34 @@ def test_non_stream():
     ]
     handler = ChunkPrintHandler()
     a = spark.generate([messages], callbacks=[handler])
-    print(a.generations[0][0].text)
+    output = a.generations[0][0].text
+    print(output)
+    output_to_topic(output)
 
 
-def test_stream():
-    """
-    还没修好
-    :return:
-    """
-    from sparkai.core.callbacks import StdOutCallbackHandler
-    spark = ChatSparkLLM(
-        spark_api_url=SPARKAI_URL,
-        spark_app_id=SPARKAI_APP_ID,
-        spark_api_key=SPARKAI_API_KEY,
-        spark_api_secret=SPARKAI_API_SECRET,
-        spark_llm_domain=SPARKAI_DOMAIN,
-        request_timeout=30, #
-        streaming=True,
-
-    )
-    messages = [ChatMessage(
-        role="user",
-        content='编写一个贪吃蛇游戏的开发流程',
-        )]
-    handler = ChunkPrintHandler()
-    a = spark.generate([messages], callbacks=[handler])
-    print(a)
+# def test_stream():
+#     """
+#     还没修好
+#     :return:
+#     """
+#     from sparkai.core.callbacks import StdOutCallbackHandler
+#     spark = ChatSparkLLM(
+#         spark_api_url=SPARKAI_URL,
+#         spark_app_id=SPARKAI_APP_ID,
+#         spark_api_key=SPARKAI_API_KEY,
+#         spark_api_secret=SPARKAI_API_SECRET,
+#         spark_llm_domain=SPARKAI_DOMAIN,
+#         request_timeout=30, #
+#         streaming=True,
+#
+#     )
+#     messages = [ChatMessage(
+#         role="user",
+#         content='编写一个贪吃蛇游戏的开发流程',
+#         )]
+#     handler = ChunkPrintHandler()
+#     a = spark.generate([messages], callbacks=[handler])
+#     print(a)
 
 
 
