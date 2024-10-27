@@ -6,7 +6,7 @@
 import mysql.connector
 from mysql.connector import Error
 import pandas as pd
-import config
+import utility.config as config
 
 
 class DatabaseConnection:
@@ -140,17 +140,18 @@ class DatabaseManager:
         except Error as e:
             print("创建表时发生错误：", e)
 
-    def insert_data(self, table_name, columns, values, check_column, check_value):
-        try:
-            # 检查数据是否已存在
-            check_sql = f"SELECT * FROM {table_name} WHERE {check_column} = %s"
-            self.cursor.execute(check_sql, (check_value,))
-            result = self.cursor.fetchone()
+    def insert_data(self, table_name, values):
+        """
 
-            # 如果数据已存在，返回提示
-            if result:
-                print("记录已存在，未插入数据")
-                return
+        # 在数据库中插入数据
+        :param table_name: 表名
+        :param columns: 列的字典
+        :param values: 插入的值 tuple
+        :return:
+        """
+        try:
+            # 取出表结构字典
+            table_field = config.all_table_field[table_name]
 
             # 插入新数据
             placeholders = ', '.join(['%s'] * len(values))
