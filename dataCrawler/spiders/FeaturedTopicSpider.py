@@ -16,7 +16,6 @@ def url_list():
     topic_list_url = config["topic_list_url"]
     for i in range(1, topic_page_count+1):
         yield topic_list_url.format(i)
-        # yield "https://api.52vmy.cn/api/query/itad"
 
 
 urls = url_list()

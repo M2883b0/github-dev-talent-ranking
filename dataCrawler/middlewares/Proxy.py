@@ -20,4 +20,7 @@ class Proxy:
     def process_request(self, request, spider):
         if spider.name == "FeaturedTopicSpider":
             ip = random.choice(self.ip)
+
             request.meta["proxy"] = ip
+        # ip = random.choice(self.ip)
+        # request.meta["proxy"] = ip

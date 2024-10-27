@@ -8,6 +8,7 @@
 """
 from utility.DataBaseManager import DatabaseManager
 from utility.config import repos_topic
+from dataCrawler.item import TopicItem, UserItem
 
 
 class UserInfoPipeline:
@@ -18,8 +19,10 @@ class UserInfoPipeline:
         pass
 
     def process_item(self, item, spider):
-        print(self.topics)
-        if item["topic_name"] in self.topics:
-            return
-        item.insert_to_database()
-        return item
+        if isinstance(item, TopicItem):
+            if item["topic_name"] in self.topics:
+                return
+            item.insert_to_database()
+            return item
+        elif isinstance(item, UserItem):
+            item.insert_to_database()
