@@ -30,11 +30,7 @@ repos_importance = 'repos_importance'
 repos_topic = 'repos_topic'
 # topic表结构
 topic_field = {
-    'name': 'name',
-    'descript': 'descript',
-    'avi': 'avi',
-    'url': 'url',
-    'is_featured': 'is_featured'
+    'columns': ['name', 'descript', 'avi', 'url', 'is_featured']
 }
 
 
