@@ -6,7 +6,7 @@ import re
 import json
 import requests
 from config import SPARKAI_URL, SPARKAI_APP_ID, SPARKAI_API_SECRET, SPARKAI_API_KEY, SPARKAI_DOMAIN, \
-    SPARKAI_Authorization, SPARKAI_HTTP_URL
+    SPARKAI_Authorization, SPARKAI_HTTP_URL, TOPIC_THRESHOLDS
 import logging
 
 
@@ -82,7 +82,7 @@ def websocket_no_stream(topic_list, project_description, all_topic_list):
     output = a.generations[0][0].text
     # print(output)
     predict_topic = output_to_topic(output, all_topic_list)
-    threshold = 4  # 设置给项目最多打4个标签
+    threshold = TOPIC_THRESHOLDS  # 设置给项目最多打4个标签
     if len(predict_topic) > threshold:
         return predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
     else:
@@ -132,7 +132,7 @@ def http_no_stream(topic_list, project_description, all_topic_list):
         output = output_json['choices'][0]['message']['content']
         # print(output)
         predict_topic = output_to_topic(output, all_topic_list)  # 提取大模型的回答内容，提取出符合feature topic list
-        threshold = 4  # 设置给项目最多打4个标签
+        threshold = TOPIC_THRESHOLDS  # 设置给项目最多打4个标签
         if len(predict_topic) > threshold:
             return predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
         else:

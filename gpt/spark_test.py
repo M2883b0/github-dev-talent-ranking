@@ -6,7 +6,7 @@ import re
 import json
 import requests
 from config import SPARKAI_URL, SPARKAI_APP_ID, SPARKAI_API_SECRET, SPARKAI_API_KEY, SPARKAI_DOMAIN, \
-    SPARKAI_Authorization, SPARKAI_HTTP_URL
+    SPARKAI_Authorization, SPARKAI_HTTP_URL, TOPIC_THRESHOLDS
 import logging
 
 
@@ -80,9 +80,9 @@ def websocket_no_stream(topic_list, project_description, all_topic_list):
     handler = ChunkPrintHandler()
     a = spark.generate([messages], callbacks=[handler])
     output = a.generations[0][0].text
-    # print(output)
+    print(output)
     predict_topic = output_to_topic(output, all_topic_list)
-    threshold = 4  # 设置给项目最多打4个标签
+    threshold = TOPIC_THRESHOLDS  # 设置给项目最多打4个标签
     if len(predict_topic) > threshold:
         return predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
     else:
@@ -92,7 +92,7 @@ def websocket_no_stream(topic_list, project_description, all_topic_list):
 def http_no_stream(topic_list, project_description, all_topic_list):
     url = SPARKAI_HTTP_URL
     data = {
-        "max_tokens": 512,
+        "max_tokens": 1024,
         "top_p": 0.9,
         "top_k": 3,
         "temperature": 0.3,
@@ -100,11 +100,11 @@ def http_no_stream(topic_list, project_description, all_topic_list):
         "messages": [
             {
                 "role": "system",
-                "content": "你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。"
+                "content": "You are now a technical consultant in the field of computer science, able to answer users' questions accurately and concisely."
             },
             {
                 "role": "user",
-                "content": "技术名称列表:{}。项目文本描述:{}。请你根据项目文本描述，从技术列表中选出10个最相关的技术。用列表格式输出：".format(topic_list, project_description)
+                "content": "Project description:{}. Please rewrite the project description to make it more detailed, such as possible computer technologies, programming languages, and computer science..".format(project_description)
             }
         ],
         "model": "lite"
@@ -130,9 +130,9 @@ def http_no_stream(topic_list, project_description, all_topic_list):
         return []                              # 大模型非正常输出，返回空     #====
     elif 'code' in output_json and output_json['code'] == 0:
         output = output_json['choices'][0]['message']['content']
-        # print(output)
+        print(output)
         predict_topic = output_to_topic(output, all_topic_list)  # 提取大模型的回答内容，提取出符合feature topic list
-        threshold = 4  # 设置给项目最多打4个标签
+        threshold = TOPIC_THRESHOLDS  # 设置给项目最多打4个标签
         if len(predict_topic) > threshold:
             return predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
         else:
