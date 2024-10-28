@@ -16,3 +16,5 @@ SPARKAI_HTTP_URL = "https://spark-api-open.xf-yun.com/v1/chat/completions"
 # 账户信息（要更改）
 SPARKAI_Authorization = "Bearer pgURxdRsxExPPZsDiqCn:ewVOvLzaHXWzqivyWlJy"
 
+# Topic_num_thresholds
+TOPIC_THRESHOLDS = 4
