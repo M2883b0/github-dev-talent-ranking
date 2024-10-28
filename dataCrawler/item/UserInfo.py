@@ -11,7 +11,7 @@ import logging
 import scrapy
 
 from utility.DataBaseManager import DatabaseManager
-from utility.config import users_info
+from utility.config import USER_TABLE_NAME, NATIONS_TABLE_NAME, TALENT_TABLE_NAME
 
 
 # GitHub 提供了访问开发者的接口 https://api.github.com/users?since=0&per_page=1000
@@ -30,21 +30,33 @@ class UserInfo(scrapy.Item):
     blog = scrapy.Field()
     repos_url = scrapy.Field()
 
-    database = DatabaseManager()
-    database.connect()
+    # database = DatabaseManager()
+    # database.connect()
 
     def insert_to_database(self):
-        self.database.insert_data(
-            users_info,
-            [
-                self["topic_name"], self["topic_descript"],self["topic_image"],
-                self["topic_url"], self["is_featured"]]
-        )
-        # TODO: insert to mysql
+        # self.database.insert_data(
+        #     USER_TABLE_NAME,
+        #     [
+        #         self["id"], self["avatar_url"],self["html_url"],
+        #         self["name"], "", ""]
+        # )
+        # self.database.insert_data(
+        #     NATIONS_TABLE_NAME,
+        #     [
+        #         self["id"], self["followers_url"], self["following_url"],
+        #         self["organizations_url"], self["company"]]
+        # )
+        # self.database.insert_data(
+        #     TALENT_TABLE_NAME,
+        #     [
+        #         self["topic_name"], self["topic_descript"], self["topic_image"],
+        #         self["topic_url"], self["is_featured"]]
+        # )
+        #
         # self.database.insert_data()
         # self.database.insert_data()
+        pass
 
-        # TODO: 项目只爬取了url， 没有爬取具体的项目ID
     def close_spider(self, spider):
-        self.database.close()
-
+        # self.database.close()
+        pass

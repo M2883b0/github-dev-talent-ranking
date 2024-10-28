@@ -7,20 +7,20 @@
 2024/10/25 23:31    1.0         None
 """
 from utility.DataBaseManager import DatabaseManager
-from utility.config import repos_topic
+from utility.config import TOPICS_TABLE_NAME
 from dataCrawler.item import TopicItem, UserItem
 
 
 class UserInfoPipeline:
     def __init__(self):
-        database = DatabaseManager()
-        database.connect()
-        self.topics = database.query_data(repos_topic)
-        pass
+        # database = DatabaseManager()
+        # database.connect()
+        # self.topics = database.query_data(TOPICS_TABLE_NAME)
+        self.topics = []
 
     def process_item(self, item, spider):
         if isinstance(item, TopicItem):
-            if item["topic_name"] in self.topics:
+            if item["name"] in self.topics:
                 return
             item.insert_to_database()
             return item
