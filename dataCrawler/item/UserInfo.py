@@ -11,7 +11,7 @@ import logging
 import scrapy
 
 from utility.DataBaseManager import DatabaseManager
-from utility.config import USER_TABLE_NAME, NATIONS_TABLE_NAME, TALENT_TABLE_NAME
+from utility.config import USER_TABLE_NAME, TALENT_TABLE_NAME
 
 
 # GitHub 提供了访问开发者的接口 https://api.github.com/users?since=0&per_page=1000

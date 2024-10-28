@@ -9,8 +9,8 @@
 import logging
 
 import scrapy
-from utility.DataBaseManager import DatabaseManager
-from utility.config import TOPICS_TABLE_NAME
+from dataCrawler import database
+from utility.config import TOPICS_TABLE_NAME, TOPICS_URL_TABLE_NAME
 
 
 class TopicInfo(scrapy.Item):
@@ -21,21 +21,20 @@ class TopicInfo(scrapy.Item):
     repos_count = scrapy.Field()
     is_featured = scrapy.Field()
 
-    # database = DatabaseManager()
-    # database.connect()
-
     def insert_to_database(self):
+        self.database.insert_data(
+            TOPICS_TABLE_NAME,
+            [self["name"], self["descript"], self["image_url"], self["repos_count"], self["is_featured"]]
+        )
+
+        self.database.insert_data(
+            TOPICS_URL_TABLE_NAME,
+            [self["name"], self["url"]]
+        )
         logging.info(f"insert topic {self['name']} to database")
-        # self.database.insert_data(
-        #     TOPICS_TABLE_NAME,
-        #     [self["topic_name"], self["topic_descript"], self["topic_image"], self["topic_url"], self["is_featured"]]
-        # )
-        #
-        # if self.cursor.rowcount >= 100:
-        #     self.conn.commit()
-        with open("topicList.txt", "a+", encoding="utf-8") as f:
-            f.write(self["name"] + '\n')
+        if database.get_rowcount() >= 100:
+            database.commit()
 
     def close_spider(self, spider):
-        # self.database.close()
-        pass
+        database.commit()
+

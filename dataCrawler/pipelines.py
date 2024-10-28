@@ -13,16 +13,12 @@ from dataCrawler.item import TopicItem, UserItem
 
 class UserInfoPipeline:
     def __init__(self):
-        # database = DatabaseManager()
-        # database.connect()
-        # self.topics = database.query_data(TOPICS_TABLE_NAME)
         self.topics = []
 
     def process_item(self, item, spider):
         if isinstance(item, TopicItem):
-            if item["name"] in self.topics:
-                return
             item.insert_to_database()
             return item
         elif isinstance(item, UserItem):
             item.insert_to_database()
+            return item

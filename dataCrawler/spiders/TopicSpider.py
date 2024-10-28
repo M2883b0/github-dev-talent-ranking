@@ -7,29 +7,56 @@
 2024/10/27 22:08    1.0         None
 """
 import json
-from typing import Any, Iterable
+from typing import Any, Iterable, Union
+
+from twisted.internet.defer import Deferred
+from typing_extensions import Self
 
 import scrapy
-from scrapy import Request
+from scrapy import Request, Spider
+from scrapy.crawler import Crawler
 from scrapy.http import Response
+from scrapy.signalmanager import SignalManager
 import logging
+
+from dataCrawler import database, crawled_topics
 from dataCrawler.config import topic_config as config
 from dataCrawler.item.TopicInfo import TopicInfo
+from utility.config import ERROR_TABLE_NAME
+
+
+# 设置两个信号量，用于错误重爬和其他爬虫调用
+class CrawlTopicListSignal(SignalManager):
+    pass
+
+
+class CrawlTopicDetailSignal(SignalManager):
+    pass
 
 
 class TopicSpider(scrapy.Spider):
     name = "TopicSpider"
     allowed_domains = ["github.com"]
+    handle_httpstatus_list = [403, 429]
     start_urls = [config["topic_list_api_template"].format(1, 1)]
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    @classmethod
+    def from_crawler(cls, crawler: Crawler, *args: Any, **kwargs: Any) -> Self:
+        spider = super(TopicSpider, cls).from_crawler(crawler, *args, **kwargs)
+        assert isinstance(spider, TopicSpider)
+        crawler.signals.connect(spider.crawl_topic_list_handle, signal=CrawlTopicListSignal)
+        crawler.signals.connect(spider.crawl_topic_detail_handle, signal=CrawlTopicDetailSignal)
+        # crawler.signals.connect(spider.crawl_topic_detail_handle, signal=)
+        return spider
 
     def start_requests(self) -> Iterable[Request]:
 
         yield scrapy.Request(url=self.start_urls[0], callback=self.init_parse)
 
     def init_parse(self, response: Response, **kwargs: Any) -> Any:
+        """
+        用于获取topic 数量，方便分配查询API参数，同时发出获取 ‘topic列表’请求
+        """
         page = 0
         step = config["topic_list_step"]
         total_count = json.loads(response.text)["total_count"]
@@ -46,7 +73,7 @@ class TopicSpider(scrapy.Spider):
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
         """
-        主分析函数
+        主分析函数，分析有哪些topic 再精爬，使用url_parse分析精爬数据
         :param response: 网页返回信息
         :param kwargs: meta
         :return:
@@ -56,7 +83,12 @@ class TopicSpider(scrapy.Spider):
 
         for topic in result["items"]:
             assert isinstance(topic, dict)
-            # 需要api 结合网页爬, 网页需要挂梯子
+            # 判断是否在爬过的列表中
+            # TODO: set crawled topics name field
+            if topic["name"] in crawled_topics or topic["display_name"] in crawled_topics:
+                logging.info(f"topic {topic['name']} 已经爬过了")
+                continue
+            # 需要api 结合网页爬, 网页需要挂梯子 所以设置is_proxy
             meta = {
                 "name": topic["display_name"] if topic["display_name"] else topic["name"],
                 "description": topic["description"] if topic["description"] else topic["short_description"],
@@ -67,10 +99,6 @@ class TopicSpider(scrapy.Spider):
             yield scrapy.Request(url=config["base_url"] + topic["name"], callback=self.url_parse, meta=meta,
                                  errback=self.err_back)
 
-            # 基本信息页面 Url 请求生成
-
-        # 如果不是那只能是详细用户信息接口
-
     def url_parse(self, response: Response, **kwargs: Any) -> Any:
         """
         用于爬取 Topic Repos 数量和 Topic 图标
@@ -80,6 +108,9 @@ class TopicSpider(scrapy.Spider):
         """
         logging.info(f"解析Topic {response.meta['name']} 详细信息字段")
         # 提取项目所需要的字段
+        if not response.meta:
+            logging.info(f"信息异常 meta: {response.meta}")
+            return
 
         if response.xpath(config["img_url_xpath"]).extract():
             image_url = response.xpath(config["img_url_xpath"]).extract()[0]
@@ -104,11 +135,30 @@ class TopicSpider(scrapy.Spider):
             )
             yield item
         else:
-            logging.info(f"topic {response.meta['name'] } is useless")
-            logging.info(f"信息异常 meta: {response.meta}")
+            logging.info(f"topic {response.meta['name']} is dropped")
 
-    def err_back(self, failure):
-        url = failure.request.url
-        print("failed url ", url)
-        with open("Failed Url.txt", "a+") as f:
-            f.write(url + "\n")
+    def err_back(self, failure_response: Response):
+        url = failure_response.request.url
+        code = failure_response.status
+        meta = json.dumps(failure_response.meta)
+        spider_name = self.name
+
+        database.insert_data(
+            ERROR_TABLE_NAME,
+            (
+                url, code, spider_name, meta
+            )
+        )
+
+    def close(spider: Spider, reason: str) -> Union[Deferred, None]:
+        database.commit()
+
+    def crawl_topic_list_handle(self, sender, **kwargs):
+        url = kwargs.get("url")
+        meta = kwargs.get("meta")
+        yield scrapy.Request(url=url, errback=self.err_back, meta=meta)
+
+    def crawl_topic_detail_handle(self, sender, **kwargs):
+        url = kwargs.get("url")
+        meta = kwargs.get("meta")
+        yield scrapy.Request(url=url, errback=self.err_back, callback=self.url_parse, meta=meta)
