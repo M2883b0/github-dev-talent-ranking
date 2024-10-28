@@ -9,6 +9,7 @@
 
 from DataBaseManager import DatabaseManager
 import utility.config as config
+from utility.config import *
 from DataBaseManager import DatabaseConnection
 
 
@@ -42,6 +43,14 @@ def initialize_table(db_manager):
         print("表初始化过程中发生错误：", e)
 
 
+def initialize_foreign_key(db_manager):
+    """
+    初始化表的外键
+    :param db_manager:
+    :return:
+    """
+    db_manager.add_foreign_key_constraint(TOPICS_URL_TABLE_NAME, 'name', TOPICS_TABLE_NAME, 'name', 'CASCADE', 'CASCADE')
+
 if __name__ == "__main__":
     # 创建DatabaseManager对象并连接数据库
     # db_manager = DatabaseConnection(config.host, config.database_name, config.user_name, config.passwd)
@@ -54,3 +63,7 @@ if __name__ == "__main__":
 
     # 初始化数据表
     initialize_table(db_manager)
+    # 设置外键
+    initialize_foreign_key(db_manager)
+    db_manager.commit()
+    db_manager.close()
