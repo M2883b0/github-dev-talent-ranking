@@ -9,6 +9,7 @@ import pandas as pd
 import utility.config as config
 import logging
 
+
 class DatabaseConnection:
     # 初始化连接池
     def __init__(self, host, user, password, database):
@@ -27,19 +28,26 @@ class DatabaseConnection:
 
 
 class DatabaseManager:
-    def __init__(self, host=config.INIT_DATABASE_INFO['host'], database=config.INIT_DATABASE_INFO['database'],
-                 user=config.INIT_DATABASE_INFO['user'], passwd=config.INIT_DATABASE_INFO['passwd']):
+    def __init__(
+            self, host=config.INIT_DATABASE_INFO['host'], database=config.INIT_DATABASE_INFO['database'],
+            user=config.INIT_DATABASE_INFO['user'], passwd=config.INIT_DATABASE_INFO['passwd'],
+            charset=config.INIT_DATABASE_INFO['charset'], collations=config.INIT_DATABASE_INFO['collations']
+    ):
         """
-
+        初始化数据库管理器
         :param host: 数据库主机地址
         :param database: 数据库名称
         :param user: 数据库用户名
         :param passwd: 数据库密码
+        :param charset: 数据库字符集
+        :param collations: 数据库排序
         """
         self.host = host
         self.database = database
         self.user = user
         self.passwd = passwd
+        self.charset = charset
+        self.collations = collations
         self.connection = None
         self.cursor = None
 
@@ -88,9 +96,20 @@ class DatabaseManager:
             self.connection.close()
             logging.info("MySQL 连接已关闭")
 
+    def commit(self):
+        """
+        提交事务
+        :return: 无返回值
+        """
+        try:
+            self.connection.commit()
+            logging.info("事务提交成功")
+        except Error as e:
+            logging.error("提交事务时发生错误: %s", e)
+
     def create_database(self):
         """
-        创建数据库
+        创建数据库并设置字符集和校对规则
         :return: 无返回值
         """
         try:
@@ -102,6 +121,7 @@ class DatabaseManager:
             )
             if self.connection.is_connected():
                 self.cursor = self.connection.cursor()
+
                 # 检查数据库是否已存在
                 self.cursor.execute("SHOW DATABASES LIKE %s", (self.database,))
                 result = self.cursor.fetchone()
@@ -110,7 +130,9 @@ class DatabaseManager:
                     logging.info("数据库 %s 已存在", self.database)
                 else:
                     # 创建数据库
-                    self.cursor.execute(f"CREATE DATABASE {self.database}")
+                    charset = self.charset
+                    collation = self.collations
+                    self.cursor.execute(f"CREATE DATABASE {self.database} CHARACTER SET {charset} COLLATE {collation}")
                     logging.info("数据库 %s 创建成功", self.database)
         except Error as e:
             logging.error("创建数据库时发生错误：%s", e)
@@ -157,7 +179,6 @@ class DatabaseManager:
             placeholders = ', '.join(['%s'] * len(values))
             sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
             self.cursor.execute(sql, values)
-            self.connection.commit()
             logging.info("%d 记录插入成功", self.cursor.rowcount)
         except Error as e:
             logging.error("错误: %s", e)
@@ -172,7 +193,6 @@ class DatabaseManager:
         try:
             sql = f"DELETE FROM {table_name} WHERE {condition}"
             self.cursor.execute(sql)
-            self.connection.commit()
             logging.info("%d 记录删除成功", self.cursor.rowcount)
         except Error as e:
             logging.error("删除数据时发生错误: %s", e)
@@ -188,7 +208,6 @@ class DatabaseManager:
         try:
             sql = f"UPDATE {table_name} SET {set_values} WHERE {condition}"
             self.cursor.execute(sql)
-            self.connection.commit()
             logging.info("%d 记录更新成功", self.cursor.rowcount)
         except Error as e:
             logging.error("更新数据时发生错误: %s", e)
@@ -232,6 +251,51 @@ class DatabaseManager:
         except Error as e:
             logging.error("查询数据时发生错误: %s", e)
             return None
+
+    def add_foreign_key_constraint(self, table_name, foreign_key_column, referenced_table, referenced_column,
+                                   on_delete_action=None, on_update_action=None):
+        """
+        为指定的表添加外键约束
+        :param table_name: 目标表名
+        :param foreign_key_column: 外键所在的列名
+        :param referenced_table: 引用的表名
+        :param referenced_column: 引用的列名
+        :param on_delete_action: 当引用表中的记录被删除时的行为（例如 'CASCADE', 'RESTRICT', 'NO ACTION', 'SET NULL', 'SET DEFAULT'）
+        :param on_update_action: 当引用表中的记录被更新时的行为（例如 'CASCADE', 'RESTRICT', 'NO ACTION', 'SET NULL', 'SET DEFAULT'）
+        :return: 无返回值
+        """
+        try:
+            constraint_name = f"fk_{table_name}_{foreign_key_column}"
+
+            # 检查外键约束是否存在
+            self.cursor.execute(
+                f"SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS "
+                f"WHERE TABLE_NAME = %s AND CONSTRAINT_TYPE = 'FOREIGN KEY' AND CONSTRAINT_NAME = %s",
+                (table_name, constraint_name)
+            )
+            result = self.cursor.fetchone()
+
+            if result:
+                logging.info("外键约束 %s 已经存在", constraint_name)
+            else:
+                # 构建外键约束的SQL语句
+                sql = (
+                    f"ALTER TABLE {table_name} "
+                    f"ADD CONSTRAINT {constraint_name} "
+                    f"FOREIGN KEY ({foreign_key_column}) REFERENCES {referenced_table}({referenced_column})"
+                )
+
+                if on_delete_action:
+                    sql += f" ON DELETE {on_delete_action}"
+
+                if on_update_action:
+                    sql += f" ON UPDATE {on_update_action}"
+
+                # 添加外键约束
+                self.cursor.execute(sql)
+                logging.info("外键约束 %s 添加成功", constraint_name)
+        except Error as e:
+            logging.error("添加外键约束时发生错误: %s", e)
 
 
 if __name__ == "__main__":
