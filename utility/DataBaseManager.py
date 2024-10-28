@@ -175,7 +175,6 @@ class DatabaseManager:
             if self.connection.is_connected():
                 self.cursor = self.connection.cursor()
 
-    def get_rowcount(self):
 
     def insert_data(self, table_name, values):
         """
