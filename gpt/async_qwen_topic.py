@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
 
 
-## 使用示例1：===========
+# 使用示例1：===========
 # # 创建异步客户端实例
 # client = AsyncOpenAI(
 #     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
 
 
-##使用示例2：
+# 使用示例2：
 # client = AsyncOpenAI(
 #     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
 #     api_key=os.getenv("DASHSCOPE_API_KEY"),
