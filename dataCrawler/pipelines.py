@@ -6,7 +6,7 @@
 ------------      --------    -----------
 2024/10/25 23:31    1.0         None
 """
-from utility.DataBaseManager import DatabaseManager
+from utility.DatabaseManager import DatabaseManager
 from utility.config import TOPICS_TABLE_NAME
 from dataCrawler.item import TopicItem, UserItem
 

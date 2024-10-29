@@ -8,7 +8,7 @@
 """
 import logging
 
-from utility.DataBaseManager import DatabaseManager
+from utility.DatabaseManager import DatabaseManager
 from utility.config import TOPICS_TABLE_NAME, TOPICS_URL_TABLE_NAME
 
 database = DatabaseManager()
