@@ -4,7 +4,7 @@ import re
 import ast
 import json
 import requests
-from config import QWEN_API_KEY, QWEN_MODEL, TOPIC_THRESHOLDS
+from config import QWEN_API_KEY, QWEN_TOPIC_MODEL, TOPIC_THRESHOLDS
 import logging
 import os
 import asyncio
@@ -46,7 +46,7 @@ client = AsyncOpenAI(
 # 异步的具体任务
 async def task(topic_list, project_description, all_topic_list):
     response = await client.chat.completions.create(
-        model=QWEN_MODEL,
+        model=QWEN_TOPIC_MODEL,
         messages=[
             {
                 'role': 'system',
