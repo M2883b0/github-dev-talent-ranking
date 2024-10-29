@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
 
 
-## 使用示例：===========
+## 使用示例1：===========
 # # 创建异步客户端实例
 # client = AsyncOpenAI(
 #     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
@@ -133,3 +133,25 @@ if __name__ == '__main__':
 #         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 #     # 运行主协程
 #     asyncio.run(main(), debug=False)
+
+
+
+
+
+##使用示例2：
+# client = AsyncOpenAI(
+#     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
+#     api_key=os.getenv("DASHSCOPE_API_KEY"),
+#     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+# )
+#
+# async def main():
+#     response = await client.chat.completions.create(
+#         messages=[{"role": "user", "content": "你是谁"}],
+#         model="qwen-plus",
+#     )
+#     print(response.model_dump_json())
+#
+# if platform.system() == "Windows":
+#     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+# asyncio.run(main())
