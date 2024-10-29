@@ -11,8 +11,11 @@ import logging
 
 class DatabaseConnectionPool:
     # 初始化连接池
-    def __init__(self, pool_name="database_pool", pool_size=20, host=config['host'],
-                 user=config['user'], passwd=config['passwd'], database=config['database']):
+    def __init__(
+            self, pool_name="database_pool", pool_size=20, host=config.INIT_DATABASE_INFO['host'],
+            user=config.INIT_DATABASE_INFO['user'], passwd=config.INIT_DATABASE_INFO['passwd'],
+            database=config.INIT_DATABASE_INFO['database']
+    ):
         self.pool = mysql.connector.pooling.MySQLConnectionPool(
             pool_name=pool_name,
             pool_size=pool_size,
@@ -234,8 +237,6 @@ if __name__ == "__main__":
     db_manager = DatabaseManager(db_connection_pool)
     db_manager.connect()
     db_manager.close()
-
-
 
     db_manager.create_table('users', 'id INT, name VARCHAR(255), score INT')
     db_manager.insert_data('users', 'id, name, score', (1, '张三', 100))
