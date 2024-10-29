@@ -22,18 +22,20 @@ class TopicInfo(scrapy.Item):
     is_featured = scrapy.Field()
 
     def insert_to_database(self):
-        self.database.insert_data(
+        database.insert_data(
             TOPICS_TABLE_NAME,
             [self["name"], self["descript"], self["image_url"], self["repos_count"], self["is_featured"]]
         )
 
-        self.database.insert_data(
+        database.insert_data(
             TOPICS_URL_TABLE_NAME,
             [self["name"], self["url"]]
         )
         logging.info(f"insert topic {self['name']} to database")
         if database.get_rowcount() >= 100:
             database.commit()
+
+
 
     def close_spider(self, spider):
         database.commit()

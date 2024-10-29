@@ -30,6 +30,7 @@ REFERER_ENABLED = False
 RETRY_ENABLED = True  # 打开重试开关
 RETRY_TIMES = 10  # 重试次数
 RETRY_HTTP_CODES = [429, 403]  # 重试的HTTP状态码
+FEED_EXPORT_ENCODING = "utf-8" # 导出编码
 
 # Override the default request headers: # 请求报头,我们打开
 DEFAULT_REQUEST_HEADERS = {
