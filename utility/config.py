@@ -45,6 +45,8 @@ TALENT_TABLE_NAME = 'talent'
 REPOS_INFO_TABLE_NAME = 'repos_info'
 # 项目重要程度表
 REPOS_IMPORTANT_TABLE_NAME = 'repos_importance'
+# 项目成员表
+REPOS_PARTICIPANTS_TABLE_NAME = 'repos_participants'
 # topic表
 TOPICS_TABLE_NAME = 'topics'
 # topic url表
@@ -84,9 +86,17 @@ USER_TABLE_FIELD = {
                       SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
 }
 
+# 能力表结构
+TALENT_TABLE_FIELD = {
+    'columns': ['id', 'repos_id_list', 'blog', 'ability', 'repos_url'],
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
+                      MEDIUM_STRING_TYPES]
+}
+
+
 # 个人博客表结构
 USER_BLOG_TABLE_FIELD = {
-    'columns': ['id', 'blog'],
+    'columns': ['id', 'blog_html'],
     'columns_types': [INT + PRIMARY_KEY, LONG_STRING_TYPES]
 }
 
@@ -99,32 +109,29 @@ USER_LOGIN_NAME_TABLE_FIELD = {
 
 # 组织表
 ORGANIZATIONS_TABLE_FIELD = {
-    'columns': ['organization_id', 'descript', 'location', 'organization_blog_url'],
-    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, SHORT_STRING_TYPES, MEDIUM_STRING_TYPES]
+    'columns': ['organization_id', 'descript', 'location', 'organization_blog_html'],
+    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, SHORT_STRING_TYPES, LONG_STRING_TYPES]
+}
+
+# 用户关系网表
+USER_RELATIONSHIPS_TABLE_FIELD = {
+    'columns': ['user_id', 'related_user_id',
+                'is_fan', 'is_follower', 'is_collaborator'],
+    'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN, BOOLEAN, BOOLEAN]
+}
+
+# 项目成员表
+REPOS_PARTICIPANTS_TABLE_FIELD = {
+    'columns': ['id', 'rid'],
+    'columns_types': [INT + PRIMARY_KEY, INT]
 }
 
 
-
-# 国家表结构
-NATIONS_TABLE_FIELD = {
-    'columns': ['id', 'followers_url', 'following_url', 'organizations_url',
-                'company', 'location', 'nation'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
-                      SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
-}
-
-# 能力表结构
-TALENT_TABLE_FIELD = {
-    'columns': ['id', 'repos_id_list', 'blog', 'ability', 'repos_url'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
-                      MEDIUM_STRING_TYPES]
-}
-
-# repos表结构
+# repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
-    'columns': ['rid', 'owner_url', 'languages_url', 'contributors_url',
-                'forks_count', 'stargazers_count', 'importance', 'commit'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
+    'columns': ['rid', 'language', 'forks_count', 'stargazers_count',
+                'importance', 'total_contribution_value', 'commit'],
+    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
                       INT, INT, DECIMAL, INT]
 }
 

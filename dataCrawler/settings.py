@@ -21,9 +21,15 @@ SPIDER_MODULES = [
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 80  # 最大并发量 默认16
+CONCURRENT_REQUESTS = 32  # 最大并发量 默认16
 
-DOWNLOAD_DELAY = 1  # 下载延迟 3秒
+DOWNLOAD_DELAY = 0.3  # 下载延迟 0.3秒
+
+REFERER_ENABLED = False
+
+RETRY_ENABLED = True  # 打开重试开关
+RETRY_TIMES = 10  # 重试次数
+RETRY_HTTP_CODES = [429, 403]  # 重试的HTTP状态码
 
 # Override the default request headers: # 请求报头,我们打开
 DEFAULT_REQUEST_HEADERS = {
@@ -35,12 +41,12 @@ ITEM_PIPELINES = {
     "dataCrawler.pipelines.UserInfoPipeline": 300
 }
 
-# LOG_LEVEL = 'INFO'
-LOG_LEVEL = 'WARNING'
+LOG_LEVEL = 'INFO'
+# LOG_LEVEL = 'WARNING'
 
 # 爬虫中间件
 # SPIDER_MIDDLEWARES = {
-#    'mySpider.middlewares.MyspiderSpiderMiddleware': 543,
+# 'dataCrawler.middlewares.SpiderManager.SpiderManager': 553,
 # }
 
 # 下载中间件
@@ -50,11 +56,9 @@ DOWNLOADER_MIDDLEWARES = {
     'dataCrawler.middlewares.Proxy.Proxy': 543,
 }
 
-# Configure item pipelines
-# See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'mySpider.pipelines.MyspiderPipeline': 300, # 管道
-# }
+EXTENSIONS = {
+    'dataCrawler.extension.SpiderManager.SpiderManager': 500
+}
 
 
 USER_AGENT_LIST = [

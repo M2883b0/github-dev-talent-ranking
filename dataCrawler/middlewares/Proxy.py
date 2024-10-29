@@ -18,9 +18,7 @@ class Proxy:
         return cls(ip=crawler.settings.get("PROXIES_LIST"))
 
     def process_request(self, request, spider):
-        if spider.name == "FeaturedTopicSpider":
+        if request.meta.get("is_proxy"):
+            # print(spider.name,request.url, "走了代理")
             ip = random.choice(self.ip)
-
             request.meta["proxy"] = ip
-        # ip = random.choice(self.ip)
-        # request.meta["proxy"] = ip

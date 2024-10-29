@@ -41,8 +41,10 @@ class FeaturedTopicSpider(scrapy.Spider):
                 topic_images.append("")
         for topic_name, topic_descript, topic_image, topic_url, is_featured \
                 in zip(topic_names, topic_description, topic_images, topic_urls, [True for _ in topic_urls]):
-            yield TopicInfo(topic_name=topic_name, topic_descript=topic_descript,
-                            topic_image=topic_image, topic_url=topic_url, is_featured=is_featured)
+
+            # 弃用
+            yield TopicInfo(name=topic_name, descript=topic_descript,
+                            image_url=topic_image, url=topic_url, is_featured=is_featured, repos_count=response)
 
         for url in urls:
             yield scrapy.Request(url)

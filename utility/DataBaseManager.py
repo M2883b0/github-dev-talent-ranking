@@ -27,6 +27,7 @@ class DatabaseConnection:
         return self.pool.get_connection()
 
 
+
 class DatabaseManager:
     def __init__(
             self, host=config.INIT_DATABASE_INFO['host'], database=config.INIT_DATABASE_INFO['database'],
@@ -107,6 +108,16 @@ class DatabaseManager:
         except Error as e:
             logging.error("提交事务时发生错误: %s", e)
 
+    def get_rowcount(self):
+        """
+        返回游标rowcount
+        :return: rowcount值
+        """
+        try:
+            return self.cursor.rowcount
+        except Error as e:
+            logging.error("获取rowcount失败: %s", e)
+
     def create_database(self):
         """
         创建数据库并设置字符集和校对规则
@@ -161,6 +172,9 @@ class DatabaseManager:
                 logging.info("表 %s 创建成功", table_name)
         except Error as e:
             logging.error("创建表时发生错误：%s", e)
+            if self.connection.is_connected():
+                self.cursor = self.connection.cursor()
+
 
     def insert_data(self, table_name, values):
         """

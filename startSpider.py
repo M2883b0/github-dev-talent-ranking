@@ -10,6 +10,7 @@ from scrapy.crawler import CrawlerProcess
 from dataCrawler.spiders.FeaturedTopicSpider import FeaturedTopicSpider
 from dataCrawler.spiders.UserSpider import UserSpider
 from dataCrawler.spiders.RepoSpider import RepoSpider
+from dataCrawler.spiders.TopicSpider import TopicSpider
 from scrapy.utils.project import get_project_settings
 
 if __name__ == "__main__":
@@ -18,7 +19,7 @@ if __name__ == "__main__":
         settings=settings
     )
 
-    # process.crawl(FeaturedTopicSpider)
+    process.crawl(TopicSpider)
     # process.crawl(RepoSpider)
-    process.crawl(UserSpider)
+    # process.crawl(UserSpider)
     process.start()
