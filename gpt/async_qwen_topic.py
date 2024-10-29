@@ -88,7 +88,7 @@ async def main():
 
 if __name__ == '__main__':
     """
-
+    异步预测项目的topic
     传入3个参数：feature_topic_lists(200那个), description, all_topic_lists（2000那个）
     """
     # 设置事件循环策略

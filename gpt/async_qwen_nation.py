@@ -105,6 +105,9 @@ async def main(log_name,name=None,bio=None,location=None,email=None,company=None
     print(output)
 
 if __name__ == '__main__':
+    """
+    异步预测用户的Nation
+    """
 
     log_name = "geenie97"
     name = "유진"
