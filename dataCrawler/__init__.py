@@ -8,10 +8,10 @@
 """
 import logging
 
-from utility.DatabaseManager import DatabaseManager
+from utility.DatabaseManager import DatabaseManager, DatabaseConnectionPool
 from utility.config import TOPICS_TABLE_NAME, TOPICS_URL_TABLE_NAME
 
-database = DatabaseManager()
+database = DatabaseManager(DatabaseConnectionPool())
 database.connect()
 
 crawled_topics = [key["name"] for key in database.query_data(TOPICS_URL_TABLE_NAME)]
