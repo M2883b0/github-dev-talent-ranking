@@ -33,6 +33,33 @@ class DatabaseInitializer:
         self.connection = None
         self.cursor = None
 
+    def connect(self):
+        """
+        建立数据库连接并选择指定的数据库
+        """
+        try:
+            # 连接到MySQL服务器
+            self.connection = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.passwd,
+                database=self.database  # 默认连接到指定的数据库
+            )
+            if self.connection.is_connected():
+                self.cursor = self.connection.cursor()
+                logging.info("数据库连接成功，已选择数据库 %s", self.database)
+        except Error as e:
+            logging.error("数据库连接失败：%s", e)
+
+    def close(self):
+        try:
+            if self.connection.is_connected():
+                self.cursor.close()
+                self.connection.close()
+            logging.info("初始化数据库连接关闭成功")
+        except Error as e:
+            logging.error("初始化数据库连接关闭失败: %s", e)
+
     def create_database(self):
         """
         创建数据库并设置字符集和校对规则
@@ -56,9 +83,7 @@ class DatabaseInitializer:
                     logging.info("数据库 %s 已存在", self.database)
                 else:
                     # 创建数据库
-                    charset = self.charset
-                    collation = self.collations
-                    self.cursor.execute(f"CREATE DATABASE {self.database} CHARACTER SET {charset} COLLATE {collation}")
+                    self.cursor.execute(f"CREATE DATABASE {self.database} CHARACTER SET {self.charset} COLLATE {self.collations}")
                     logging.info("数据库 %s 创建成功", self.database)
         except Error as e:
             logging.error("创建数据库时发生错误：%s", e)
@@ -66,10 +91,9 @@ class DatabaseInitializer:
             if self.connection.is_connected():
                 self.cursor.close()
                 self.connection.close()
-
     def create_all_tables(self):
         try:
-            for table_name, table_fields in self.all_table_field.item():
+            for table_name, table_fields in self.all_table_field.items():
                 column_definitions = self.__generate_table_sql(table_fields)
                 self.__create_table(table_name, column_definitions)
             logging.info("所有表创建成功")

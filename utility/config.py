@@ -25,7 +25,8 @@ DATABASE_INFO = {
 
 # 测试表存储请求失败的url
 ERROR_TABLE_NAME = 'spider_error'
-
+# 已爬取的URL表
+CRAWLED_URL_TABLE_NAME = 'crawled_url'
 # users部分
 # 用户信息表
 USER_TABLE_NAME = 'users'
@@ -82,6 +83,12 @@ PRIMARY_KEY = ' PRIMARY KEY'
 ERROR_TABLE_FIELD = {
     'columns': ['url', 'code', 'spider', 'detail'],
     'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, INT, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
+}
+
+# 已爬取的URL表结构
+CRAWLED_URL_TABLE_FIELD = {
+    'columns': ['url'],
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY]
 }
 
 # 用户信息表结构
@@ -190,6 +197,7 @@ TOPICS_URL_TABLE_FIELD = {
 
 ALL_TABLE_FIELD = {
     ERROR_TABLE_NAME: ERROR_TABLE_FIELD,
+    CRAWLED_URL_TABLE_NAME: CRAWLED_URL_TABLE_FIELD,
     TOPICS_TABLE_NAME: TOPICS_TABLE_FIELD,
     TOPICS_URL_TABLE_NAME: TOPICS_URL_TABLE_FIELD
 

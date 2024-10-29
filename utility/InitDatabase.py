@@ -197,14 +197,12 @@ def initialize_foreign_key(database_initializer):
 if __name__ == "__main__":
     db_initializer = DatabaseInitializer()
     # 初始化数据库
-    db_initializer
-    initialize_database(db_initializer)
+    db_initializer.create_database()
+    # 连接数据库
+    db_initializer.connect()
     # 初始化数据表
-    db_manager.connect()
-
-    # 初始化数据表
-    initialize_table(db_manager)
+    db_initializer.create_all_tables()
     # 设置外键
-    initialize_foreign_key(db_manager)
-    db_manager.commit()
-    db_manager.close()
+    # db_initializer.add_foreign_key_for_all_tables()
+    # 关闭数据库连接
+    db_initializer.close()
