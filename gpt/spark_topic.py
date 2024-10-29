@@ -17,7 +17,7 @@ with open("../topicList.txt", "r") as f:
         if line not in seen:
             seen.add(line)
             all_topic_lists.append(line)
-print(all_topic_lists)
+# print(all_topic_lists)
 # print(len(all_topic_lists))
 
 
@@ -93,8 +93,8 @@ def http_no_stream(topic_list, project_description, all_topic_list):
     url = SPARKAI_HTTP_URL
     data = {
         "max_tokens": 512,
-        "top_p": 0.9,
-        "top_k": 3,
+        "top_p": 0.8,
+        "top_k": 2,
         "temperature": 0.3,
         "presence_penalty": 2,
         "messages": [
@@ -146,7 +146,7 @@ def http_no_stream(topic_list, project_description, all_topic_list):
 if __name__ == '__main__':
     """
     
-    传入3个参数：feature_topic_lists, description, all_topic_lists
+    传入3个参数：feature_topic_lists(200那个), description, all_topic_lists（2000那个）
     """
     # # Websocket的方式
     # predict_topics = websocket_no_stream(feature_topic_lists, description, all_topic_lists)
