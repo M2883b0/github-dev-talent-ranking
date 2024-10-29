@@ -28,7 +28,7 @@ all_featured_topics_config = {
 # Topic config
 topic_config = {
     "topic_list_api_template": "https://api.github.com/search/topics?q=created:>2007-10-11 "
-                               "repositories:>3000&per_page={}&page={}",
+                               "repositories:>300000&per_page={}&page={}",
     "topic_list_step": 100,
     "base_url": "https://github.com/topics/",
     "img_url_xpath": "/html/body/div[1]/div[4]/main/div[2]/div[2]/div/div[1]/div[1]/div[1]/img/@src",

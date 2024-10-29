@@ -30,6 +30,7 @@ REFERER_ENABLED = False
 RETRY_ENABLED = True  # 打开重试开关
 RETRY_TIMES = 10  # 重试次数
 RETRY_HTTP_CODES = [429, 403]  # 重试的HTTP状态码
+FEED_EXPORT_ENCODING = "utf-8"  # 导出编码
 
 # Override the default request headers: # 请求报头,我们打开
 DEFAULT_REQUEST_HEADERS = {
@@ -59,7 +60,6 @@ DOWNLOADER_MIDDLEWARES = {
 EXTENSIONS = {
     'dataCrawler.extension.SpiderManager.SpiderManager': 500
 }
-
 
 USER_AGENT_LIST = [
     "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; AcooBrowser; .NET CLR 1.1.4322; .NET CLR 2.0.50727)",

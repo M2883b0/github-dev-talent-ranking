@@ -7,6 +7,7 @@
 2024/10/27 22:08    1.0         None
 """
 import json
+from time import sleep
 from typing import Any, Iterable, Union
 
 from twisted.internet.defer import Deferred
@@ -16,41 +17,46 @@ import scrapy
 from scrapy import Request, Spider
 from scrapy.crawler import Crawler
 from scrapy.http import Response
-from scrapy.signalmanager import SignalManager
+from scrapy.exceptions import DontCloseSpider
+from scrapy import signals
 import logging
 
 from dataCrawler import database, crawled_topics
 from dataCrawler.config import topic_config as config
 from dataCrawler.item.TopicInfo import TopicInfo
+from dataCrawler.extension.SpiderManager import CrawlTopicListSignal, \
+    CrawlTopicDetailSignal, SpiderIdleSignal
 from utility.config import ERROR_TABLE_NAME
-
-
-# 设置两个信号量，用于错误重爬和其他爬虫调用
-class CrawlTopicListSignal(SignalManager):
-    pass
-
-
-class CrawlTopicDetailSignal(SignalManager):
-    pass
+from scrapy.core import engine
 
 
 class TopicSpider(scrapy.Spider):
     name = "TopicSpider"
     allowed_domains = ["github.com"]
-    handle_httpstatus_list = [403, 429]
+    # handle_httpstatus_list = [403, 429]
     start_urls = [config["topic_list_api_template"].format(1, 1)]
+
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+        self.is_all_idle = False
 
     @classmethod
     def from_crawler(cls, crawler: Crawler, *args: Any, **kwargs: Any) -> Self:
+        """
+        连接信号量
+        :param crawler:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         spider = super(TopicSpider, cls).from_crawler(crawler, *args, **kwargs)
         assert isinstance(spider, TopicSpider)
         crawler.signals.connect(spider.crawl_topic_list_handle, signal=CrawlTopicListSignal)
         crawler.signals.connect(spider.crawl_topic_detail_handle, signal=CrawlTopicDetailSignal)
-        # crawler.signals.connect(spider.crawl_topic_detail_handle, signal=)
+        spider.crawler.signals.connect(spider.on_idle, signal=signals.spider_idle)
         return spider
 
     def start_requests(self) -> Iterable[Request]:
-
         yield scrapy.Request(url=self.start_urls[0], callback=self.init_parse)
 
     def init_parse(self, response: Response, **kwargs: Any) -> Any:
@@ -150,15 +156,25 @@ class TopicSpider(scrapy.Spider):
             )
         )
 
-    def close(spider: Spider, reason: str) -> Union[Deferred, None]:
         database.commit()
 
+    def on_idle(self):
+        database.commit()
+        self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_closed=True)
+        logging.info(f"blocked in close spider name {self.name}")
+        while True:
+            if self.is_all_idle:
+                break
+
     def crawl_topic_list_handle(self, sender, **kwargs):
-        url = kwargs.get("url")
-        meta = kwargs.get("meta")
-        yield scrapy.Request(url=url, errback=self.err_back, meta=meta)
+        self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_closed=False)
+        logging.info(f"spider {self.name} handle topic list crawl")
+        print(f"kwargs is ", kwargs)
+        self.crawler.engine.crawl(scrapy.Request(url=kwargs["url"], errback=self.err_back, meta=kwargs["meta"]))
 
     def crawl_topic_detail_handle(self, sender, **kwargs):
-        url = kwargs.get("url")
-        meta = kwargs.get("meta")
+        self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_closed=False)
+        logging.info(f"spider {self.name} handle topic detail crawl")
+        url = kwargs["url"]
+        meta = kwargs["meta"]
         yield scrapy.Request(url=url, errback=self.err_back, callback=self.url_parse, meta=meta)

@@ -10,7 +10,7 @@ import logging
 
 import scrapy
 
-from utility.DataBaseManager import DatabaseManager
+from utility.DatabaseManager import DatabaseManager
 from utility.config import USER_TABLE_NAME, TALENT_TABLE_NAME
 
 

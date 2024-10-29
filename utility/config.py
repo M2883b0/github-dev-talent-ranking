@@ -25,10 +25,13 @@ DATABASE_INFO = {
 
 # 测试表存储请求失败的url
 ERROR_TABLE_NAME = 'spider_error'
-
+# 已爬取的URL表
+CRAWLED_URL_TABLE_NAME = 'crawled_url'
 # users部分
 # 用户信息表
 USER_TABLE_NAME = 'users'
+# 能力表
+TALENT_TABLE_NAME = 'talent'
 # 个人博客网页内容表
 USER_BLOG_TABLE_NAME = 'blogs'
 # 用户login名表
@@ -37,14 +40,18 @@ USER_LOGIN_NAME_TABLE_NAME = 'login_names'
 ORGANIZATIONS_TABLE_NAME = 'organizations'
 # 用户关系网表
 USER_RELATIONSHIPS_TABLE_NAME = 'relationships'
-# 能力表
-TALENT_TABLE_NAME = 'talent'
 
 # repos部分
 # 基本信息表
 REPOS_INFO_TABLE_NAME = 'repos_info'
-# 项目重要程度表
-REPOS_IMPORTANT_TABLE_NAME = 'repos_importance'
+# 项目URL表
+REPOS_URL_TABLE_NAME = 'repos_url'
+# 项目语言占比表
+REPOS_LANGUAGE_PROPORTION_TABLE_NAME = 'repos_lg_proportion'
+# 项目参与者贡献表
+REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME = 'repos_parti_contrib'
+# 项目领域表
+REPOS_FIELDS_TABLE_NAME = 'repos_fields'
 # 项目成员表
 REPOS_PARTICIPANTS_TABLE_NAME = 'repos_participants'
 # topic表
@@ -78,11 +85,17 @@ ERROR_TABLE_FIELD = {
     'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, INT, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
 }
 
+# 已爬取的URL表结构
+CRAWLED_URL_TABLE_FIELD = {
+    'columns': ['url'],
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY]
+}
+
 # 用户信息表结构
 USER_TABLE_FIELD = {
-    'columns': ['id', 'name', 'followers', 'bio',
+    'columns': ['id', 'name', 'email_address', 'followers', 'bio',
                 'organizations_id', 'company', 'location', 'nation'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, INT, LONG_STRING_TYPES,
+    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, SHORT_STRING_TYPES, INT, LONG_STRING_TYPES,
                       SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
 }
 
@@ -129,24 +142,40 @@ REPOS_PARTICIPANTS_TABLE_FIELD = {
 
 # repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
-    'columns': ['rid', 'language', 'forks_count', 'stargazers_count',
-                'importance', 'total_contribution_value', 'commit'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
-                      INT, INT, DECIMAL, INT]
+    'columns': ['rid', 'main_language', 'forks_count', 'stargazers_count',
+                'subscribers_count', 'importance', 'total_contribution_value', 'issue_count'],
+    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, INT, INT,
+                      INT, DECIMAL, DECIMAL, INT]
 }
 
-# repos重要性表结构
-REPOS_IMPORTANT_TABLE_FIELD = {
-    'columns': ['rid', 'forks_count', 'stargazers_count', 'topics', 'subscribers_count', 'importance'],
-    'columns_types': [INT + PRIMARY_KEY, INT, INT, SHORT_STRING_TYPES, INT, DECIMAL]
-
+# 项目URL表结构
+REPOS_URL_TABLE_FIELD = {
+    'columns': ['rid', 'repos_url'],
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
 }
 
+# 项目语言占比表结构
+REPOS_PROPORTION_TABLE_FIELD = {
+    'columns': ['rid', 'language', 'proportion'],
+    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, INT]
+}
+
+# 项目参与者贡献表结构
+REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_FIELD = {
+    'columns': ['rid', 'contributor_id', 'is_owner'],
+    'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN]
+}
+
+# 项目领域表
+REPOS_FIELDS_TABLE_FIELD = {
+    'columns': ['rid', 'topics'],
+    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES]
+}
 # topic表结构
 TOPICS_TABLE_FIELD = {
     'columns': ['name', 'descript', 'avi',
                 'repos_count', 'is_featured'],
-    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
+    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, LONG_STRING_TYPES, MEDIUM_STRING_TYPES,
                       INT, BOOLEAN]
 }
 
@@ -168,7 +197,34 @@ TOPICS_URL_TABLE_FIELD = {
 
 ALL_TABLE_FIELD = {
     ERROR_TABLE_NAME: ERROR_TABLE_FIELD,
+    CRAWLED_URL_TABLE_NAME: CRAWLED_URL_TABLE_FIELD,
     TOPICS_TABLE_NAME: TOPICS_TABLE_FIELD,
     TOPICS_URL_TABLE_NAME: TOPICS_URL_TABLE_FIELD
 
 }
+
+
+# 级联行为常量
+CASCADE = 'CASCADE'
+RESTRICT = 'RESTRICT'
+NO_ACTION = 'NO ACTION'
+SET_NULL = 'SET NULL'
+SET_DEFAULT = 'SET DEFAULT'
+# 主表-从表映射字典 用于添加外键约束
+MASTER_SLAVE_MAPPING_RULE = {
+   'master_table': ['', ''],
+    'slave_table': ['', ''],
+    'foreign_key_column': ['', ''],
+    'referenced_column': ['', ],
+    'on_delete_action': [''],
+    'on_update_action': ['']
+}
+
+# 获取各个列的值
+master_table_values = MASTER_SLAVE_MAPPING_RULE['master_table']
+slave_table_values = MASTER_SLAVE_MAPPING_RULE['slave_table']
+foreign_key_column_values = MASTER_SLAVE_MAPPING_RULE['foreign_key_column']
+referenced_column_values = MASTER_SLAVE_MAPPING_RULE['referenced_column']
+
+
+

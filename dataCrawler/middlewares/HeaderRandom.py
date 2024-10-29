@@ -16,6 +16,7 @@ class HeaderRandom(UserAgentMiddleware):
     tokens = []
 
     def __init__(self, agents, token_list):
+        super().__init__()
         self.agents = agents
         self.tokens = cycle(token_list)
 
