@@ -4,7 +4,6 @@ import re
 import ast
 import json
 import requests
-from twisted.web.html import output
 from config import QWEN_API_KEY, QWEN_MODEL, TOPIC_THRESHOLDS
 import logging
 import os
@@ -70,8 +69,8 @@ async def task(topic_list, project_description, all_topic_list):
     )
     output = response.choices[0].message.content
     # print(output)
-    output = ast.literal_eval(output)  # 输出转为list
-    predict_topic = [element for element in output if element in all_topic_list]
+    output_list = ast.literal_eval(output)  # 输出转为list
+    predict_topic = [element for element in output_list if element in all_topic_list]
     threshold = TOPIC_THRESHOLDS  # 设置给项目最多打max个标签
     if len(predict_topic) > threshold:
         predict_topic = predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
