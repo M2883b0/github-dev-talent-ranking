@@ -32,19 +32,20 @@ feature_topic_lists = list(t)
 # print(len(feature_topic_lists))
 
 # 项目的描述，从数据库里拿（对所有没有topic的项目，都需要爬取）
-# description = 'huggingface\Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.'
-description = 'Linux kernel source tree'
-# description = 'Visual Instruction Tuning (LLaVA) built towards GPT-4V level capabilities and beyond.'
+description1 = 'huggingface\Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.'
+description2 = 'Linux kernel source tree'
+description3 = 'Visual Instruction Tuning (LLaVA) built towards GPT-4V level capabilities and beyond.'
 
 
-
+# 创建异步客户端实例
 client = AsyncOpenAI(
     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
     api_key=QWEN_API_KEY,
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
 
-async def main(topic_list, project_description, all_topic_list):
+# 异步的具体任务
+async def task(topic_list, project_description, all_topic_list):
     response = await client.chat.completions.create(
         model=QWEN_MODEL,
         messages=[
@@ -59,7 +60,7 @@ async def main(topic_list, project_description, all_topic_list):
             }
         ],
         stream=False,
-        temperature=0.5,
+        temperature=0.6,
         top_p=0.8,
         max_tokens=512,
         presence_penalty=1,
@@ -68,16 +69,21 @@ async def main(topic_list, project_description, all_topic_list):
         }
     )
     output = response.choices[0].message.content
-    print(output)
+    # print(output)
     output = ast.literal_eval(output)  # 输出转为list
     predict_topic = [element for element in output if element in all_topic_list]
     threshold = TOPIC_THRESHOLDS  # 设置给项目最多打max个标签
     if len(predict_topic) > threshold:
-        return predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
-    else:
-        return predict_topic
+        predict_topic = predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
+    # print(predict_topic)
+    return predict_topic
 
 
+# 主异步函数
+async def main():
+    question = [description1, description2, description3]
+    tasks = [task(feature_topic_lists, q, all_topic_lists) for q in question]
+    await asyncio.gather(*tasks)
 
 
 
@@ -86,9 +92,45 @@ if __name__ == '__main__':
 
     传入3个参数：feature_topic_lists(200那个), description, all_topic_lists（2000那个）
     """
+    # 设置事件循环策略
     if platform.system() == "Windows":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    predict_topics = asyncio.run(main(feature_topic_lists, description, all_topic_lists))
+    # 运行主协程
+    asyncio.run(main())
 
-    # 输出结果
-    print(predict_topics)
+
+
+
+
+
+## 使用示例：===========
+# # 创建异步客户端实例
+# client = AsyncOpenAI(
+#     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
+#     api_key=os.getenv("DASHSCOPE_API_KEY"),
+#     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+# )
+#
+# # 定义异步任务列表
+# async def task(question):
+#     print(f"Sending question: {question}")
+#     response = await client.chat.completions.create(
+#         messages=[
+#             {"role": "user", "content": question}
+#         ],
+#         model="qwen-plus",
+#     )
+#     print(f"Received answer: {response.choices[0].message.content}")
+#
+# # 主异步函数
+# async def main():
+#     questions = ["你是谁？", "你会什么？", "天气怎么样？"]
+#     tasks = [task(q) for q in questions]
+#     await asyncio.gather(*tasks)
+#
+# if __name__ == '__main__':
+#     # 设置事件循环策略
+#     if platform.system() == 'Windows':
+#         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+#     # 运行主协程
+#     asyncio.run(main(), debug=False)

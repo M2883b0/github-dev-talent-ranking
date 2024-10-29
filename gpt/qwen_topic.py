@@ -55,7 +55,7 @@ def qwen_topic(topic_list, project_description, all_topic_list):
                     }
                 ],
             stream=False,
-            temperature=0.5,
+            temperature=0.6,
             top_p=0.8,
             max_tokens=512,
             presence_penalty=1,
