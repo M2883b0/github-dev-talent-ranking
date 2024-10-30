@@ -24,13 +24,13 @@ import logging
 from dataCrawler import database, crawled_topics
 from dataCrawler.config import topic_config as config
 from dataCrawler.item.TopicInfo import TopicInfo
-from dataCrawler.extension.SpiderManager import CrawlTopicListSignal, \
-    CrawlTopicDetailSignal, SpiderIdleSignal
+from dataCrawler import CrawlTopicListSignal, CrawlTopicDetailSignal, SpiderIdleSignal, AllSpiderIdle
 from utility.config import ERROR_TABLE_NAME
 from scrapy.core import engine
+from dataCrawler.spiders.SpiderTemplate import SpiderTemplate
 
 
-class TopicSpider(scrapy.Spider):
+class TopicSpider(SpiderTemplate):
     name = "TopicSpider"
     allowed_domains = ["github.com"]
     # handle_httpstatus_list = [403, 429]
@@ -51,9 +51,8 @@ class TopicSpider(scrapy.Spider):
         """
         spider = super(TopicSpider, cls).from_crawler(crawler, *args, **kwargs)
         assert isinstance(spider, TopicSpider)
-        crawler.signals.connect(spider.crawl_topic_list_handle, signal=CrawlTopicListSignal)
+
         crawler.signals.connect(spider.crawl_topic_detail_handle, signal=CrawlTopicDetailSignal)
-        spider.crawler.signals.connect(spider.on_idle, signal=signals.spider_idle)
         return spider
 
     def start_requests(self) -> Iterable[Request]:
@@ -63,6 +62,9 @@ class TopicSpider(scrapy.Spider):
         """
         用于获取topic 数量，方便分配查询API参数，同时发出获取 ‘topic列表’请求
         """
+        self.crawler.signals.send_catch_log(signal=CrawlTopicDetailSignal, url="http://www.baidu.com", op="crawl_list",
+                                            meta={"1":"2"})
+
         page = 0
         step = config["topic_list_step"]
         total_count = json.loads(response.text)["total_count"]
@@ -143,38 +145,40 @@ class TopicSpider(scrapy.Spider):
         else:
             logging.info(f"topic {response.meta['name']} is dropped")
 
-    def err_back(self, failure_response: Response):
-        url = failure_response.request.url
-        code = failure_response.status
-        meta = json.dumps(failure_response.meta)
-        spider_name = self.name
-
-        database.insert_data(
-            ERROR_TABLE_NAME,
-            (
-                url, code, spider_name, meta
-            )
-        )
-
-        database.commit()
-
-    def on_idle(self):
-        database.commit()
-        self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_closed=True)
-        logging.info(f"blocked in close spider name {self.name}")
-        while True:
-            if self.is_all_idle:
-                break
-
-    def crawl_topic_list_handle(self, sender, **kwargs):
-        self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_closed=False)
-        logging.info(f"spider {self.name} handle topic list crawl")
-        print(f"kwargs is ", kwargs)
-        self.crawler.engine.crawl(scrapy.Request(url=kwargs["url"], errback=self.err_back, meta=kwargs["meta"]))
+    # def err_back(self, failure_response: Response):
+    #     url = failure_response.request.url
+    #     code = failure_response.status
+    #     meta = json.dumps(failure_response.meta)
+    #     spider_name = self.name
+    #
+    #     database.insert_data(
+    #         ERROR_TABLE_NAME,
+    #         (
+    #             url, code, spider_name, meta
+    #         )
+    #     )
+    #
+    #     database.commit()
+    #
+    # def on_idle(self):
+    #     database.commit()
+    #     self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_closed=True)
+    #     logging.info(f"blocked in close spider name {self.name}")
+    #     while True:
+    #         if self.is_all_idle:
+    #             break
+    #
 
     def crawl_topic_detail_handle(self, sender, **kwargs):
-        self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_closed=False)
-        logging.info(f"spider {self.name} handle topic detail crawl")
-        url = kwargs["url"]
-        meta = kwargs["meta"]
-        yield scrapy.Request(url=url, errback=self.err_back, callback=self.url_parse, meta=meta)
+        print("crawl topic detail handle", kwargs, sender.spider.name)
+        if kwargs.get("op") == "crawl_detail":
+            self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_idle=False)
+            logging.info(f"spider {self.name} handle topic detail crawl")
+            self.crawler.engine.crawl(scrapy.Request(url=kwargs["url"], errback=self.err_back, callback=self.url_parse, meta=kwargs["meta"]))
+        elif kwargs.get("op") == "crawl_list":
+            self.crawler.signals.send_catch_log(SpiderIdleSignal, name=self.name, is_idle=False)
+            logging.info(f"spider {self.name} handle topic list crawl")
+            self.crawler.engine.crawl(scrapy.Request(url=kwargs["url"], errback=self.err_back, meta=kwargs["meta"]))
+        else:
+            print("rubbish")
+

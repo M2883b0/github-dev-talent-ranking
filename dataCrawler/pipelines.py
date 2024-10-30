@@ -14,11 +14,17 @@ from dataCrawler.item import TopicItem, UserItem
 class UserInfoPipeline:
     def __init__(self):
         self.topics = []
+        self.users = []
 
     def process_item(self, item, spider):
+        print("recvied item", item)
         if isinstance(item, TopicItem):
-            item.insert_to_database()
-            return item
+            if item["name"] not in self.topics:
+                item.insert_to_database()
+                self.topics.append(item["name"])
         elif isinstance(item, UserItem):
-            item.insert_to_database()
-            return item
+            if item["id"] not in self.users:
+                item.insert_to_database()
+                self.users.append(item["id"])
+
+        return item

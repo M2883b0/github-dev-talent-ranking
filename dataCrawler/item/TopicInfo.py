@@ -35,8 +35,6 @@ class TopicInfo(scrapy.Item):
         if database.get_rowcount() >= 100:
             database.commit()
 
-
-
     def close_spider(self, spider):
+        print("item closed")
         database.commit()
-
