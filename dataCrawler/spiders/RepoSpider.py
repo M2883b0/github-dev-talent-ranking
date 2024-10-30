@@ -41,5 +41,5 @@ class RepoSpider(scrapy.Spider):
 
         for url in urls:
             # print(url)
-            yield scrapy.Request(url, dont_filter=True)
-
+            # yield scrapy.Request(url, dont_filter=True)
+            pass

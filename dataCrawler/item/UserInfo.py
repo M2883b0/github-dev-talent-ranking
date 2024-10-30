@@ -16,22 +16,20 @@ from utility.config import USER_TABLE_NAME, TALENT_TABLE_NAME
 
 # GitHub 提供了访问开发者的接口 https://api.github.com/users?since=0&per_page=1000
 class UserInfo(scrapy.Item):
+    # 接口获取信息
     id = scrapy.Field()
-    url = scrapy.Field()
+    login = scrapy.Field()
     name = scrapy.Field()
-    avatar_url = scrapy.Field()
-    html_url = scrapy.Field()
     followers = scrapy.Field()
-    followers_url = scrapy.Field()
-    following_url = scrapy.Field()
-    organizations_url = scrapy.Field()
     company = scrapy.Field()
     location = scrapy.Field()
-    blog = scrapy.Field()
-    repos_url = scrapy.Field()
+    email = scrapy.Field()
+    bio = scrapy.Field()
 
-    # database = DatabaseManager()
-    # database.connect()
+    # 个人主页获取信息
+    blog_html = scrapy.Field(default="")
+
+    following_id = scrapy.Field(default=0)
 
     def insert_to_database(self):
         # self.database.insert_data(
