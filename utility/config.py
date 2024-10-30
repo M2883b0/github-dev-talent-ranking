@@ -17,7 +17,6 @@ INIT_DATABASE_INFO = {
 # 数据库创建配置
 DATABASE_INFO = {
 
-
 }
 
 #
@@ -34,6 +33,8 @@ USER_TABLE_NAME = 'users'
 TALENT_TABLE_NAME = 'talent'
 # 个人博客网页内容表
 USER_BLOG_TABLE_NAME = 'blogs'
+# 个人仓库关联表
+USER_REPOS_TABLE_NAME = 'repos'
 # 用户login名表
 USER_LOGIN_NAME_TABLE_NAME = 'login_names'
 # 组织表
@@ -94,9 +95,9 @@ CRAWLED_URL_TABLE_FIELD = {
 # 用户信息表结构
 USER_TABLE_FIELD = {
     'columns': ['id', 'name', 'email_address', 'followers', 'bio',
-                'organizations_id', 'company', 'location', 'nation'],
+                'company', 'location', 'nation'],
     'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, SHORT_STRING_TYPES, INT, LONG_STRING_TYPES,
-                      SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
+                      SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
 }
 
 # 能力表结构
@@ -106,6 +107,11 @@ TALENT_TABLE_FIELD = {
                       MEDIUM_STRING_TYPES]
 }
 
+# 用户仓库关联表结构
+USER_REPOS_TABLE_FIELD = {
+    'columns': ['id', 'repos_url'],
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
+}
 
 # 个人博客表结构
 USER_BLOG_TABLE_FIELD = {
@@ -122,8 +128,9 @@ USER_LOGIN_NAME_TABLE_FIELD = {
 
 # 组织表
 ORGANIZATIONS_TABLE_FIELD = {
-    'columns': ['organization_id', 'descript', 'location', 'organization_blog_html'],
-    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, SHORT_STRING_TYPES, LONG_STRING_TYPES]
+    'columns': ['organization_id', 'name', 'descript', 'location', 'organization_blog_html'],
+    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, SHORT_STRING_TYPES, MEDIUM_STRING_TYPES, SHORT_STRING_TYPES,
+                      LONG_STRING_TYPES]
 }
 
 # 用户关系网表
@@ -138,7 +145,6 @@ REPOS_PARTICIPANTS_TABLE_FIELD = {
     'columns': ['id', 'rid'],
     'columns_types': [INT + PRIMARY_KEY, INT]
 }
-
 
 # repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
@@ -186,7 +192,6 @@ TOPICS_URL_TABLE_FIELD = {
 
 }
 
-
 # ALL_TABLE_FIELD = {
 #     USER_TABLE_NAME: USER_TABLE_FIELD,
 #     TALENT_TABLE_NAME: TALENT_TABLE_FIELD,
@@ -198,13 +203,17 @@ TOPICS_URL_TABLE_FIELD = {
 ALL_TABLE_FIELD = {
     USER_TABLE_NAME: USER_TABLE_FIELD,
     ERROR_TABLE_NAME: ERROR_TABLE_FIELD,
+    TALENT_TABLE_NAME: TALENT_TABLE_FIELD,
+    USER_BLOG_TABLE_NAME: USER_TABLE_FIELD,
+    USER_LOGIN_NAME_TABLE_NAME: USER_LOGIN_NAME_TABLE_FIELD,
+    USER_REPOS_TABLE_NAME: USER_REPOS_TABLE_FIELD,
+    ORGANIZATIONS_TABLE_NAME: ORGANIZATIONS_TABLE_FIELD,
+
     CRAWLED_URL_TABLE_NAME: CRAWLED_URL_TABLE_FIELD,
     TOPICS_TABLE_NAME: TOPICS_TABLE_FIELD,
     TOPICS_URL_TABLE_NAME: TOPICS_URL_TABLE_FIELD,
 
-
 }
-
 
 # 级联行为常量
 CASCADE = 'CASCADE'
@@ -214,7 +223,7 @@ SET_NULL = 'SET NULL'
 SET_DEFAULT = 'SET DEFAULT'
 # 主表-从表映射字典 用于添加外键约束
 MASTER_SLAVE_MAPPING_RULE = {
-   'master_table': ['', ''],
+    'master_table': ['', ''],
     'slave_table': ['', ''],
     'foreign_key_column': ['', ''],
     'referenced_column': ['', ],
@@ -227,6 +236,3 @@ master_table_values = MASTER_SLAVE_MAPPING_RULE['master_table']
 slave_table_values = MASTER_SLAVE_MAPPING_RULE['slave_table']
 foreign_key_column_values = MASTER_SLAVE_MAPPING_RULE['foreign_key_column']
 referenced_column_values = MASTER_SLAVE_MAPPING_RULE['referenced_column']
-
-
-
