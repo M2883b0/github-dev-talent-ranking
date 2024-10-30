@@ -99,7 +99,7 @@ USER_TABLE_FIELD = {
     'columns': ['id', 'name', 'email_address', 'followers', 'bio',
                 'company', 'location', 'nation'],
     'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, SHORT_STRING_TYPES, INT, LONG_STRING_TYPES,
-                      SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
+                      MEDIUM_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
 }
 
 # 能力表结构
