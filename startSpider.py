@@ -19,8 +19,12 @@ from dataCrawler.spiders.TopicSpider import TopicSpider
 from dataCrawler.spiders.UserSpider import UserSpider
 from scrapy.utils.project import get_project_settings
 from dataCrawler import database
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 if __name__ == "__main__":
+
     settings = get_project_settings()
     process = CrawlerProcess(
         settings=settings

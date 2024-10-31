@@ -6,6 +6,7 @@
 ------------      --------    -----------
 2024/10/26 20:36    1.0         None
 """
+import logging
 import random
 from itertools import cycle
 
@@ -28,7 +29,7 @@ class HeaderRandom(UserAgentMiddleware):
         )
 
     def process_request(self, request, spider):
-        print(f"request url {request.url}")
+        # logging.info(f"request url {request.url}")
         agent = random.choice(self.agents)
         token = next(self.tokens)
         request.headers["User-Agent"] = agent
