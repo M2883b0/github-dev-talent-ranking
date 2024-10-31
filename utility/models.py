@@ -115,6 +115,7 @@ class ReposInfo(Base):
     __tablename__ = 'repos_info'
     id = Column(Integer, primary_key=True)
     main_language = Column(String(255))
+    descript = Column(MEDIUMTEXT)
     forks_count = Column(Integer)
     stargazers_count = Column(Integer)
     subscribers_count = Column(Integer)

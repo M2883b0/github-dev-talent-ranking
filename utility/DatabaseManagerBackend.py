@@ -239,7 +239,7 @@ if __name__ == "__main__":
     # 执行查询
 
     filters = {
-        'is_featured' : 1
+        'is_featured': 1
     }
     filters = and_(
         User.nation == "中国",

@@ -106,7 +106,7 @@ USER_TABLE_FIELD = {
 # 能力表结构
 TALENT_TABLE_FIELD = {
     'columns': ['uid', 'topic', 'ability'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, DECIMAL]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT]
 }
 
 # 用户仓库关联表结构
@@ -156,10 +156,10 @@ REPOS_PARTICIPANTS_TABLE_FIELD = {
 
 # repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
-    'columns': ['id', 'main_language', 'forks_count', 'stargazers_count',
+    'columns': ['id', 'main_language', 'descript', 'forks_count', 'stargazers_count',
                 'subscribers_count', 'importance', 'total_contribution_value', 'issue_count'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT, INT,
-                      INT, DECIMAL, DECIMAL, INT]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, LONG_STRING_TYPES, INT, INT,
+                      INT, INT, INT, INT]
 }
 
 # 项目URL表结构
