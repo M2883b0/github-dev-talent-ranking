@@ -9,7 +9,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():  # 主页
-    return render_template("index.html")
+    # return render_template("index.html", name='123')
+    return "Hello word"
 
 
 @app.route("/get_topics")
