@@ -18,8 +18,8 @@ user_info_config = {
     # 4500
     "user_info_api_template": "https://api.github.com/search/users?q=followers:{}..{}&per_page={}&page={}",
     "user_detail_template": "https://api.github.com/users/",
-    "user_followers_begin": 2000,  # 500
-    "user_followers_end": 4500,  # 4500
+    "user_followers_begin": 1000,  # 500
+    "user_followers_end": 2000,  # 4500
     "user_list_step": 100
 }
 
