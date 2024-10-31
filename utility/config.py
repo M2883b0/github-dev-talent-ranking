@@ -85,7 +85,7 @@ PRIMARY_KEY = ' PRIMARY KEY'
 # 爬虫错误日志表结构
 ERROR_TABLE_FIELD = {
     'columns': ['url', 'code', 'spider', 'detail'],
-    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, INT, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, INT, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES]
 }
 
 # 已爬取的URL表结构
@@ -98,8 +98,8 @@ CRAWLED_URL_TABLE_FIELD = {
 USER_TABLE_FIELD = {
     'columns': ['id', 'name', 'email_address', 'followers', 'bio',
                 'company', 'location', 'nation'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, SHORT_STRING_TYPES, INT, LONG_STRING_TYPES,
-                      MEDIUM_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, INT, LONG_STRING_TYPES,
+                      MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES]
 }
 
 # 能力表结构
@@ -124,14 +124,14 @@ USER_BLOG_TABLE_FIELD = {
 # 用户login名表
 USER_LOGIN_NAME_TABLE_FIELD = {
     'columns': ['id', 'login_name'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
 
 }
 
 # 组织表
 ORGANIZATIONS_TABLE_FIELD = {
     'columns': ['organization_id', 'name', 'descript', 'location', 'organization_blog_html'],
-    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, SHORT_STRING_TYPES, MEDIUM_STRING_TYPES, SHORT_STRING_TYPES,
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
                       LONG_STRING_TYPES]
 }
 
@@ -158,7 +158,7 @@ REPOS_PARTICIPANTS_TABLE_FIELD = {
 REPOS_INFO_TABLE_FIELD = {
     'columns': ['rid', 'main_language', 'forks_count', 'stargazers_count',
                 'subscribers_count', 'importance', 'total_contribution_value', 'issue_count'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, INT, INT,
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT, INT,
                       INT, DECIMAL, DECIMAL, INT]
 }
 
@@ -171,7 +171,7 @@ REPOS_URL_TABLE_FIELD = {
 # 项目语言占比表结构
 REPOS_PROPORTION_TABLE_FIELD = {
     'columns': ['rid', 'language', 'proportion'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, INT]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT]
 }
 
 # 项目参与者贡献表结构
@@ -183,7 +183,7 @@ REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_FIELD = {
 # 项目领域表
 REPOS_FIELDS_TABLE_FIELD = {
     'columns': ['rid', 'topics'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
 }
 # topic表结构
 TOPICS_TABLE_FIELD = {
