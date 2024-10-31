@@ -17,7 +17,6 @@ INIT_DATABASE_INFO = {
 # 数据库创建配置
 DATABASE_INFO = {
 
-
 }
 
 #
@@ -34,10 +33,14 @@ USER_TABLE_NAME = 'users'
 TALENT_TABLE_NAME = 'talent'
 # 个人博客网页内容表
 USER_BLOG_TABLE_NAME = 'blogs'
+# 个人仓库关联表
+USER_REPOS_TABLE_NAME = 'user_repos'
 # 用户login名表
 USER_LOGIN_NAME_TABLE_NAME = 'login_names'
 # 组织表
 ORGANIZATIONS_TABLE_NAME = 'organizations'
+# 用户组织关联表
+USER_ORGANIZATION_TABLE_NAME = 'user_organization'
 # 用户关系网表
 USER_RELATIONSHIPS_TABLE_NAME = 'relationships'
 
@@ -82,7 +85,7 @@ PRIMARY_KEY = ' PRIMARY KEY'
 # 爬虫错误日志表结构
 ERROR_TABLE_FIELD = {
     'columns': ['url', 'code', 'spider', 'detail'],
-    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, INT, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, INT, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES]
 }
 
 # 已爬取的URL表结构
@@ -94,9 +97,9 @@ CRAWLED_URL_TABLE_FIELD = {
 # 用户信息表结构
 USER_TABLE_FIELD = {
     'columns': ['id', 'name', 'email_address', 'followers', 'bio',
-                'organizations_id', 'company', 'location', 'nation'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, SHORT_STRING_TYPES, INT, LONG_STRING_TYPES,
-                      SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES, SHORT_STRING_TYPES]
+                'company', 'location', 'nation'],
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, INT, LONG_STRING_TYPES,
+                      MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES]
 }
 
 # 能力表结构
@@ -106,6 +109,11 @@ TALENT_TABLE_FIELD = {
                       MEDIUM_STRING_TYPES]
 }
 
+# 用户仓库关联表结构
+USER_REPOS_TABLE_FIELD = {
+    'columns': ['id', 'repos_url'],
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
+}
 
 # 个人博客表结构
 USER_BLOG_TABLE_FIELD = {
@@ -116,14 +124,21 @@ USER_BLOG_TABLE_FIELD = {
 # 用户login名表
 USER_LOGIN_NAME_TABLE_FIELD = {
     'columns': ['id', 'login_name'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
 
 }
 
 # 组织表
 ORGANIZATIONS_TABLE_FIELD = {
-    'columns': ['organization_id', 'descript', 'location', 'organization_blog_html'],
-    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, SHORT_STRING_TYPES, LONG_STRING_TYPES]
+    'columns': ['organization_id', 'name', 'descript', 'location', 'organization_blog_html'],
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
+                      LONG_STRING_TYPES]
+}
+
+# 用户组织关联表结构
+USER_ORGANIZATION_TABLE_FIELD = {
+    'columns': ['user_id', 'organization_id'],
+    'columns_types': [INT + PRIMARY_KEY, INT]
 }
 
 # 用户关系网表
@@ -139,12 +154,11 @@ REPOS_PARTICIPANTS_TABLE_FIELD = {
     'columns_types': [INT + PRIMARY_KEY, INT]
 }
 
-
 # repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
     'columns': ['rid', 'main_language', 'forks_count', 'stargazers_count',
                 'subscribers_count', 'importance', 'total_contribution_value', 'issue_count'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, INT, INT,
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT, INT,
                       INT, DECIMAL, DECIMAL, INT]
 }
 
@@ -157,7 +171,7 @@ REPOS_URL_TABLE_FIELD = {
 # 项目语言占比表结构
 REPOS_PROPORTION_TABLE_FIELD = {
     'columns': ['rid', 'language', 'proportion'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES, INT]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT]
 }
 
 # 项目参与者贡献表结构
@@ -169,7 +183,7 @@ REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_FIELD = {
 # 项目领域表
 REPOS_FIELDS_TABLE_FIELD = {
     'columns': ['rid', 'topics'],
-    'columns_types': [INT + PRIMARY_KEY, SHORT_STRING_TYPES]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
 }
 # topic表结构
 TOPICS_TABLE_FIELD = {
@@ -186,7 +200,6 @@ TOPICS_URL_TABLE_FIELD = {
 
 }
 
-
 # ALL_TABLE_FIELD = {
 #     USER_TABLE_NAME: USER_TABLE_FIELD,
 #     TALENT_TABLE_NAME: TALENT_TABLE_FIELD,
@@ -196,12 +209,21 @@ TOPICS_URL_TABLE_FIELD = {
 # }
 
 ALL_TABLE_FIELD = {
+    USER_TABLE_NAME: USER_TABLE_FIELD,
     ERROR_TABLE_NAME: ERROR_TABLE_FIELD,
+    TALENT_TABLE_NAME: TALENT_TABLE_FIELD,
+    USER_BLOG_TABLE_NAME: USER_BLOG_TABLE_FIELD,
+    USER_LOGIN_NAME_TABLE_NAME: USER_LOGIN_NAME_TABLE_FIELD,
+    USER_REPOS_TABLE_NAME: USER_REPOS_TABLE_FIELD,
+    USER_ORGANIZATION_TABLE_NAME: USER_ORGANIZATION_TABLE_FIELD,
+    ORGANIZATIONS_TABLE_NAME: ORGANIZATIONS_TABLE_FIELD,
     CRAWLED_URL_TABLE_NAME: CRAWLED_URL_TABLE_FIELD,
     TOPICS_TABLE_NAME: TOPICS_TABLE_FIELD,
-    TOPICS_URL_TABLE_NAME: TOPICS_URL_TABLE_FIELD
+    TOPICS_URL_TABLE_NAME: TOPICS_URL_TABLE_FIELD,
+    USER_RELATIONSHIPS_TABLE_NAME: USER_RELATIONSHIPS_TABLE_FIELD
 
 }
+
 
 
 # 级联行为常量
@@ -212,7 +234,7 @@ SET_NULL = 'SET NULL'
 SET_DEFAULT = 'SET DEFAULT'
 # 主表-从表映射字典 用于添加外键约束
 MASTER_SLAVE_MAPPING_RULE = {
-   'master_table': ['', ''],
+    'master_table': ['', ''],
     'slave_table': ['', ''],
     'foreign_key_column': ['', ''],
     'referenced_column': ['', ],
@@ -225,6 +247,3 @@ master_table_values = MASTER_SLAVE_MAPPING_RULE['master_table']
 slave_table_values = MASTER_SLAVE_MAPPING_RULE['slave_table']
 foreign_key_column_values = MASTER_SLAVE_MAPPING_RULE['foreign_key_column']
 referenced_column_values = MASTER_SLAVE_MAPPING_RULE['referenced_column']
-
-
-

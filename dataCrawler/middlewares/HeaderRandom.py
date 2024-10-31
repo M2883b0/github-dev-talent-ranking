@@ -28,6 +28,7 @@ class HeaderRandom(UserAgentMiddleware):
         )
 
     def process_request(self, request, spider):
+        print(f"request url {request.url}")
         agent = random.choice(self.agents)
         token = next(self.tokens)
         request.headers["User-Agent"] = agent
