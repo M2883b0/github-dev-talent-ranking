@@ -22,6 +22,7 @@ class User(Base):
     nation = Column(String(255))
     blogs = relationship("UserBlog", backref="user", cascade="all, delete-orphan")
 
+
     # 关联关系
     blogs = relationship("UserBlog", backref="user", cascade="all, delete-orphan")
     talents = relationship("Talent", backref="user", cascade="all, delete-orphan")

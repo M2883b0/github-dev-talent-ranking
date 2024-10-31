@@ -9,6 +9,7 @@ import utility.config as config
 from sqlalchemy import and_, or_
 import pymysql
 
+
 class DatabaseManager:
     def __init__(self):
         """
