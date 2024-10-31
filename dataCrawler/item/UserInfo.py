@@ -29,6 +29,7 @@ class UserInfo(scrapy.Item):
     location = scrapy.Field()
     email = scrapy.Field()
     bio = scrapy.Field()
+    public_repos = scrapy.Field()
 
     # 中间量
     repos_url = scrapy.Field()
@@ -40,15 +41,15 @@ class UserInfo(scrapy.Item):
 
     def insert_to_database(self):
         global row_count
-        print("begin insert ", crawled_users)
-        print("the item is ", self)
+        # print("begin insert ", crawled_users)
+        # print("the item is ", self)
         if self['id'] not in crawled_users.keys():
 
             database.insert_data(
                 USER_TABLE_NAME,
                 [
                     self["id"], self["name"], self["email"],
-                    self["followers"], self["bio"], self["company"], self["location"], ""]
+                    self["followers"], self["bio"], self["public_repos"], self["company"], self["location"], ""]
             )
             database.insert_data(
                 USER_LOGIN_NAME_TABLE_NAME,

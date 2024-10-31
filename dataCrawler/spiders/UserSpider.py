@@ -60,6 +60,7 @@ class UserSpider(scrapy.Spider):
         # TODO: 错误处理
         print("type of failure", type(failure))
         print("request url ", failure.request.url)
+
         print(failure.check(TCPTimedOutError))
         # if failure
         # response = failure.value.response
@@ -109,7 +110,7 @@ class UserSpider(scrapy.Spider):
             return
         if response.meta.get("is_follower"):
             li = result
-            print("follower list ", len(li))
+            # print("follower list ", len(li))
         else:
             li = result["items"]
         for user in li:
@@ -120,7 +121,7 @@ class UserSpider(scrapy.Spider):
                                meta=response.meta)
 
     def parse_detail(self, response: Response, **kwargs: Any) -> Any:
-        print("begin parse Detail the meta is ", response.meta)
+        # print("begin parse Detail the meta is ", response.meta)
         data = json.loads(response.text)
         assert isinstance(data, dict)
         # 提取项目所需要的字段
@@ -134,7 +135,8 @@ class UserSpider(scrapy.Spider):
             "email",
             "location",
             "bio",
-            "repos_url"
+            "repos_url",
+            "public_repos"
         )
         field = {
             key: value for key, value in data.items() if key in required_key
