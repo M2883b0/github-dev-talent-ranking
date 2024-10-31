@@ -12,12 +12,14 @@ SPIDER_NUM = 2
 # GitHub 官方提供的接口
 
 # 用户信息接口
+# TODO: 需要更改常量
 user_info_config = {
     "user_info_api_top1000_template": "https://api.github.com/search/users?q=followers:>4500&per_page={}&page={}",
+    # 4500
     "user_info_api_template": "https://api.github.com/search/users?q=followers:{}..{}&per_page={}&page={}",
     "user_detail_template": "https://api.github.com/users/",
-    "user_followers_begin": 4500,
-    "user_followers_end": 4500,
+    "user_followers_begin": 2000,  # 500
+    "user_followers_end": 4500,  # 4500
     "user_list_step": 100
 }
 

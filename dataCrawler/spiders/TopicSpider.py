@@ -92,7 +92,6 @@ class TopicSpider(SpiderTemplate):
         for topic in result["items"]:
             assert isinstance(topic, dict)
             # 判断是否在爬过的列表中
-            # TODO: set crawled topics name field
             if topic["name"] in crawled_topics or topic["display_name"] in crawled_topics:
                 logging.info(f"topic {topic['name']} 已经爬过了")
                 continue
