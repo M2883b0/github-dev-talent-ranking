@@ -2,7 +2,7 @@ import logging
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker
-from models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
+from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
 import utility.config as config
@@ -242,7 +242,8 @@ if __name__ == "__main__":
         'is_featured' : 1
     }
     filters = and_(
-
+        User.nation == "中国",
+        User.followers > 1000
     )
     result = db_manager.query_with_filters(Topic, filters=filters)
 
