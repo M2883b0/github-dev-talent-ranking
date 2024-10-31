@@ -212,7 +212,7 @@ class UserSpider(scrapy.Spider):
             is_proxy = False
             for i in need_proxy_url:
                 if i in field.get("blog_html"):
-                    is_proxy=True
+                    is_proxy = True
             yield self.request(url=self.url_check(field["blog_html"]), callback=self._download_personal_blog,
                                meta={"field": field, "is_proxy": is_proxy, "download_timeout": 5})
         else:
