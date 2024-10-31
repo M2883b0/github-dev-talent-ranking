@@ -220,7 +220,6 @@ def relate_topic():
     "stars_num": 41341,
     "followers_num": 394,
     "fork_num": 32131,
-    # "committed": 每年的
     "have_topic": ["Linux", "C", "C++"],
     "have_topic_talent": [100, 110, 120],
     "total_talent": 330,
