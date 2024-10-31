@@ -22,6 +22,7 @@ DATABASE_INFO = {
 #
 # 表名
 
+
 # 测试表存储请求失败的url
 ERROR_TABLE_NAME = 'spider_error'
 # 已爬取的URL表
