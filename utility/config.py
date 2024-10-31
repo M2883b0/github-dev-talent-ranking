@@ -96,34 +96,33 @@ CRAWLED_URL_TABLE_FIELD = {
 
 # 用户信息表结构
 USER_TABLE_FIELD = {
-    'columns': ['id', 'name', 'email_address', 'followers', 'bio',
+    'columns': ['id', 'name', 'email_address', 'followers', 'bio', 'repos_count',
                 'company', 'location', 'nation'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, INT, LONG_STRING_TYPES,
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, INT, LONG_STRING_TYPES, INT,
                       MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES]
 }
 
 # 能力表结构
 TALENT_TABLE_FIELD = {
-    'columns': ['id', 'repos_id_list', 'blog', 'ability', 'repos_url'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
-                      MEDIUM_STRING_TYPES]
+    'columns': ['uid', 'topic', 'ability'],
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, DECIMAL]
 }
 
 # 用户仓库关联表结构
 USER_REPOS_TABLE_FIELD = {
-    'columns': ['id', 'repos_url'],
+    'columns': ['uid', 'repos_url'],
     'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
 }
 
 # 个人博客表结构
 USER_BLOG_TABLE_FIELD = {
-    'columns': ['id', 'blog_html'],
+    'columns': ['uid', 'blog_html'],
     'columns_types': [INT + PRIMARY_KEY, LONG_STRING_TYPES]
 }
 
 # 用户login名表
 USER_LOGIN_NAME_TABLE_FIELD = {
-    'columns': ['id', 'login_name'],
+    'columns': ['uid', 'login_name'],
     'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES]
 
 }
@@ -137,13 +136,13 @@ ORGANIZATIONS_TABLE_FIELD = {
 
 # 用户组织关联表结构
 USER_ORGANIZATION_TABLE_FIELD = {
-    'columns': ['user_id', 'organization_id'],
+    'columns': ['uid', 'organization_id'],
     'columns_types': [INT + PRIMARY_KEY, INT]
 }
 
 # 用户关系网表
 USER_RELATIONSHIPS_TABLE_FIELD = {
-    'columns': ['user_id', 'related_user_id',
+    'columns': ['uid', 'related_uid',
                 'is_fan', 'is_follower', 'is_collaborator'],
     'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN, BOOLEAN, BOOLEAN]
 }
@@ -156,7 +155,7 @@ REPOS_PARTICIPANTS_TABLE_FIELD = {
 
 # repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
-    'columns': ['rid', 'main_language', 'forks_count', 'stargazers_count',
+    'columns': ['id', 'main_language', 'forks_count', 'stargazers_count',
                 'subscribers_count', 'importance', 'total_contribution_value', 'issue_count'],
     'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT, INT,
                       INT, DECIMAL, DECIMAL, INT]
