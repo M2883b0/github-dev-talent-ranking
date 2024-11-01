@@ -7,6 +7,7 @@ passwd = 'www.gzhu.edu.cn'
 # 数据库相关连接信息
 INIT_DATABASE_INFO = {
     'host': '8.134.144.185',
+    'port': 3307,
     'database': 'data',
     'user': 'root',
     'passwd': 'www.gzhu.edu.cn',
@@ -131,7 +132,7 @@ USER_LOGIN_NAME_TABLE_FIELD = {
 # 组织表
 ORGANIZATIONS_TABLE_FIELD = {
     'columns': ['organization_id', 'name', 'descript', 'location', 'organization_blog_html'],
-    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, LONG_STRING_TYPES, MEDIUM_STRING_TYPES,
                       LONG_STRING_TYPES]
 }
 

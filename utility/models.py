@@ -45,7 +45,7 @@ class Talent(Base):
     __tablename__ = 'talent'
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
     topic = Column(String(255))
-    ability = Column(DECIMAL(5, 2))
+    ability = Column(Integer)
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'topic'),
     )
@@ -75,13 +75,22 @@ class UserRepos(Base):
     )
 
 
+class Organization(Base):
+    __tablename__ = 'organizations'
+    organization_id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+    descript = Column(MEDIUMTEXT)
+    location = Column(String(255))
+    organization_blog_html = Column(MEDIUMTEXT)
+
+
 # 用户组织关联表
 class UserOrganization(Base):
     __tablename__ = 'user_organization'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
-    organization_id = Column(String(255),
+    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
+    organization_id = Column(Integer,
                              ForeignKey('organizations.organization_id', onupdate='CASCADE', ondelete='CASCADE'),
-                             primary_key=True)
+                             )
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'organization_id'),
     )
@@ -119,8 +128,8 @@ class ReposInfo(Base):
     forks_count = Column(Integer)
     stargazers_count = Column(Integer)
     subscribers_count = Column(Integer)
-    importance = Column(DECIMAL(5, 2))
-    total_contribution_value = Column(DECIMAL(5, 2))
+    importance = Column(Integer)
+    total_contribution_value = Column(Integer)
     issue_count = Column(Integer)
 
     # 关联关系
@@ -154,7 +163,7 @@ class ReposParticipantContribution(Base):
     rid = Column(Integer, ForeignKey('repos_info.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     is_owner = Column(Boolean)
-    personal_contribution_value = Column(DECIMAL(5, 2))
+    personal_contribution_value = Column(Integer)
     __table_args__ = (
         PrimaryKeyConstraint('rid', 'uid'),
     )
@@ -185,13 +194,6 @@ class TopicUrl(Base):
 
 
 # 组织表
-class Organization(Base):
-    __tablename__ = 'organizations'
-    organization_id = Column(String(255), primary_key=True)
-    name = Column(String(255))
-    descript = Column(String(255))
-    location = Column(String(255))
-    organization_blog_html = Column(MEDIUMTEXT)
 
 
 # 爬虫错误日志表
