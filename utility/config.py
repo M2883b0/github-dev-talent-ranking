@@ -7,6 +7,7 @@ passwd = 'www.gzhu.edu.cn'
 # 数据库相关连接信息
 INIT_DATABASE_INFO = {
     'host': '8.134.144.185',
+    'port': 3307,
     'database': 'data',
     'user': 'root',
     'passwd': 'www.gzhu.edu.cn',
@@ -106,7 +107,7 @@ USER_TABLE_FIELD = {
 # 能力表结构
 TALENT_TABLE_FIELD = {
     'columns': ['uid', 'topic', 'ability'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, DECIMAL]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT]
 }
 
 # 用户仓库关联表结构
@@ -131,7 +132,7 @@ USER_LOGIN_NAME_TABLE_FIELD = {
 # 组织表
 ORGANIZATIONS_TABLE_FIELD = {
     'columns': ['organization_id', 'name', 'descript', 'location', 'organization_blog_html'],
-    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES,
+    'columns_types': [MEDIUM_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, LONG_STRING_TYPES, MEDIUM_STRING_TYPES,
                       LONG_STRING_TYPES]
 }
 
@@ -156,10 +157,10 @@ REPOS_PARTICIPANTS_TABLE_FIELD = {
 
 # repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
-    'columns': ['id', 'main_language', 'forks_count', 'stargazers_count',
+    'columns': ['id', 'main_language', 'descript', 'forks_count', 'stargazers_count',
                 'subscribers_count', 'importance', 'total_contribution_value', 'issue_count'],
-    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT, INT,
-                      INT, DECIMAL, DECIMAL, INT]
+    'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, LONG_STRING_TYPES, INT, INT,
+                      INT, INT, INT, INT]
 }
 
 # 项目URL表结构

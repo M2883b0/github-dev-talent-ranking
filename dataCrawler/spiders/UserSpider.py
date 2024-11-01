@@ -21,19 +21,13 @@ from dataCrawler import database, crawled_users
 from dataCrawler.config import user_info_config as config
 from dataCrawler.item.OrgInfo import OrgInfo
 from dataCrawler.item.UserInfo import UserInfo
+from dataCrawler.spiders.SpiderTemplate import SpiderTemplate
 from utility.config import ERROR_TABLE_NAME
 
 
-def url_list(user_number):
-    """
-    迭代器 生成要爬取的 url
-    :return:
-    """
-    for i in range(2, user_number, config["user_list_step"]):
-        yield config["user_info_api_template"].format(config["user_list_step"], 1)
 
 
-class UserSpider(scrapy.Spider):
+class UserSpider(SpiderTemplate):
     name = "UserSpider"
     # allowed_domains = ["github.com"]
     step = config["user_list_step"]
@@ -53,15 +47,15 @@ class UserSpider(scrapy.Spider):
             yield self.request(url=self.user_list_url.format(lower_num, lower_num + 100, 1, 1),
                                callback=self.init_parse, meta={"begin": lower_num, "end": lower_num + 100})
 
-    def request(self, url, callback, meta=None):
-        return scrapy.Request(url=url, callback=callback, errback=self.err_back, meta=meta)
+    # def request(self, url, callback, meta=None):
+    #     return scrapy.Request(url=url, callback=callback, errback=self.err_back, meta=meta)
 
-    def err_back(self, failure: Failure):
-        # TODO: 错误处理
-        print("type of failure", type(failure))
-        print("request url ", failure.request.url)
+    # def err_back(self, failure: Failure):
+    #     TODO: 错误处理
+        # print("type of failure", type(failure))
+        # print("response ", failure.response)
+        # print("request url ", failure.request.url)
 
-        print(failure.check(TCPTimedOutError))
         # if failure
         # response = failure.value.response
         # assert isinstance(response, Response)
@@ -114,7 +108,7 @@ class UserSpider(scrapy.Spider):
         else:
             li = result["items"]
         for user in li:
-            if user['id'] in crawled_users.keys() and crawled_users[user['id']] < 500:
+            if user['id'] in crawled_users.keys() and crawled_users[user['id']] < config["user_followers_begin"]:
                 continue
             # logging.info(f"解析用户{user['id']}详细信息字段")
             yield self.request(url=self.user_detail_template + user["login"], callback=self.parse_detail,

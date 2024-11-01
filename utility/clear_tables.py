@@ -6,7 +6,8 @@ import utility.config as config
 class Database:
     def __init__(
             self, host=config.INIT_DATABASE_INFO['host'], database=config.INIT_DATABASE_INFO['database'],
-            user=config.INIT_DATABASE_INFO['user'], passwd=config.INIT_DATABASE_INFO['passwd']
+            user=config.INIT_DATABASE_INFO['user'], passwd=config.INIT_DATABASE_INFO['passwd'],
+            port=config.INIT_DATABASE_INFO['port']
     ):
         """
 
@@ -19,6 +20,7 @@ class Database:
         self.database = database
         self.user = user
         self.passwd = passwd
+        self.port = port
         self.connection = None
         self.cursor = None
 
@@ -32,7 +34,8 @@ class Database:
             self.connection = mysql.connector.connect(
                 host=self.host,
                 user=self.user,
-                password=self.passwd
+                password=self.passwd,
+                port=self.port
             )
             if self.connection.is_connected():
                 db_info = self.connection.get_server_info()
@@ -49,7 +52,8 @@ class Database:
                     host=self.host,
                     database=self.database,
                     user=self.user,
-                    password=self.passwd
+                    password=self.passwd,
+                    port=self.port
                 )
                 if self.connection.is_connected():
                     print("已连接到数据库:", self.database)
