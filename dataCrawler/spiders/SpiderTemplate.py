@@ -16,6 +16,7 @@ from scrapy.exceptions import DontCloseSpider
 from scrapy.crawler import Crawler
 from scrapy.http import Response
 from twisted.internet.defer import Deferred
+from twisted.python.failure import Failure
 from typing_extensions import Self
 
 from dataCrawler import database, CrawlTopicDetailSignal
@@ -44,23 +45,33 @@ class SpiderTemplate(scrapy.Spider):
 
         return spider
 
+    def request(self, url, callback, meta=None):
+        return scrapy.Request(url=url, callback=callback, errback=self.err_back, meta=meta)
+
     def err_back(self, failure_response: Response):
-        print(failure_response)
-        url = failure_response.request.url
-        code = failure_response.status
+        def err_back(self, failure: Failure):
+            # TODO: 错误处理
+            print("type of failure", type(failure))
+            print("response ", failure.response)
+            print("request url ", failure.request.url)
 
-        meta = json.dumps(failure_response.meta)
-        spider_name = self.name
-
-        print(url, code, meta, spider_name)
-        database.insert_data(
-            ERROR_TABLE_NAME,
-            (
-                url, code, spider_name, meta
-            )
-        )
-
-        database.commit()
+            # if failure
+            # response = failure.value.response
+            # assert isinstance(response, Response)
+            # code = response.status
+            # url = response.url
+            # meta = json.dumps(response.meta)
+            # spider_name = self.name
+            #
+            # print(url, code, meta, spider_name)
+            # database.insert_data(
+            #     ERROR_TABLE_NAME,
+            #     (
+            #         url, code, spider_name, meta
+            #     )
+            # )
+            #
+            # database.commit()
 
     def on_idle(self):
         database.commit()

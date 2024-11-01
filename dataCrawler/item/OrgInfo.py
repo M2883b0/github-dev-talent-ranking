@@ -40,7 +40,8 @@ class OrgInfo(scrapy.Item):
         database.insert_data(
             USER_ORGANIZATION_TABLE_NAME,
             [
-                self["user_id"], self["organizations_id"]]
+                self["user_id"], self["organizations_id"]
+            ]
         )
 
         row_count += 1

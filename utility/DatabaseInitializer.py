@@ -83,7 +83,8 @@ class DatabaseInitializer:
                     logging.info("数据库 %s 已存在", self.database)
                 else:
                     # 创建数据库
-                    self.cursor.execute(f"CREATE DATABASE {self.database} CHARACTER SET {self.charset} COLLATE {self.collations}")
+                    self.cursor.execute(
+                        f"CREATE DATABASE {self.database} CHARACTER SET {self.charset} COLLATE {self.collations}")
                     logging.info("数据库 %s 创建成功", self.database)
         except Error as e:
             logging.error("创建数据库时发生错误：%s", e)
@@ -91,6 +92,7 @@ class DatabaseInitializer:
             if self.connection.is_connected():
                 self.cursor.close()
                 self.connection.close()
+
     def create_all_tables(self):
         try:
             for table_name, table_fields in self.all_table_field.items():
