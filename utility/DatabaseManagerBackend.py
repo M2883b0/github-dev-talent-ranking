@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-
+from sqlalchemy import join
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker
 from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
@@ -131,6 +131,10 @@ class DatabaseManager:
             logging.error("删除记录失败：%s", e)
         finally:
             session.close()
+
+    def get_topics_page(self, order, page, limit):
+        session = self.get_session()
+        session.query(Topic, Order).join(Order, User.id == Order.user_id))
 
     def query_with_filters(self, table_name, filters=None, logic=None, order_by=None, joins=None,
                            load_related=None, limit=None, offset=None,

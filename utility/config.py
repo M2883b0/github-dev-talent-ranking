@@ -177,8 +177,8 @@ REPOS_PROPORTION_TABLE_FIELD = {
 
 # 项目参与者贡献表结构
 REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_FIELD = {
-    'columns': ['rid', 'contributor_id', 'is_owner'],
-    'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN]
+    'columns': ['rid', 'contributor_id', 'is_owner', 'personal_contribution_value'],
+    'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN, INT]
 }
 
 # 项目领域表
@@ -202,7 +202,8 @@ TOPICS_URL_TABLE_FIELD = {
 }
 
 REPOS_LANGUAGE_PROPORTION_TABLE_FIELD = {
-    'columns': ['rid', 'language', 'proportion']
+    'columns': ['rid', 'language', 'proportion'],
+    'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, MEDIUM_STRING_TYPES, INT]
 }
 
 # ALL_TABLE_FIELD = {
