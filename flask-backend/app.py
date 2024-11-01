@@ -47,63 +47,72 @@ def get_topics_page():   #一次性返回26个：A【9个】，B【9个】
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a2",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a3",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a4",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a5",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a6",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a7",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a8",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "a9",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             }
         ],
         "B":[
@@ -112,35 +121,40 @@ def get_topics_page():   #一次性返回26个：A【9个】，B【9个】
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "b2",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "b3",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "b4",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "b5",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "b6",
@@ -154,21 +168,24 @@ def get_topics_page():   #一次性返回26个：A【9个】，B【9个】
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "b8",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "b9",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             }
         ],
         "C":[
@@ -177,63 +194,72 @@ def get_topics_page():   #一次性返回26个：A【9个】，B【9个】
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "c2",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "c3",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature": 1,
             },
             {
                 "tpoic_name": "c4",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "c5",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "c6",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "c7",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "c8",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "c9",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             }
         ],
 
@@ -243,63 +269,72 @@ def get_topics_page():   #一次性返回26个：A【9个】，B【9个】
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d2",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d3",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d4",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d5",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d6",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d7",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d8",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "d9",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             }
         ]
     }
@@ -319,7 +354,7 @@ def get_topic():
     limit = request.args.get("limit")    # 每页的限制，可以20个等
 
     #示例
-    test={
+    test = {
         "total_count": 80,
         "size": 6,
         "total_pages": 16,
@@ -330,42 +365,48 @@ def get_topic():
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1,
             }
         ]
     }
@@ -488,6 +529,73 @@ def topic_rank():
     return json.dumps(test)
 
 
+@app.route("/random_topic")
+def random_topic():
+    """
+  :return:随机返回几个topic
+  """
+    num = request.args.get("num")   #随机返回几个topic，得有介绍和url的。【被人修改过的topic中随机选】
+
+    # 操作数据库，还是哪里。拿到这个统计的数据
+    # 例如：
+    test = {
+        "total_count": 6,
+        "relate_topic_list": [
+            {
+                "tpoic_name": "python",
+                "topic_url": "xxx",
+                "topic_img_url": "",
+                "descrip": "sasdfadfsa",
+                "repos_num": 3411,
+                "is_feature":1
+            },
+            {
+                "tpoic_name": "python",
+                "topic_url": "xxx",
+                "topic_img_url": "",
+                "descrip": "sasdfadfsa",
+                "repos_num": 3411,
+                "is_feature":1
+            },
+            {
+                "tpoic_name": "python",
+                "topic_url": "xxx",
+                "topic_img_url": "",
+                "descrip": "sasdfadfsa",
+                "repos_num": 3411,
+                "is_feature":1
+            },
+            {
+                "tpoic_name": "python",
+                "topic_url": "xxx",
+                "topic_img_url": "",
+                "descrip": "sasdfadfsa",
+                "repos_num": 3411,
+                "is_feature":1
+            },
+            {
+                "tpoic_name": "python",
+                "topic_url": "xxx",
+                "topic_img_url": "",
+                "descrip": "sasdfadfsa",
+                "repos_num": 3411,
+                "is_feature":1
+            },
+            {
+                "tpoic_name": "python",
+                "topic_url": "xxx",
+                "topic_img_url": "",
+                "descrip": "sasdfadfsa",
+                "repos_num": 3411,
+                "is_feature":1
+            }
+        ]
+    }
+    return json.dumps(test)
+
+
+
+
 @app.route("/relate_topic")
 def relate_topic():
     """
@@ -506,42 +614,48 @@ def relate_topic():
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1
             },
             {
                 "tpoic_name": "python",
                 "topic_url": "xxx",
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
-                "repos_num": "3411"
+                "repos_num": 3411,
+                "is_feature":1
             }
         ]
     }
