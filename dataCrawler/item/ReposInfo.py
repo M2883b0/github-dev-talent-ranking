@@ -15,7 +15,7 @@ from utility.config import REPOS_INFO_TABLE_NAME, REPOS_URL_TABLE_NAME, REPOS_LA
 row_count = 0
 
 
-class ReposItem(scrapy.Item):
+class ReposInfo(scrapy.Item):
     # api.github.com/repos/xx
     id = scrapy.Field()
     url = scrapy.Field()  # api url
@@ -71,6 +71,6 @@ class ReposItem(scrapy.Item):
         )
 
         row_count += 1
-        if self.row_count >= 100:
+        if row_count >= 100:
             row_count = 0
             database.commit()

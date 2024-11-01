@@ -66,7 +66,6 @@ class UserInfo(scrapy.Item):
                 )
             if isinstance(self["repos_url"], list):
                 for url in self["repos_url"]:
-                    print(self["id"], url)
                     database.insert_data(
                         USER_REPOS_TABLE_NAME,
                         [
@@ -74,7 +73,6 @@ class UserInfo(scrapy.Item):
                         ]
                     )
         if self.get("following_id"):
-            # print("关系 item ", self["following_id"], self["id"], 1, 0, 0)
             database.insert_data(
                 USER_RELATIONSHIPS_TABLE_NAME,
                 [
@@ -87,4 +85,5 @@ class UserInfo(scrapy.Item):
         if row_count >= 100:
             row_count = 0
             database.commit()
-            print("committed ")
+
+            logging.info("committed ")

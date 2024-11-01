@@ -20,15 +20,17 @@ from dataCrawler.spiders.UserSpider import UserSpider
 from scrapy.utils.project import get_project_settings
 from dataCrawler import database
 import logging
-
-logging.basicConfig(level=logging.INFO)
+from scrapy.utils.log import configure_logging
 
 if __name__ == "__main__":
-
+    logging.basicConfig(level=logging.INFO)
     settings = get_project_settings()
+    settings["LOG_LEVEL"] = "INFO"
+    settings["LOG_ENABLED"] = "False"
     process = CrawlerProcess(
         settings=settings
     )
+    # settings[""]
     # logging.info("Starting spider1...")
     # process.crawl(TopicSpider)
     process.crawl("UserSpider")
@@ -38,3 +40,4 @@ if __name__ == "__main__":
     logging.info("Starting crawler process...")
     process.start()
     database.close()
+

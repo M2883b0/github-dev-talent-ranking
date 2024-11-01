@@ -44,7 +44,9 @@ ITEM_PIPELINES = {
 
 # LOG_LEVEL = 'DEBUG'
 # LOG_LEVEL = 'WARNING'
-LOG_LEVEL = 'ERROR'
+# LOG_LEVEL = 'ERROR'
+# settings.py
+LOG_ENABLED = False
 
 # 爬虫中间件
 # SPIDER_MIDDLEWARES = {

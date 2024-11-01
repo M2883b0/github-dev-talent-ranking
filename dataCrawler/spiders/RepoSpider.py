@@ -14,7 +14,7 @@ from scrapy.http import Response
 
 from dataCrawler import database
 from dataCrawler.spiders.SpiderTemplate import SpiderTemplate
-
+from dataCrawler import crawled_repos
 from dataCrawler.item.TopicInfo import TopicInfo
 
 
@@ -25,9 +25,8 @@ class RepoSpider(SpiderTemplate):
     }
 
     def start_requests(self) -> Iterable[Request]:
-
-
         # self.request(url=)
         pass
+
     def parse(self, response: Response, **kwargs: Any) -> Any:
         print(response.request.headers["Authorization"])
