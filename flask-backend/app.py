@@ -17,9 +17,9 @@ def hello():  # 主页
 
 
 @app.route("/get_topics_page")
-def get_topics_page():   #一次性返回26个：A【9个】，B【9个】
+def get_topics_page():
     """
-  列出所有的topic列表详细信息，获得一个topic的详细
+    #所有的page页面：一次性返回26个：A【9个】，B【9个】
   :return:
   """
     order = request.args.get("order")   # 按仓库数的排序方式【正序和逆序,不填的话，默认是正序】
