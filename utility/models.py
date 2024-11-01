@@ -100,7 +100,8 @@ class UserOrganization(Base):
 class UserRelationship(Base):
     __tablename__ = 'relationships'
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
-    related_uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
+    # related_uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
+    related_uid = Column(Integer)
     is_fan = Column(Boolean)
     is_follower = Column(Boolean)
     is_collaborator = Column(Boolean)
