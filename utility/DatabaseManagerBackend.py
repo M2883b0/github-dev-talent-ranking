@@ -1,6 +1,7 @@
 import logging
+from enum import Enum
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker
 from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
@@ -8,16 +9,63 @@ from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, Use
 import utility.config as config
 from sqlalchemy import and_, or_
 import pymysql
+from utility.field_constants import UserFields, UserOrganizationFields, UserRelationshipFields, UserReposFields, \
+    UserBlogFields, UserLoginNameFields, ReposFieldFields, ReposInfoFields, ReposParticipantFields, ReposUrlFields, \
+    ReposLanguageProportionFields, ReposParticipantContributionFields, OrganizationFields, TopicFields, \
+    CrawledUrlFields, TopicUrlFields, TalentFields, SpiderErrorFields
+
+
+class TableName(Enum):
+    USER = "User"
+    TALENT = "Talent"
+    USER_BLOG = "UserBlog"
+    USER_LOGIN_NAME = "UserLoginName"
+    USER_REPOS = "UserRepos"
+    ORGANIZATION = "Organization"
+    USER_ORGANIZATION = "UserOrganization"
+    USER_RELATIONSHIP = "UserRelationship"
+    REPOS_PARTICIPANT = "ReposParticipant"
+    REPOS_INFO = "ReposInfo"
+    REPOS_URL = "ReposUrl"
+    REPOS_LANGUAGE_PROPORTION = "ReposLanguageProportion"
+    REPOS_PARTICIPANT_CONTRIBUTION = "ReposParticipantContribution"
+    REPOS_FIELD = "ReposField"
+    TOPIC = "Topic"
+    TOPIC_URL = "TopicUrl"
+    SPIDER_ERROR = "SpiderError"
+    CRAWLED_URL = "CrawledUrl"
 
 
 class DatabaseManager:
+    # 定义模型名称和模型类的映射关系
+    TABLE_MAPPING = {
+        "User": User,
+        "Talent": Talent,
+        "UserBlog": UserBlog,
+        "UserLoginName": UserLoginName,
+        "UserRepos": UserRepos,
+        "Organization": Organization,
+        "UserOrganization": UserOrganization,
+        "UserRelationship": UserRelationship,
+        "ReposParticipant": ReposParticipant,
+        "ReposInfo": ReposInfo,
+        "ReposUrl": ReposUrl,
+        "ReposLanguageProportion": ReposLanguageProportion,
+        "ReposParticipantContribution": ReposParticipantContribution,
+        "ReposField": ReposField,
+        "Topic": Topic,
+        "TopicUrl": TopicUrl,
+        "SpiderError": SpiderError,
+        "CrawledUrl": CrawledUrl,
+    }
+
     def __init__(self):
         """
         初始化数据库管理器，包括连接池和会话工厂
         """
         # 连接信息从配置文件读取
         database_url = f"mysql+pymysql://{config.INIT_DATABASE_INFO['user']}:{config.INIT_DATABASE_INFO['passwd']}@" \
-                       f"{config.INIT_DATABASE_INFO['host']}/{config.INIT_DATABASE_INFO['database']}"
+                       f"{config.INIT_DATABASE_INFO['host']}:{config.INIT_DATABASE_INFO['port']}/{config.INIT_DATABASE_INFO['database']}"
 
         # 创建SQLAlchemy引擎和连接池
         self.engine = create_engine(database_url, pool_size=20, max_overflow=0)
@@ -84,11 +132,14 @@ class DatabaseManager:
         finally:
             session.close()
 
-    def query_with_filters(self, base_model, filters=None, joins=None, load_related=None, limit=None, offset=None):
+    def query_with_filters(self, table_name, filters=None, logic=None, order_by=None, joins=None,
+                           load_related=None, limit=None, offset=None,
+                           ):
         """
         支持多表复杂查询和过滤的方法
-        :param base_model: 查询的基础模型类，例如 User 表
+        :param table_name: 查询的基础表类，例如 User 表  TableName.USER
         :param filters: 字典形式的过滤条件，如 {"nation": "中国"}
+        :param order_by: 排序条件，包含字段名称和排序方向 ("asc" 或 "desc")  如 {"repos_count", "asc"}
         :param joins: 表之间的关系关联列表，使用模型中的关系属性名称
         :param load_related: 需要预加载的关联表列表，避免 N+1 查询
         :param limit: 返回结果的数量限制
@@ -96,7 +147,8 @@ class DatabaseManager:
         :return: 查询结果的字典列表
         """
         session = self.get_session()
-        query = session.query(base_model)
+        table = self.TABLE_MAPPING.get(table_name.value)
+        query = session.query(table)
 
         # 动态加载关联表
         if joins:
@@ -110,8 +162,38 @@ class DatabaseManager:
 
         # 根据过滤条件进行查询
         if filters:
-            for attr, value in filters.items():
-                query = query.filter(getattr(base_model, attr) == value)
+            expressions = []
+            for condition in filters:
+                field = getattr(table, condition["field"])
+                op = condition["op"]
+                value = condition["value"]
+                if op == "==":
+                    expressions.append(field == value)
+                elif op == "!=":
+                    expressions.append(field != value)
+                elif op == ">":
+                    expressions.append(field > value)
+                elif op == "<":
+                    expressions.append(field < value)
+                elif op == ">=":
+                    expressions.append(field >= value)
+                elif op == "<=":
+                    expressions.append(field <= value)
+
+            # 根据逻辑操作组合条件
+            if logic == "and":
+                query = query.filter(and_(*expressions))
+            elif logic == "or":
+                query = query.filter(or_(*expressions))
+
+        # 设置排序
+        if order_by:
+            field = order_by['field']
+            direction = order_by['direction']
+            if direction == "asc":
+                query = query.order_by(asc(getattr(table, field)))
+            elif direction == "desc":
+                query = query.order_by(desc(getattr(table, field)))
 
         # 限制查询数量和偏移量（分页）
         if limit:
@@ -136,66 +218,43 @@ if __name__ == "__main__":
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
     # db_manager.insert_data(User, {"id": 3, "name": "王五", "nation": "英国"})
 
-    # 插入几条数据
-    users_data = [
-        {
-            'id': 1,
-            'name': 'Alice Smith',
-            'email_address': 'alice.smith@example.com',
-            'followers': 500,
-            'bio': 'A passionate developer and tech enthusiast.',
-            'repos_count': 10,
-            'company': 'Tech Innovations Inc.',
-            'location': 'San Francisco, CA',
-            'nation': 'United States'
-        },
-        {
-            'id': 2,
-            'name': 'Bob Johnson',
-            'email_address': 'bob.johnson@example.com',
-            'followers': 300,
-            'bio': 'Full-stack developer with a focus on web technologies.',
-            'repos_count': 15,
-            'company': 'Web Solutions Corp.',
-            'location': 'New York, NY',
-            'nation': 'United States'
-        },
-        {
-            'id': 3,
-            'name': 'Charlie Lee',
-            'email_address': 'charlie.lee@example.com',
-            'followers': 800,
-            'bio': 'Data scientist specializing in machine learning.',
-            'repos_count': 10,
-            'company': 'Data Insights Ltd.',
-            'location': 'Los Angeles, CA',
-            'nation': 'United States'
-        }
-    ]
 
-    # 插入数据
-    # for user_data in users_data:
-    #     db_manager.insert_data(User, user_data)
-    #
-    #
-    #
-    #
-    #
-    # db_manager.insert_data(UserBlog, {"uid": 1, "blog_html": "张三中国jfslajfiwofnsadnsdfajfweijafasdfsajflwjieofjwaf"})
-    # db_manager.insert_data(UserBlog, {"uid": 2, "blog_html": "李四美国fajfweijafasdfsajflwjieofjwaf"})
-    # db_manager.insert_data(UserBlog, {"uid": 3, "blog_html": "王五美国ajfiwofnsadnsdfajfweijafasdfsajflwjieofjwaf"})
-    #
-    # db_manager.insert_data(UserLoginName, {"uid": 1, "login_name": "zhangsan"})
-    # db_manager.insert_data(UserLoginName, {"uid": 2, "login_name": "lisi"})
-    # db_manager.insert_data(UserLoginName, {"uid": 3, "login_name": "wangwu"})
+
 
     # 查询示例
     # 1.查询某用户及其博客信息和登录名
     # 过滤出 nation 为 "中国" 的用户，同时加载用户的博客信息和登录名
     # filters = {"nation": "中国"}
+
+    filters = [
+        {
+            "field": UserFields.FOLLOWERS,
+            "op": ">",
+            "value": 100
+        },
+        {
+            "field": UserFields.REPOS_COUNT,
+            "op": ">",
+            "value": 100
+        },
+    ]
+    # 按照用户项目数升序
+    order_by = {
+            'field': UserFields.REPOS_COUNT,
+            'direction': 'asc'
+        }
+    # 按照用户项目数降序
+    # order_by = {
+    #         'field': UserFields.REPOS_COUNT,
+    #         'direction': 'desc'
+    #     }
+
+
     # load_related = [User.blogs, User.login_name]  # 预加载博客和登录名，避免额外查询
-    #
+
     # result = db_manager.query_with_filters(User, filters=filters, load_related=load_related)
+    result = db_manager.query_with_filters(TableName.USER, filters=filters, limit=10, logic='and', order_by=order_by)
+    print(result)
     # result1 = [blog.__dict__ for blog in result[0]['blogs']]
     # result2 = [login.__dict__ for login in result[0]['login_name']]
     # print(result1)
@@ -228,23 +287,23 @@ if __name__ == "__main__":
 
     # 5.使用 and_ 和 or_ 实现复杂条件查询
     # 设置查询条件
-    filters = and_(
-        User.nation == "中国",
-        or_(
-            User.followers > 1000,
-            User.name.like("%张%")
-        )
-    )
+    # filters = and_(
+    #     User.nation == "中国",
+    #     or_(
+    #         User.followers > 1000,
+    #         User.name.like("%张%")
+    #     )
+    # )
     # 在这个查询中，and_确保用户在“中国”，or_则用于表示“关注人数多于1000人或名字包含‘张’”。
     # 执行查询
 
-    filters = {
-        'is_featured': 1
-    }
-    filters = and_(
-        User.nation == "中国",
-        User.followers > 1000
-    )
-    result = db_manager.query_with_filters(Topic, filters=filters)
+    # filters = {
+    #     'is_featured': 1
+    # }
+    # filters = and_(
+    #     User.nation == "中国",
+    #     User.followers > 1000
+    # )
+    # result = db_manager.query_with_filters(Topic, filters=filters)
 
-    print(result[0])
+    # print(result[0])

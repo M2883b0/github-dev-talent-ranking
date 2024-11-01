@@ -88,9 +88,10 @@ class Organization(Base):
 class UserOrganization(Base):
     __tablename__ = 'user_organization'
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
-    organization_id = Column(Integer,
-                             ForeignKey('organizations.organization_id', onupdate='CASCADE', ondelete='CASCADE'),
-                             )
+    # organization_id = Column(Integer,
+    #                          ForeignKey('organizations.organization_id', onupdate='CASCADE', ondelete='CASCADE'),
+    #                          )
+    organization_id = Column(Integer)
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'organization_id'),
     )
