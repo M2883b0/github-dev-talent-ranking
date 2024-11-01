@@ -54,7 +54,7 @@ REPOS_URL_TABLE_NAME = 'repos_url'
 # 项目语言占比表
 REPOS_LANGUAGE_PROPORTION_TABLE_NAME = 'repos_lg_proportion'
 # 项目参与者贡献表
-REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME = 'repos_parti_contrib'
+REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME = 'repos_parti_contribution'
 # 项目领域表
 REPOS_FIELDS_TABLE_NAME = 'repos_fields'
 # 项目成员表
@@ -149,11 +149,6 @@ USER_RELATIONSHIPS_TABLE_FIELD = {
     'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN, BOOLEAN, BOOLEAN]
 }
 
-# 项目成员表
-REPOS_PARTICIPANTS_TABLE_FIELD = {
-    'columns': ['id', 'rid'],
-    'columns_types': [INT + PRIMARY_KEY, INT]
-}
 
 # repos基本信息表结构
 REPOS_INFO_TABLE_FIELD = {
