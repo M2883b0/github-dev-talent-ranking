@@ -8,3 +8,5 @@
 """
 from dataCrawler.item.TopicInfo import TopicInfo as TopicItem
 from dataCrawler.item.UserInfo import UserInfo as UserItem
+from dataCrawler.item.OrgInfo import OrgInfo as OrgItem
+from dataCrawler.item.ReposInfo import ReposInfo as ReposItem

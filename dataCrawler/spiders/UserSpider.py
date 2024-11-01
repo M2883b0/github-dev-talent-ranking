@@ -39,40 +39,13 @@ class UserSpider(SpiderTemplate):
         super().__init__(**kwargs)
 
     def start_requests(self) -> Iterable[Request]:
-
+        
         yield self.request(url=self.top1000url.format(1, 1), callback=self.init_parse)
         begin = config["user_followers_begin"]
         end = config["user_followers_end"]
-        for lower_num in range(begin, end, 100):
-            yield self.request(url=self.user_list_url.format(lower_num, lower_num + 100, 1, 1),
-                               callback=self.init_parse, meta={"begin": lower_num, "end": lower_num + 100})
-
-    # def request(self, url, callback, meta=None):
-    #     return scrapy.Request(url=url, callback=callback, errback=self.err_back, meta=meta)
-
-    # def err_back(self, failure: Failure):
-    #     TODO: 错误处理
-        # print("type of failure", type(failure))
-        # print("response ", failure.response)
-        # print("request url ", failure.request.url)
-
-        # if failure
-        # response = failure.value.response
-        # assert isinstance(response, Response)
-        # code = response.status
-        # url = response.url
-        # meta = json.dumps(response.meta)
-        # spider_name = self.name
-        #
-        # print(url, code, meta, spider_name)
-        # database.insert_data(
-        #     ERROR_TABLE_NAME,
-        #     (
-        #         url, code, spider_name, meta
-        #     )
-        # )
-        #
-        # database.commit()
+        for lower_num in range(begin, end, config["user_followers_step"]):
+            yield self.request(url=self.user_list_url.format(lower_num, lower_num + config["user_followers_step"], 1, 1),
+                               callback=self.init_parse, meta={"begin": lower_num, "end": lower_num + config["user_followers_step"]})
 
     def init_parse(self, response: Response, **kwargs: Any) -> Any:
         result = json.loads(response.text)
@@ -98,24 +71,22 @@ class UserSpider(SpiderTemplate):
             yield request
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        logging.info("parse function begin")
+        self.logger.info("parse function begin")
         result = json.loads(response.text)
         if not result:
             return
         if response.meta.get("is_follower"):
             li = result
-            # print("follower list ", len(li))
         else:
             li = result["items"]
         for user in li:
             if user['id'] in crawled_users.keys() and crawled_users[user['id']] < config["user_followers_begin"]:
                 continue
-            # logging.info(f"解析用户{user['id']}详细信息字段")
+            # self.logger.info (f"解析用户{user['id']}详细信息字段")
             yield self.request(url=self.user_detail_template + user["login"], callback=self.parse_detail,
                                meta=response.meta)
 
     def parse_detail(self, response: Response, **kwargs: Any) -> Any:
-        # print("begin parse Detail the meta is ", response.meta)
         data = json.loads(response.text)
         assert isinstance(data, dict)
         # 提取项目所需要的字段
@@ -132,16 +103,13 @@ class UserSpider(SpiderTemplate):
             "repos_url",
             "public_repos"
         )
-        field = {
-            key: value for key, value in data.items() if key in required_key
-        }
-        # print(meta)
+        field = self.filter_dict(data, required_key)
         if response.meta.get("is_follower"):
             field["following_id"] = response.meta["follower_id"]
             yield UserInfo(**field)
         else:
             # "followers_url" 国籍判断
-            # TODO: 需要更改常量
+
             for page in range(1, 2):
                 url = data["followers_url"] + f"?per_page=30&page={page}"
                 yield self.request(url=url, callback=self.parse,
@@ -160,14 +128,14 @@ class UserSpider(SpiderTemplate):
 
     def parse_organization(self, response: Response, **kwargs: Any) -> Any:
         data = json.loads(response.text)
+
         if not data:
             return
         for org in data:
-            self.request(url=org["url"], callback=self._parse_organiztion, meta=response.meta)
+            yield self.request(url=org["url"] + "?per_page=100&page=1", callback=self._parse_organiztion, meta=response.meta)
 
     def _parse_organiztion(self, response: Response, **kwargs: Any) -> Any:
         data = json.loads(response.text)
-
         required_key = (
             "id",
             "description",
@@ -177,7 +145,7 @@ class UserSpider(SpiderTemplate):
 
         field = self.filter_dict(data, required_key)
         field["partner_id"] = response.meta["partner_id"]
-        if data["blog"]:
+        if data.get("blog"):
             self.request(url=self.url_check(data["blog"]), callback=self._downlaod_org_blog, meta={"field": field})
         else:
             yield OrgInfo(**field)
@@ -198,9 +166,6 @@ class UserSpider(SpiderTemplate):
 
     def personal_page_parse(self, response: Response, **kwargs: Any) -> Any:
         field = response.meta["field"]
-
-        # TODO: personal page
-
         if field.get("blog_html"):
             need_proxy_url = ["twitter", "github.com"]
             is_proxy = False
@@ -220,16 +185,4 @@ class UserSpider(SpiderTemplate):
 
             yield UserInfo(**field)
 
-    def filter_dict(self, target, keys):
-        return {
-            key: value for key, value in target if key in keys
-        }
 
-    def url_check(self, url: str):
-        if url.startswith("www."):
-            url = "http://" + url
-        elif url.startswith("http"):
-            pass
-        elif '.' in url:
-            url = "http://" + url
-        return url

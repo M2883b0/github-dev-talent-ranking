@@ -20,7 +20,14 @@ user_info_config = {
     "user_detail_template": "https://api.github.com/users/",
     "user_followers_begin": 500,  # 500
     "user_followers_end": 4500,  # 4500
+    "user_followers_step": 20,
     "user_list_step": 100
+}
+
+# repos
+repos_info_config = {
+    "https://api.github.com/search/repositories?q=stars:%3E28000&per_page={}&page={}", # 28000
+    ""
 }
 
 # All featured topics 接口 https://github.com/topics?page=6

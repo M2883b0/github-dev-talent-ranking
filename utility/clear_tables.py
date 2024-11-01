@@ -96,6 +96,7 @@ if __name__ == "__main__":
     db.clear_table("login_names")  # 指定要清空的表名
     db.clear_table("relationships")
     db.clear_table("organizations")
+    db.clear_table("user_organization")
     db.clear_table("user_repos")
     db.clear_table("users")
     db.clear_table("blogs")

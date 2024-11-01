@@ -8,13 +8,16 @@
 """
 from utility.DatabaseManager import DatabaseManager
 from utility.config import TOPICS_TABLE_NAME
-from dataCrawler.item import TopicItem, UserItem
+from dataCrawler.item import TopicItem, UserItem, OrgItem, ReposItem
+from dataCrawler import crawled_users, crawled_orgs, crawled_topics, crawled_repos
 
 
 class UserInfoPipeline:
     def __init__(self):
-        self.topics = []
-        self.users = []
+        self.topics = crawled_topics
+        self.users = list(crawled_users.keys())
+        self.orgs = crawled_orgs
+        self.repos = list(crawled_repos.keys())
 
     def process_item(self, item, spider):
         # print("recvied item", item)
@@ -27,5 +30,13 @@ class UserInfoPipeline:
                 # print(f"recved user id {item['id']} name {item['name']}")
                 item.insert_to_database()
                 self.users.append(item["id"])
+        elif isinstance(item, OrgItem):
+            if item["id"] not in self.users:
+                item.insert_to_database()
+                self.topics.append(item["id"])
+        elif isinstance(item, ReposItem):
+            if item["id"] not in self.repos:
+                item.insert_to_database()
+                self.topics.append(item["id"])
 
         return item

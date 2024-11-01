@@ -17,34 +17,42 @@ row_count = 0
 
 
 class OrgInfo(scrapy.Item):
-    organizations_id = scrapy.Field()
-    descript = scrapy.Field()
+    id = scrapy.Field()
+    description = scrapy.Field()
     login = scrapy.Field()
     location = scrapy.Field()
-    organization_blog_html = scrapy.Field(default="")
-    partner_id = scrapy.Field(default=0)
+
+    ##
+    organization_blog_html = scrapy.Field()
+    partner_id = scrapy.Field()
 
     def insert_to_database(self):
         global row_count
-        if not self.get("organization_blog_html"):
-            self["organization_blog_html"] = ""
-        if not self.get("partner_id"):
-            self["partner_id"] = 0
-        database.insert_data(
-            ORGANIZATIONS_TABLE_NAME,
-            [
-                self["organization_id"], self["descript"], self["location"],
-                self["organization_blog_html"]]
-        )
+        for field in ["organization_blog_html", "partner_id", "organization_blog_html", "location", "description"]:
+            if not self.get(field):
+                if field == "partner_id":
+                    self[field] = 0
+                self[field] = ""
+        try:
+            database.insert_data(
+                ORGANIZATIONS_TABLE_NAME,
+                [
+                    self["id"], self["login"], self["description"], self["location"],
+                    self["organization_blog_html"]]
+            )
+        except:
+            pass
+        try:
 
-        database.insert_data(
-            USER_ORGANIZATION_TABLE_NAME,
-            [
-                self["user_id"], self["organizations_id"]
-            ]
-        )
-
+            database.insert_data(
+                USER_ORGANIZATION_TABLE_NAME,
+                [
+                    self["partner_id"], self["id"]
+                ]
+            )
+        except:
+            pass
         row_count += 1
-        if self.row_count >= 100:
+        if row_count >= 100:
             row_count = 0
             database.commit()

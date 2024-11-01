@@ -89,5 +89,18 @@ class SpiderTemplate(scrapy.Spider):
     def _drop_parse(self):
         pass
 
+    def filter_dict(self, target:dict, keys):
+        return {
+            key: value for key, value in target.items() if key in keys
+        }
+
+    def url_check(self, url: str):
+        if url.startswith("www."):
+            url = "http://" + url
+        elif url.startswith("http"):
+            pass
+        elif '.' in url:
+            url = "http://" + url
+        return url
 
 

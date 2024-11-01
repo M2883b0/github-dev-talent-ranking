@@ -12,6 +12,8 @@ import scrapy
 from dataCrawler import database
 from utility.config import TOPICS_TABLE_NAME, TOPICS_URL_TABLE_NAME
 
+row_count = 0
+
 
 class TopicInfo(scrapy.Item):
     name = scrapy.Field()
@@ -22,6 +24,7 @@ class TopicInfo(scrapy.Item):
     is_featured = scrapy.Field()
 
     def insert_to_database(self):
+        global row_count
         database.insert_data(
             TOPICS_TABLE_NAME,
             [self["name"], self["descript"], self["image_url"], self["repos_count"], self["is_featured"]]
@@ -32,7 +35,9 @@ class TopicInfo(scrapy.Item):
             [self["name"], self["url"]]
         )
         logging.info(f"insert topic {self['name']} to database")
-        if database.get_rowcount() >= 100:
+        row_count += 1
+        if row_count >= 100:
+            row_count = 0
             database.commit()
 
     def close_spider(self, spider):
