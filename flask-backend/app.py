@@ -421,12 +421,12 @@ def topic_rank():
   1、搜索框，搜索topic跳转过来，2、所有topic页面的点击某个topic跳转过来
   :return:这个topic的开发者的榜单
   """
-    topic = request.args.get("topic")    #  topic名字
+    topic = request.args.get("topic")    # topic名字
     nation = request.args.get("nation")  # 筛选项：国籍
     page = request.args.get("page")      # 分页
     limit = request.args.get("limit")    # 每页的限制
 
-    #查询数据库：需要多表查询
+    #查询数据库：多表
 
     if topic:              #如果指定了topic，就返回这个topic的榜单talent排序的，开发者信息榜单
         print('')
@@ -434,7 +434,6 @@ def topic_rank():
         print('')
 
 
-    # 操作数据库拿到数据
     # 例如：
     test = {
         "total_count": 45,
