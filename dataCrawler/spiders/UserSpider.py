@@ -158,10 +158,13 @@ class UserSpider(SpiderTemplate):
         yield OrgInfo(**field)
 
     def _download_personal_blog(self, response: Response, **kwargs: Any):
-        main_lable = response.xpath("/html/body").extract()[0]
-        blog = main_lable[:10000000]
-        field = response.meta["field"]
-        field["blog_html"] = blog
+        try:
+            main_lable = response.xpath("/html/body").extract()[0]
+            blog = main_lable[:10000000]
+            field = response.meta["field"]
+            field["blog_html"] = blog
+        except:
+            pass
         yield UserInfo(**field)
 
     def personal_page_parse(self, response: Response, **kwargs: Any) -> Any:

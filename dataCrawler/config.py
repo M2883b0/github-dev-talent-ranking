@@ -26,8 +26,14 @@ user_info_config = {
 
 # repos
 repos_info_config = {
-    "https://api.github.com/search/repositories?q=stars:%3E28000&per_page={}&page={}", # 28000
-    ""
+    "repos_info_api_top1000_template": "https://api.github.com/search/repositories?q=stars:%3E28000&per_page={}&page={}",# 28000
+    # 4500
+    "repos_info_api_template": "https://api.github.com/search/repositories?q=stars:{}..{}&per_page={}&page={}",
+    # "repos_detail_template": "https://api.github.com/reposs/",
+    "repos_stars_begin": 1000,  # 500
+    "repos_stars_end": 28000,  # 4500
+    "repos_stars_step": 20,
+    "repos_list_step": 100
 }
 
 # All featured topics 接口 https://github.com/topics?page=6

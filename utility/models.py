@@ -1,12 +1,13 @@
 # models.py
 from sqlalchemy import Column, Integer, String, Text, Boolean, DECIMAL, ForeignKey, UniqueConstraint, \
-    PrimaryKeyConstraint
+    PrimaryKeyConstraint, Table, MetaData
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
 
+Base = declarative_base()
+metadata = MetaData()
 
 # 用户信息表
 class User(Base):
@@ -211,3 +212,31 @@ class SpiderError(Base):
 class CrawledUrl(Base):
     __tablename__ = 'crawled_url'
     url = Column(String(255), primary_key=True)
+
+
+# 定义视图SQL查询
+user_profile_view_sql = """
+CREATE VIEW user_profile_view AS
+SELECT 
+    login_names.login_name AS login_name,
+    users.name AS name,
+    users.bio AS bio,
+    users.location AS location,
+    users.email_address AS email_address,
+    users.company AS company,
+    organizations.name AS organization_name,
+    organizations.location AS organization_location,
+    blogs.blog_html AS blog_html
+FROM 
+    login_names
+LEFT JOIN 
+    users ON login_names.uid = users.id
+LEFT JOIN 
+    user_organization ON users.id = user_organization.uid
+LEFT JOIN 
+    organizations ON user_organization.organization_id = organizations.organization_id
+LEFT JOIN 
+    blogs ON users.id = blogs.uid;
+"""
+
+# 创建 SQLAlchemy 视图模型
