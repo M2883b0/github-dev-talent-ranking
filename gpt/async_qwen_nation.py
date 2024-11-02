@@ -1,11 +1,29 @@
+import ast
+
+from sqlalchemy.testing.plugin.plugin_base import logging
+
 from config import QWEN_API_KEY, QWEN_NATION_MODEL, TOPIC_THRESHOLDS
 import asyncio
+import logging
 from openai import AsyncOpenAI
 import platform
 
+# import pandas as pd
+# df = pd.read_excel(r'C:\Users\luo20\Desktop\国家列表.xlsx')
+# column_data = df.iloc[:, 0].tolist()
+# print(column_data)
+
+Nation_list = ['阿尔巴尼亚', '阿尔及利亚', '美属萨摩亚', '安道尔', '安哥拉', '安圭拉岛', '南极洲', '安提瓜和巴布达', '阿根廷', '亚美尼亚', '阿鲁巴岛', '澳大利亚', '奥地利', '阿塞拜疆', '巴哈马', '巴林', '孟加拉国', '巴巴多斯', '白俄罗斯', '比利时', '伯利兹', '贝宁', '百慕大', '不丹', '玻利维亚', '波斯尼亚和黑塞哥维那', '博茨瓦纳',
+               '巴西', '英属印度洋领地', '英属维尔京群岛', '文莱', '保加利亚', '布基纳法索', '缅甸', '布隆迪', '柬埔寨', '喀麦隆', '加拿大', '佛得角', '开曼群岛', '中非共和国', '乍得', '智利', '中国', '圣诞岛', '克利珀顿岛', '科科斯（基林）群岛', '哥伦比亚', '科摩罗', '刚果民主共和国', '刚果共和国', '库克群岛', '珊瑚海群岛', '哥斯达黎加',
+               '科特迪瓦', '克罗地亚', '古巴', '塞浦路斯', '捷克共和国', '丹麦', '吉布地', '多米尼克', '多明尼加共和国', '厄瓜多尔', '埃及', '萨尔瓦多', '赤道几内亚', '厄立特里亚', '爱沙尼亚', '埃塞俄比亚', '欧罗巴岛', '福克兰群岛', '法罗群岛', '斐济', '芬兰', '法国', '法属圭亚那', '法属波利尼西亚', '加蓬', '冈比亚', '乔治亚', '德国',
+               '加纳', '直布罗陀', '格洛里厄斯群岛', '希腊', '格陵兰', '格林纳达', '瓜德罗普岛', '关岛', '危地马拉', '根西岛', '几内亚', '几内亚比绍', '圭亚那', '海地', '罗马教廷（梵蒂冈城）', '洪都拉斯', '匈牙利', '冰岛', '印度', '印度尼西亚', '伊朗', '伊拉克', '爱尔兰', '马恩岛', '以色列', '意大利', '牙买加', '扬马延岛', '日本',
+               '泽西岛', '约旦', '新胡安岛', '哈萨克斯坦', '肯尼亚', '基里巴斯', '科威特', '吉尔吉斯斯坦', '老挝', '拉脱维亚', '黎巴嫩', '莱索托', '利比里亚', '利比亚', '列支敦士登', '立陶宛', '卢森堡', '马其顿', '马达加斯加', '马拉维', '马来西亚', '马尔代夫', '马里', '马耳他', '马绍尔群岛', '马提尼克岛', '毛里塔尼亚', '毛里求斯',
+               '马约特岛', '墨西哥', '密克罗尼西亚联邦', '摩尔多瓦', '摩纳哥', '蒙古', '蒙特塞拉特', '摩洛哥', '莫桑比克', '纳米比亚', '瑙鲁', '纳瓦萨岛', '尼泊尔', '荷兰', '荷属安的列斯', '新喀里多尼亚', '新西兰', '尼加拉瓜', '尼日尔', '尼日利亚', '纽埃', '诺福克岛', '朝鲜', '北马里亚纳群岛', '挪威', '阿曼', '巴基斯坦', '帕劳', '巴拿马',
+               '巴布亚新几内亚', '西沙群岛', '巴拉圭', '秘鲁', '菲律宾', '皮特凯恩群岛', '波兰', '葡萄牙', '波多黎各', '卡塔尔', '留尼汪', '罗马尼亚', '俄罗斯', '卢旺达', '圣赫勒拿岛', '圣基茨和尼维斯', '圣卢西亚岛', '圣皮埃尔和密克隆群岛', '圣文森特和格林纳丁斯', '萨摩亚', '圣马力诺', '圣多美和普林西比', '沙特阿拉伯', '塞内加尔', '塞尔维亚和黑山',
+               '塞舌尔群岛', '塞拉利昂', '新加坡', '斯洛伐克', '斯洛文尼亚', '所罗门群岛', '索马里', '南非', '韩国', '西班牙', '南沙群岛', '斯里兰卡', '苏丹', '苏里南', '斯瓦尔巴群岛', '斯威士兰', '瑞典', '瑞士', '叙利亚', '塔吉克斯坦', '坦桑尼亚', '泰国', '东帝汶', '多哥', '托克劳', '汤加', '特立尼达和多巴哥', '特罗姆兰岛', '突尼斯', '土耳其',
+               '土库曼斯坦', '特克斯和凯科斯群岛', '图瓦卢', '乌干达', '乌克兰', '阿拉伯联合酋长国', '英国', '美国', '乌拉圭', '乌兹别克斯坦', '瓦努阿图', '委内瑞拉', '越南', '维尔京群岛', '威克岛', '瓦利斯和富图纳群岛', '西撒哈拉', '也门', '赞比亚', '津巴布韦']
 
 
-blog="I am a Senior Applied Scientist in Amazon AGI. I closely collaborate with AWS AI Labs. Before this, I was an applied scientist in Amazon Halo where I worked on problems at the intersection of Computer Vision and Health. Prior to Amazon, I was a Principal Computer Vision Researcher at Magic Leap. I finished my Ph.D. from the School of Interactive Computing at Georgia Institute of Technology. I was advised by Professor Henrik I. Christensen and Professor Frank Dellaert. I completed my Bachelors and Masters in Computer Science from IIIT Hyderabad where I was advised by Prof. P J Narayanan."
 
 
 seen = set()
@@ -89,7 +107,7 @@ async def main(log_name,name=None,bio=None,location=None,email=None,company=None
                 'role': 'user',
                 # 'content': "这个一个人的博客主页内容：'{}'。\n利用这个人的基本信息和社交关系网络,共同的所提供的线索，猜测这个人最可能的原始国籍是什么(国籍使用英语表示)，并且同时给出猜测的概率值。使用list列表输出结果：".format(blog)
                 # 'content': "GitHub账户名字是“torvalds”，用户名是“Linus Torvalds”，目前在Linux Foundation公司上班，GitHub显示目前的定位是在：“Portland, OR”，同时也是位于Spain的DROPCitizenShip组织的一员。\n利用这个人的基本信息和社交关系网络,共同的提供的线索，猜测这个人的国籍是什么(国籍使用英语表示)，并且同时给出猜测的概率值。\n使用list列表返回结果："
-                'content': "{}。\n利用这个人的基本信息和社交关系网络,共同的提供的线索，猜测这个人的国籍是什么(国籍使用英语表示)，并且同时给出猜测的概率值。\n使用list列表返回结果，若提供用户的信息太少难以推测其国籍，则返回['','0']。只需返回list列表：".format(person_info)
+                'content': "{}。\n利用这个人的基本信息和社交关系网络,共同的提供的线索，猜测这个人的国籍是什么(只需要猜测一个国籍，国籍使用中文表示)，并且同时给出猜测的概率值。\n使用list列表返回结果，若提供用户的信息太少难以推测其国籍，则返回['',0]。只需返回list列表：".format(person_info)
             }
         ],
         stream=False,
@@ -102,7 +120,15 @@ async def main(log_name,name=None,bio=None,location=None,email=None,company=None
         }
     )
     output = response.choices[0].message.content
-    print(output)
+    try:
+        output_list = ast.literal_eval(output)
+        if (output_list[1] > 0.3) and (output_list[0] in Nation_list):    # 猜测概率
+            print(output_list[0])
+        else:
+            print('N/A')
+
+    except (ValueError, SyntaxError) as e:
+        logging.error("大模型预测国籍出错: {e}")
 
 if __name__ == '__main__':
     """

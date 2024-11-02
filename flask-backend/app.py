@@ -3,9 +3,14 @@ import json
 from flask import request
 from flask import Flask
 from flask import render_template
-from utility.DatabaseManagerBackend import DatabaseManager
+from utility.DatabaseManagerBackend import DatabaseManager, TableName
 from utility.models import Topic
 from sqlalchemy import and_, or_
+
+from utility.field_constants import UserFields, UserOrganizationFields, UserRelationshipFields, UserReposFields, \
+    UserBlogFields, UserLoginNameFields, ReposFieldFields, ReposInfoFields, ReposParticipantFields, ReposUrlFields, \
+    ReposLanguageProportionFields, ReposParticipantContributionFields, OrganizationFields, TopicFields, \
+    CrawledUrlFields, TopicUrlFields, TalentFields, SpiderErrorFields
 
 app = Flask(__name__)
 
@@ -24,7 +29,7 @@ def get_topics_page():
   """
     order = request.args.get("order")   # 按仓库数的排序方式【正序和逆序,不填的话，默认是正序】
     page = request.args.get("page")    # 分页
-    limit = request.args.get("limit")  # 每页的限制,建议9个
+    limit = request.args.get("limit")  # 每页的限制,建议9个,就是每个topic首字母，只返回9个
 
 
 
@@ -343,7 +348,8 @@ def get_topics_page():
 @app.route("/get_topic")
 def get_topic():
     """
-  1、搜索框，搜索topic跳转过来，2、所有topic页面的点击某个topic跳转过来
+  1、精确查询：【搜索框搜索，跳到topic榜单】；【点击某个topic跳转，跳到topic榜单】，这个榜单的第一个，就是返回单个topic的信息。
+  2、模糊查询，所有topic的列表，A只展示9个，点击A的所有topic。就需要模糊查询所有以A开头的topic，按仓库排序。
   :return:这个topic的开发者的榜单
   """
     order = request.args.get("order")  # 按仓库数的排序方式【正序和逆序,不填的话，默认是正序】
@@ -352,6 +358,9 @@ def get_topic():
     is_feature = request.args.get("is_feature")
     page = request.args.get("page")      # 分页
     limit = request.args.get("limit")    # 每页的限制，可以20个等
+
+
+
 
     #示例
     test = {
