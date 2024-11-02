@@ -1,6 +1,6 @@
 import ast
 
-from sqlalchemy.testing.plugin.plugin_base import logging
+# from sqlalchemy.testing.plugin.plugin_base import logging
 
 from config import QWEN_API_KEY, QWEN_NATION_MODEL, TOPIC_THRESHOLDS
 import asyncio
@@ -11,11 +11,7 @@ from utility.InitDatabase2 import UserProfileView
 
 from utility.DatabaseManagerBackend import DatabaseManager
 
-# import pandas as pd
-# df = pd.read_excel(r'C:\Users\luo20\Desktop\国家列表.xlsx')
-# column_data = df.iloc[:, 0].tolist()
-# print(column_data)
-
+# from https://studycli.org/zh-CN/
 Nation_list = ['阿尔巴尼亚', '阿尔及利亚', '美属萨摩亚', '安道尔', '安哥拉', '安圭拉岛', '南极洲', '安提瓜和巴布达', '阿根廷', '亚美尼亚', '阿鲁巴岛', '澳大利亚', '奥地利', '阿塞拜疆', '巴哈马', '巴林', '孟加拉国', '巴巴多斯', '白俄罗斯', '比利时', '伯利兹', '贝宁', '百慕大', '不丹', '玻利维亚', '波斯尼亚和黑塞哥维那', '博茨瓦纳',
                '巴西', '英属印度洋领地', '英属维尔京群岛', '文莱', '保加利亚', '布基纳法索', '缅甸', '布隆迪', '柬埔寨', '喀麦隆', '加拿大', '佛得角', '开曼群岛', '中非共和国', '乍得', '智利', '中国', '圣诞岛', '克利珀顿岛', '科科斯（基林）群岛', '哥伦比亚', '科摩罗', '刚果民主共和国', '刚果共和国', '库克群岛', '珊瑚海群岛', '哥斯达黎加',
                '科特迪瓦', '克罗地亚', '古巴', '塞浦路斯', '捷克共和国', '丹麦', '吉布地', '多米尼克', '多明尼加共和国', '厄瓜多尔', '埃及', '萨尔瓦多', '赤道几内亚', '厄立特里亚', '爱沙尼亚', '埃塞俄比亚', '欧罗巴岛', '福克兰群岛', '法罗群岛', '斐济', '芬兰', '法国', '法属圭亚那', '法属波利尼西亚', '加蓬', '冈比亚', '乔治亚', '德国',
@@ -27,54 +23,28 @@ Nation_list = ['阿尔巴尼亚', '阿尔及利亚', '美属萨摩亚', '安道�
                '土库曼斯坦', '特克斯和凯科斯群岛', '图瓦卢', '乌干达', '乌克兰', '阿拉伯联合酋长国', '英国', '美国', '乌拉圭', '乌兹别克斯坦', '瓦努阿图', '委内瑞拉', '越南', '维尔京群岛', '威克岛', '瓦利斯和富图纳群岛', '西撒哈拉', '也门', '赞比亚', '津巴布韦']
 
 
-
-
-seen = set()
-all_topic_lists = []
-with open("../topicList.txt", "r") as f:
-    for line in f.read().strip().split("\n"):
-        if line not in seen:
-            seen.add(line)
-            all_topic_lists.append(line)
-# print(all_topic_lists)
-# print(len(all_topic_lists))
-
-
-with open("../feature_topicList.txt", "r") as f:
-    t = f.read().strip().split("\n")
-feature_topic_lists = list(t)
-# print(feature_topic_lists)
-# print(len(feature_topic_lists))
-
-# 项目的描述，从数据库里拿（对所有没有topic的项目，都需要爬取）
-# description = 'huggingface\Transformers: State-of-the-art Machine Learning for Pytorch, TensorFlow, and JAX.'
-description = 'Linux kernel source tree'
-# description = 'Visual Instruction Tuning (LLaVA) built towards GPT-4V level capabilities and beyond.'
-
-
-
 client = AsyncOpenAI(
     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
     api_key=QWEN_API_KEY,
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
-async def task(log_name,name=None,bio=None,location=None,email=None,company=None,oraganization_name=None,oraganization_loaction=None,blog_html=None,followers_list=None,following_list=None):
+async def task(login_name,name=None,bio=None,location=None,email=None,company=None,organization_name=None,organization_location=None,blog_html=None,followers_list=None,following_list=None):
     """
 
-    :param log_name:  登录名（必填）
+    :param login_name:  登录名（必填）
     :param name:  用户名（可选）
     :param bio:  简介（可选）
     :param location:  定位（可选）
     :param email:  邮箱（可选）
     :param company:  公司（可选）
-    :param oraganization_name:  组织名（可选）
-    :param oraganization_loaction:  组织地址（可选）
+    :param organization_name:  组织名（可选）
+    :param organization_location:  组织地址（可选）
     :param blog_html:  博客链接的内容（可选）
     :param followers_list:  粉丝的位置列表（可选）
     :param following_list:  关注的位置列表（可选）
     :return:
     """
-    person_info = "用户名：'{}'".format(log_name)
+    person_info = "用户名：'{}'".format(login_name)
     if name:
         person_info = person_info + "，姓名：'{}'".format(name)
     if bio:
@@ -85,10 +55,10 @@ async def task(log_name,name=None,bio=None,location=None,email=None,company=None
         person_info = person_info + "，邮箱：'{}'".format(email)
     if company:
         person_info = person_info + "，工作的公司：'{}'".format(company)
-    if oraganization_name:
-        person_info = person_info + "，加入的组织：'{}'".format(oraganization_name)
-    if oraganization_loaction:
-        person_info = person_info + "，组织的位置：'{}'".format(oraganization_loaction)
+    if organization_name:
+        person_info = person_info + "，加入的组织：'{}'".format(organization_name)
+    if organization_location:
+        person_info = person_info + "，组织的位置：'{}'".format(organization_location)
     if blog_html:
         person_info = person_info + "，个人博客信息：'{}'".format(blog_html)
     if followers_list:
@@ -119,19 +89,19 @@ async def task(log_name,name=None,bio=None,location=None,email=None,company=None
         max_tokens=512,
         presence_penalty=1,
         extra_body={
-            "enable_search": True  # 联网
+            "enable_search": True  # 联网搜索
         }
     )
     output = response.choices[0].message.content
     try:
         output_list = ast.literal_eval(output)
-        if (output_list[1] > 0.3) and (output_list[0] in Nation_list):    # 猜测概率
-            print(output_list[0])
+        if (output_list[1] >= 0.5) and (output_list[0] in Nation_list):    # 猜测概率
+            print(output_list[0])    # 写入国籍
         else:
-            print('N/A')
+            print('N/A')             # 写入N/A
 
     except (ValueError, SyntaxError) as e:
-        logging.error("大模型预测国籍出错: {e}")
+        logging.error("{}国籍预测出错: {}".format(login_name, e))
 
 
 async def main():
@@ -140,7 +110,9 @@ async def main():
     session = db_manager.get_session()
     results = session.query(UserProfileView).all()
 
-    tasks = [task(q.login_name,name=q.name,bio=q.bio,location=q.location,email=q.email,company=q.company,oraganization_name=q.oraganization_name,oraganization_loaction=q.oraganization_loaction,blog_html=q.blog_html,followers_list=q.followers_list,following_list=q.following_list) for q in results]
+
+
+    tasks = [task(login_name=q.login_name,name=q.name,bio=q.bio,location=q.location,email=q.email_address,company=q.company,organization_name=q.organization_name,organization_location=q.organization_location,blog_html=q.blog_html) for q in results]
     await asyncio.gather(*tasks)
 
 

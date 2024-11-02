@@ -543,7 +543,7 @@ def random_topic():
     """
   :return:随机返回几个topic
   """
-    num = request.args.get("num")   #随机返回几个topic，得有介绍和url的。【被人修改过的topic中随机选】
+    num = request.args.get("num")   #随机返回几个topic，得有介绍和url的。【从被人修改过的topic中随机选】
 
     # 操作数据库，还是哪里。拿到这个统计的数据
     # 例如：
