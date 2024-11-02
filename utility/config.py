@@ -6,8 +6,8 @@ passwd = 'www.gzhu.edu.cn'
 
 # 数据库相关连接信息
 INIT_DATABASE_INFO = {
-    'host': '8.134.144.185',
-    'port': 3307,
+    'host': '192.168.43.160',
+    'port': 3306,
     'database': 'data',
     'user': 'root',
     'passwd': 'www.gzhu.edu.cn',
@@ -17,7 +17,7 @@ INIT_DATABASE_INFO = {
 
 # 数据库相关连接信息
 INIT_DATABASE_INFO_DATABASE3306 = {
-    'host': '8.134.144.185',
+    'host': '192.168.43.160',
     'port': 3306,
     'database': 'data',
     'user': 'root',
@@ -263,3 +263,57 @@ master_table_values = MASTER_SLAVE_MAPPING_RULE['master_table']
 slave_table_values = MASTER_SLAVE_MAPPING_RULE['slave_table']
 foreign_key_column_values = MASTER_SLAVE_MAPPING_RULE['foreign_key_column']
 referenced_column_values = MASTER_SLAVE_MAPPING_RULE['referenced_column']
+
+
+# 定义视图SQL查询
+user_profile_view_sql = """
+CREATE VIEW user_profile_view AS
+SELECT 
+    login_names.login_name AS login_name,
+    users.id AS uid,
+    users.name AS name,
+    users.bio AS bio,
+    users.location AS location,
+    users.email_address AS email_address,
+    users.company AS company,
+    organizations.name AS organization_name,
+    organizations.location AS organization_location,
+    blogs.blog_html AS blog_html,
+    users.nation AS nation
+FROM 
+    login_names
+LEFT JOIN 
+    users ON login_names.uid = users.id
+LEFT JOIN 
+    user_organization ON users.id = user_organization.uid
+LEFT JOIN 
+    organizations ON user_organization.organization_id = organizations.organization_id
+LEFT JOIN 
+    blogs ON users.id = blogs.uid
+WHERE 
+    users.followers > 500 and users.nation = "";
+"""
+
+# 定义视图SQL查询
+user_relation_view_sql = """
+CREATE VIEW user_relation_view AS
+SELECT 
+    relationships.uid AS uid,
+    relationships.related_id AS related_id,
+    relationships.is_follower AS is_follower,
+    u2.location AS locatioin,
+    followes_list,
+    following_list
+FROM 
+    relationships
+LEFT JOIN 
+    users u1 ON relationships.uid = u1.id
+LEFT JOIN 
+    user u2 ON relationships.related_id = u2.uid;
+WHERE 
+    users.followers > 500 and users.nation = "";
+"""
+
+ALL_VIEWS = {
+    "user_profile_view": "user_profile_view"
+}
