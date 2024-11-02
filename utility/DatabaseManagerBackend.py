@@ -68,7 +68,7 @@ class DatabaseManager:
         """
         # 连接信息从配置文件读取
         database_url = f"mysql+pymysql://{config.INIT_DATABASE_INFO['user']}:{config.INIT_DATABASE_INFO['passwd']}@" \
-                       f"{config.INIT_DATABASE_INFO['host']}:{config.INIT_DATABASE_INFO['port']}/{config.INIT_DATABASE_INFO['database']}"
+                       f"{config.INIT_DATABASE_INFO['host']}:{3306}/{config.INIT_DATABASE_INFO['database']}"
 
         # 创建SQLAlchemy引擎和连接池
         self.engine = create_engine(database_url, pool_size=20, max_overflow=0)
