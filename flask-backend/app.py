@@ -27,20 +27,11 @@ def get_topics_page():
     #所有的page页面：一次性返回26个：A【9个】，B【9个】
   :return:
   """
-    order = request.args.get("order")   # 按仓库数的排序方式【正序和逆序,不填的话，默认是正序】
+    order = request.args.get("order")   # 按topic仓库数的排序方式【正序和逆序,不填的话，默认是正序】
     page = request.args.get("page")    # 分页
     limit = request.args.get("limit")  # 每页的限制,建议9个,就是每个topic首字母，只返回9个
 
-
-
-    #要分多个情况，示例
-    # if name=='':          #name为空，不指定name，返回topic list的情况
-    #     if is_feature:  # is_feature = True #返回精选的
-    #         print('')
-    #     else:            # is_feature = False,表示不按feature筛选，返回所有的
-    #         print('')
-    # else:                #传了name，按照name，返回一个topic【'C'】或者list【'C%'】
-    #     print('')
+    #操作数据库:单表
 
 
     # 例如得到：
@@ -360,6 +351,7 @@ def get_topic():
     limit = request.args.get("limit")    # 每页的限制，可以20个等
 
 
+    #查询数据库，单表
 
 
     #示例
@@ -433,6 +425,8 @@ def topic_rank():
     nation = request.args.get("nation")  # 筛选项：国籍
     page = request.args.get("page")      # 分页
     limit = request.args.get("limit")    # 每页的限制
+
+    #查询数据库：需要多表查询
 
     if topic:              #如果指定了topic，就返回这个topic的榜单talent排序的，开发者信息榜单
         print('')
@@ -545,7 +539,8 @@ def random_topic():
   """
     num = request.args.get("num")   #随机返回几个topic，得有介绍和url的。【从被人修改过的topic中随机选】
 
-    # 操作数据库，还是哪里。拿到这个统计的数据
+    # 操作数据库，单表
+
     # 例如：
     test = {
         "total_count": 6,
@@ -613,7 +608,7 @@ def relate_topic():
     topic = request.args.get("topic")  # topic名字
     num = request.args.get("num")   #返回推荐的前几个，例如返回6个
 
-    # 操作数据库，还是哪里。拿到这个统计的数据
+    # 操作数据库，单表
     # 例如：
     test = {
         "total_count": 6,
@@ -684,7 +679,8 @@ def search_users():
     # TODO: 关系圈：先调用数据库，如果没有，就调用爬虫接口现场爬。
 
 
-    # 操作数据库，还是哪里。拿到这个统计的数据
+    # 操作数据库，多表
+
     # 例如：
     test = {
         "login_name": "zhangsan",
