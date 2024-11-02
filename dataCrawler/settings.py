@@ -24,7 +24,7 @@ ROBOTSTXT_OBEY = False
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 100  # 最大并发量 默认16
 
-DOWNLOAD_DELAY = 0.09  # 下载延迟 0.3秒 15s/min
+DOWNLOAD_DELAY = 0.1  # 下载延迟 0.3秒 15s/min
 
 REFERER_ENABLED = False
 

@@ -73,13 +73,6 @@ class ReposInfo(scrapy.Item):
                     self["id"], language, proportion
                 ]
             )
-        # for uid in self["personal_contribution_value"].keys():
-        #     database.insert_data(
-        #         REPOS_PARTICIPANTS_TABLE_NAME,
-        #         [
-        #             uid, self["id"]
-        #         ]
-        #     )
         try:
             for topic in set(self["topics"] + [self["language"]]):
                 database.insert_data(
