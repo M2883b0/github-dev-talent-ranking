@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, Text, Boolean, DECIMAL, ForeignK
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
 
 Base = declarative_base()
 metadata = MetaData()
@@ -165,6 +166,7 @@ class ReposParticipantContribution(Base):
     rid = Column(Integer, ForeignKey('repos_info.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     is_owner = Column(Boolean)
+    repos_ability = Column(Integer)
     personal_contribution_value = Column(Integer)
     __table_args__ = (
         PrimaryKeyConstraint('rid', 'uid'),
@@ -218,6 +220,7 @@ user_profile_view_sql = """
 CREATE VIEW user_profile_view AS
 SELECT 
     login_names.login_name AS login_name,
+    users.id AS uid,
     users.name AS name,
     users.bio AS bio,
     users.location AS location,
@@ -241,30 +244,51 @@ WHERE
     users.followers > 500 and users.nation = "";
 """
 
-"""
-
 # 定义视图SQL查询
-# user_relation_profile_view_sql = """
-
+user_relation_view_sql = """
+CREATE VIEW user_relation_view AS
+SELECT 
+    relationships.uid AS uid,
+    relationships.related_id AS related_id,
+    relationships.is_follower AS is_follower,
+    u2.location AS locatioin,
+    followes_list,
+    following_list
+FROM 
+    relationships
+LEFT JOIN 
+    users u1 ON relationships.uid = u1.id
+LEFT JOIN 
+    user u2 ON relationships.related_id = u2.uid;
+WHERE 
+    users.followers > 500 and users.nation = "";
 """
-CREATE VIEW user_relation_profile_view AS
-SELECT
-    login_names.login_name AS login_name,
-    users.location AS location,
-
-FROM
-    login_names
-LEFT JOIN
-    users ON login_names.uid = users.id
-LEFT JOIN
-    user_organization ON users.id = user_organization.uid
-LEFT JOIN
-    organizations ON user_organization.organization_id = organizations.organization_id
-LEFT JOIN
-    blogs ON users.id = blogs.uid;
-"""
 
 
+db_url = (
+    f"mysql+mysqlconnector://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}"
+    f"@{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"
+)
+engine = create_engine(db_url, echo=True)
+
+class UserProfileView(Base):
+    # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
+    # __table__ = Table("user_profile_view", metadata)
+    # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
+    # SQLAlchemy 不会强制要求主键
+    # __mapper_args__ = {"primary_key": []}
+    __tablename__ = "user_profile_view"
+    __table_args__ = {'autoload_with': engine}
+
+    # 将 login_name 设为伪主键
+    login_name = Column(String, primary_key=True)
 
 
+class UserProfileView(Base):
 
+    __tablename__ = "user_relation_view"
+    __table_args__ = {'autoload_with': engine}
+
+    # 将 login_name 设为伪主键
+    uid = Column(String)
+    related_id = Column()

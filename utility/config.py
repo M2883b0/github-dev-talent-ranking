@@ -183,8 +183,8 @@ REPOS_PROPORTION_TABLE_FIELD = {
 
 # 项目参与者贡献表结构
 REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_FIELD = {
-    'columns': ['rid', 'uid', 'is_owner', 'personal_contribution_value'],
-    'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN, INT]
+    'columns': ['rid', 'uid', 'is_owner', 'personal_contribution_value', 'repos_ability'],
+    'columns_types': [INT + PRIMARY_KEY, INT, BOOLEAN, INT, INT]
 }
 
 # 项目领域表
