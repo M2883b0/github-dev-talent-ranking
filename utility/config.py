@@ -7,7 +7,7 @@ passwd = 'www.gzhu.edu.cn'
 # 数据库相关连接信息
 INIT_DATABASE_INFO = {
     'host': '8.134.144.185',
-    'port': 3307,
+    'port': 3306,
     'database': 'data',
     'user': 'root',
     'passwd': 'www.gzhu.edu.cn',

@@ -3,6 +3,8 @@ from enum import Enum
 from sqlalchemy import join, select
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker, Session
+
+from utility.InitDatabase2 import UserProfileView
 from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
@@ -305,35 +307,35 @@ if __name__ == "__main__":
     # 过滤出 nation 为 "中国" 的用户，同时加载用户的博客信息和登录名
     # filters = {"nation": "中国"}
 
-    filters = [
-        {
-            "field": UserFields.FOLLOWERS,
-            "op": ">",
-            "value": 100
-        },
-        {
-            "field": UserFields.REPOS_COUNT,
-            "op": ">",
-            "value": 100
-        },
-    ]
-    # 按照用户项目数升序
-    order_by = {
-            'field': UserFields.REPOS_COUNT,
-            'direction': 'asc'
-        }
-    # 按照用户项目数降序
+    # filters = [
+    #     {
+    #         "field": UserFields.FOLLOWERS,
+    #         "op": ">",
+    #         "value": 100
+    #     },
+    #     {
+    #         "field": UserFields.REPOS_COUNT,
+    #         "op": ">",
+    #         "value": 100
+    #     },
+    # ]
+    # # 按照用户项目数升序
     # order_by = {
     #         'field': UserFields.REPOS_COUNT,
-    #         'direction': 'desc'
+    #         'direction': 'asc'
     #     }
-
-
-    # load_related = [User.blogs, User.login_name]  # 预加载博客和登录名，避免额外查询
-
-    # result = db_manager.query_with_filters(User, filters=filters, load_related=load_related)
-    result = db_manager.query_with_filters(TableName.USER, filters=filters, limit=10, logic='and', order_by=order_by)
-    print(result)
+    # # 按照用户项目数降序
+    # # order_by = {
+    # #         'field': UserFields.REPOS_COUNT,
+    # #         'direction': 'desc'
+    # #     }
+    #
+    #
+    # # load_related = [User.blogs, User.login_name]  # 预加载博客和登录名，避免额外查询
+    #
+    # # result = db_manager.query_with_filters(User, filters=filters, load_related=load_related)
+    # result = db_manager.query_with_filters(TableName.USER, filters=filters, limit=10, logic='and', order_by=order_by)
+    # print(result)
     # result1 = [blog.__dict__ for blog in result[0]['blogs']]
     # result2 = [login.__dict__ for login in result[0]['login_name']]
     # print(result1)
@@ -346,6 +348,21 @@ if __name__ == "__main__":
     #
     # result = db_manager.query_with_filters(ReposInfo, filters=filters, joins=joins, load_related=load_related)
     # print(result)
+    session = db_manager.get_session()
+    results = session.query(UserProfileView).all()
+    for row in results:
+        # 遍历结果并打印字段值
+        for row in results:
+            print(f"Login Name: {row.login_name}")
+            print(f"Name: {row.name}")
+            print(f"Bio: {row.bio}")
+            print(f"Location: {row.location}")
+            print(f"Email: {row.email_address}")
+            print(f"Company: {row.company}")
+            print(f"Organization Name: {row.organization_name}")
+            print(f"Organization Location: {row.organization_location}")
+            print(f"Blog HTML: {row.blog_html}")
+            print("-" * 40)  # 分隔符
 
     # 3.分页查询带条件的主题信息
     # 查询 is_featured 为 True 的主题，按分页返回，每页10条
