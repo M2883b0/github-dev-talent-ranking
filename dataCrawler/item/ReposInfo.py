@@ -91,7 +91,7 @@ class ReposInfo(scrapy.Item):
             database.insert_data(
                 REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME,
                 [
-                    self["id"], uid, is_owner, contribute
+                    self["id"], uid, is_owner, contribute, 0
                 ]
             )
 
