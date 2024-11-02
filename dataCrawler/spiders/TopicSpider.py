@@ -100,6 +100,7 @@ class TopicSpider(SpiderTemplate):
                 "name": topic["display_name"] if topic["display_name"] else topic["name"],
                 "description": topic["description"] if topic["description"] else topic["short_description"],
                 "featured": topic["featured"],
+                "curated": topic["curated"],
                 "is_proxy": True
             }
 
@@ -137,7 +138,8 @@ class TopicSpider(SpiderTemplate):
                     "url": response.request.url,
                     "image_url": image_url,
                     "repos_count": repos_count,
-                    "is_featured": response.meta["featured"]
+                    "is_featured": response.meta["featured"],
+                    "curated": response.meta["curated"]
                 }
             )
             yield item

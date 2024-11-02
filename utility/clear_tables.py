@@ -93,11 +93,15 @@ class Database:
 # 示例调用
 if __name__ == "__main__":
     db = Database()
-    db.clear_table("login_names")  # 指定要清空的表名
-    db.clear_table("relationships")
-    db.clear_table("organizations")
-    db.clear_table("user_organization")
-    db.clear_table("user_repos")
-    db.clear_table("users")
-    db.clear_table("blogs")
-
+    # db.clear_table("login_names")  # 指定要清空的表名
+    # db.clear_table("relationships")
+    # db.clear_table("organizations")
+    # db.clear_table("user_organization")
+    # db.clear_table("user_repos")
+    # db.clear_table("users")
+    # db.clear_table("blogs")
+    db.clear_table("repos_info")
+    db.clear_table("repos_fields")
+    db.clear_table("repos_parti_contribution")
+    db.clear_table("repos_lg_proportion")
+    db.clear_table("repos_url")

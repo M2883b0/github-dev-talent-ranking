@@ -4,8 +4,9 @@ import ast
 
 from config import QWEN_API_KEY, QWEN_NATION_MODEL, TOPIC_THRESHOLDS
 import asyncio
+from tqdm import tqdm
 import logging
-from openai import AsyncOpenAI
+from openai import OpenAI
 import platform
 from utility.InitDatabase2 import UserProfileView
 
@@ -23,12 +24,12 @@ Nation_list = ['阿尔巴尼亚', '阿尔及利亚', '美属萨摩亚', '安道�
                '土库曼斯坦', '特克斯和凯科斯群岛', '图瓦卢', '乌干达', '乌克兰', '阿拉伯联合酋长国', '英国', '美国', '乌拉圭', '乌兹别克斯坦', '瓦努阿图', '委内瑞拉', '越南', '维尔京群岛', '威克岛', '瓦利斯和富图纳群岛', '西撒哈拉', '也门', '赞比亚', '津巴布韦']
 
 
-client = AsyncOpenAI(
+client = OpenAI(
     # 若没有配置环境变量，请用百炼API Key将下行替换为：api_key="sk-xxx",
     api_key=QWEN_API_KEY,
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
-async def task(login_name,name=None,bio=None,location=None,email=None,company=None,organization_name=None,organization_location=None,blog_html=None,followers_list=None,following_list=None):
+def task(login_name,name=None,bio=None,location=None,email=None,company=None,organization_name=None,organization_location=None,blog_html=None,followers_list=None,following_list=None):
     """
 
     :param login_name:  登录名（必填）
@@ -68,7 +69,7 @@ async def task(login_name,name=None,bio=None,location=None,email=None,company=No
 
 
 
-    response = await client.chat.completions.create(
+    response = client.chat.completions.create(
         model=QWEN_NATION_MODEL,
         messages=[
             {
@@ -95,7 +96,7 @@ async def task(login_name,name=None,bio=None,location=None,email=None,company=No
     output = response.choices[0].message.content
     try:
         output_list = ast.literal_eval(output)
-        if (output_list[1] >= 0.5) and (output_list[0] in Nation_list):    # 猜测概率
+        if (output_list[1] >= 0.4) and (output_list[0] in Nation_list):    # 猜测概率
             print(output_list[0])    # 写入国籍
         else:
             print('N/A')             # 写入N/A
@@ -104,22 +105,21 @@ async def task(login_name,name=None,bio=None,location=None,email=None,company=No
         logging.error("用户{}，国籍预测出错: {}，模型的输出是{}".format(login_name, e, output))
 
 
-async def main():
+def main():
 
     db_manager = DatabaseManager()
     session = db_manager.get_session()
     results = session.query(UserProfileView).all()
 
+    total_records = len(results)
 
+    for q in tqdm(results, total=total_records):
+        task(login_name=q.login_name, name=q.name, bio=q.bio, location=q.location, email=q.email_address,
+             company=q.company, organization_name=q.organization_name, organization_location=q.organization_location, blog_html=q.blog_html)
 
-    tasks = [task(login_name=q.login_name,name=q.name,bio=q.bio,location=q.location,email=q.email_address,company=q.company,organization_name=q.organization_name,organization_location=q.organization_location,blog_html=q.blog_html) for q in results]
-    await asyncio.gather(*tasks)
 
 
 if __name__ == '__main__':
-    """
-    异步预测用户的Nation
-    """
 
     # log_name = "geenie97"
     # name = "유진"
@@ -134,6 +134,4 @@ if __name__ == '__main__':
     # following_list = "['Yonsei University - Computer Science  Seoul, South Korea','Yonsei University  College of Artificial Intelligence','MICV Lab at Yonsei University','@bigdyl-yonsei  Daejeon,Korea','@kakao  Seoul, Korea','KFTC  Jeongja-dong, Korea','Seoul, Republic of Korea']"
 
 
-    if platform.system() == "Windows":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    asyncio.run(main())
+    main()

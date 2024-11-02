@@ -24,7 +24,7 @@ ROBOTSTXT_OBEY = False
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 100  # 最大并发量 默认16
 
-DOWNLOAD_DELAY = 0.09  # 下载延迟 0.3秒 15s/min
+DOWNLOAD_DELAY = 0.1  # 下载延迟 0.3秒 15s/min
 
 REFERER_ENABLED = False
 
@@ -108,7 +108,7 @@ USER_AGENT_LIST = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 ]
 
-PROXIES_LIST = ['http://127.0.0.1:7890']
+PROXIES_LIST = ['socks://127.0.0.1:7890']
 
 TOKEN = [
     "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",

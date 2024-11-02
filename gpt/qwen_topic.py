@@ -76,12 +76,13 @@ def qwen_topic(topic_list, project_description, all_topic_list):
         logging.error(f"错误信息：{e}")
         # print("请参考文档：https://help.aliyun.com/zh/model-studio/developer-reference/error-code")
 
+def main():
+    """
+        非异步预测项目的topic
+        传入3个参数：feature_topic_lists(200那个), description, all_topic_lists（2000那个）
+        """
+    #操作数据集，单表查询即可
 
-if __name__ == '__main__':
-    """
-    非异步预测项目的topic
-    传入3个参数：feature_topic_lists(200那个), description, all_topic_lists（2000那个）
-    """
     predict_topics = qwen_topic(feature_topic_lists, description, all_topic_lists)
 
     # 输出结果
@@ -89,4 +90,7 @@ if __name__ == '__main__':
 
 
 
-    # 2、异步的实现
+if __name__ == '__main__':
+    main()
+
+
