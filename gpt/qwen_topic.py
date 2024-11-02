@@ -81,6 +81,7 @@ def main():
         非异步预测项目的topic
         传入3个参数：feature_topic_lists(200那个), description, all_topic_lists（2000那个）
         """
+    #操作数据集，单表查询即可
 
     predict_topics = qwen_topic(feature_topic_lists, description, all_topic_lists)
 

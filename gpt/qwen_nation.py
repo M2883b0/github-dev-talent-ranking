@@ -96,7 +96,7 @@ def task(login_name,name=None,bio=None,location=None,email=None,company=None,org
     output = response.choices[0].message.content
     try:
         output_list = ast.literal_eval(output)
-        if (output_list[1] >= 0.5) and (output_list[0] in Nation_list):    # 猜测概率
+        if (output_list[1] >= 0.4) and (output_list[0] in Nation_list):    # 猜测概率
             print(output_list[0])    # 写入国籍
         else:
             print('N/A')             # 写入N/A
@@ -120,9 +120,6 @@ def main():
 
 
 if __name__ == '__main__':
-    """
-    异步预测用户的Nation
-    """
 
     # log_name = "geenie97"
     # name = "유진"
