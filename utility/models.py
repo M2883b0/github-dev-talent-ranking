@@ -236,10 +236,11 @@ LEFT JOIN
 LEFT JOIN 
     organizations ON user_organization.organization_id = organizations.organization_id
 LEFT JOIN 
-    blogs ON users.id = blogs.uid;
+    blogs ON users.id = blogs.uid
 WHERE 
-    users.followers > 500 and
-    users.nation != ""
+    users.followers > 500 and users.nation = "";
+"""
+
 """
 
 # 定义视图SQL查询
