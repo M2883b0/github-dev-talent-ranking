@@ -95,6 +95,6 @@ class ReposInfo(scrapy.Item):
                 ]
             )
 
-        # if row_count >= 100:
-        #     row_count = 0
-        database.commit()
+        if row_count >= 50:
+            row_count = 0
+            database.commit()
