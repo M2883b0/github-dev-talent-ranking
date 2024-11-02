@@ -36,7 +36,6 @@ class ReposInfo(scrapy.Item):
     def insert_to_database(self):
         global row_count
         row_count += 1
-        print(row_count)
         for field in ["url", "language", "description"]:
             if not self.get(field):
                 self[field] = ""
@@ -53,36 +52,35 @@ class ReposInfo(scrapy.Item):
         if not self.get("personal_contribution_value"):
             self["personal_contribution_value"] = {0: 0}
         total_value = sum(self["personal_contribution_value"].values())
+        database.insert_data(
+            REPOS_INFO_TABLE_NAME,
+            [
+                self["id"], self["language"], self["description"], self["subscribers_count"],
+                self["forks_count"], self["stargazers_count"], 0,
+                total_value, self["open_issues_count"]
+            ]
+        )
+        database.insert_data(
+            REPOS_URL_TABLE_NAME,
+            [
+                self["id"], self["url"]
+            ]
+        )
+        for language, proportion in self["languages_percent"].items():
+            database.insert_data(
+                REPOS_LANGUAGE_PROPORTION_TABLE_NAME,
+                [
+                    self["id"], language, proportion
+                ]
+            )
+        # for uid in self["personal_contribution_value"].keys():
+        #     database.insert_data(
+        #         REPOS_PARTICIPANTS_TABLE_NAME,
+        #         [
+        #             uid, self["id"]
+        #         ]
+        #     )
         try:
-            database.insert_data(
-                REPOS_INFO_TABLE_NAME,
-                [
-                    self["id"], self["language"], self["description"], self["subscribers_count"],
-                    self["forks_count"], self["stargazers_count"], 0,
-                    total_value, self["open_issues_count"]
-                ]
-            )
-            database.insert_data(
-                REPOS_URL_TABLE_NAME,
-                [
-                    self["id"], self["url"]
-                ]
-            )
-            for language, proportion in self["languages_percent"].items():
-                database.insert_data(
-                    REPOS_LANGUAGE_PROPORTION_TABLE_NAME,
-                    [
-                        self["id"], language, proportion
-                    ]
-                )
-            # for uid in self["personal_contribution_value"].keys():
-            #     database.insert_data(
-            #         REPOS_PARTICIPANTS_TABLE_NAME,
-            #         [
-            #             uid, self["id"]
-            #         ]
-            #     )
-
             for topic in set(self["topics"] + [self["language"]]):
                 database.insert_data(
                     REPOS_FIELDS_TABLE_NAME,
@@ -90,20 +88,19 @@ class ReposInfo(scrapy.Item):
                         self["id"], topic
                     ]
                 )
-
-            for uid, contribute in self["personal_contribution_value"].items():
-                if uid == self["owner"]["id"]:
-                    is_owner = 1
-                else:
-                    is_owner = 0
-                database.insert_data(
-                    REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME,
-                    [
-                        self["id"], uid, is_owner, contribute
-                    ]
-                )
         except:
             pass
+        for uid, contribute in self["personal_contribution_value"].items():
+            if uid == self["owner"]["id"]:
+                is_owner = 1
+            else:
+                is_owner = 0
+            database.insert_data(
+                REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME,
+                [
+                    self["id"], uid, is_owner, contribute
+                ]
+            )
 
         # if row_count >= 100:
         #     row_count = 0

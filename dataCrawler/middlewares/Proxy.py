@@ -19,6 +19,6 @@ class Proxy:
 
     def process_request(self, request, spider):
         if request.meta.get("is_proxy"):
-            # print(spider.name,request.url, "走了代理")
+            print(spider.name,request.url, "走了代理")
             ip = random.choice(self.ip)
             request.meta["proxy"] = ip

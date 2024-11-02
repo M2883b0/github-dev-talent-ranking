@@ -18,16 +18,19 @@ row_count = 0
 class TopicInfo(scrapy.Item):
     name = scrapy.Field()
     descript = scrapy.Field()
+    is_featured = scrapy.Field()
+    curated = scrapy.Field()
+
     image_url = scrapy.Field()
     url = scrapy.Field()
     repos_count = scrapy.Field()
-    is_featured = scrapy.Field()
+
 
     def insert_to_database(self):
         global row_count
         database.insert_data(
             TOPICS_TABLE_NAME,
-            [self["name"], self["descript"], self["image_url"], self["repos_count"], self["is_featured"]]
+            [self["name"], self["descript"], self["image_url"], self["repos_count"], self["is_featured"], self["curated"]]
         )
 
         database.insert_data(

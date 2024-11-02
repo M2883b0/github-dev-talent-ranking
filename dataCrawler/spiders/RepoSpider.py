@@ -45,7 +45,10 @@ class RepoSpider(SpiderTemplate):
         result = json.loads(response.text)
         total_count = int(result["total_count"])
         page = 0
+        if total_count // self.per_page > 10:
+            print("repos list step need smaller ")
         for page in range(1, total_count // self.per_page + 1):
+
             if ".." in response.request.url:
                 request = self.request(
                     url=self.repos_list_url.format(response.meta["begin"], response.meta["end"], self.per_page, page),
@@ -65,7 +68,7 @@ class RepoSpider(SpiderTemplate):
             yield request
 
     def parse(self, response: Response, **kwargs: Any) -> Any:
-        self.logger.info("parse function begin")
+        self.logger.info(f"parse function begin {response.request.url}")
         result = json.loads(response.text)
         if not result:
             return
@@ -74,7 +77,6 @@ class RepoSpider(SpiderTemplate):
                 continue
             yield self.request(url=repo["url"], callback=self.parse_detail,
                                meta=response.meta)
-
 
     def parse_detail(self, response: Response, **kwargs: Any) -> Any:
         data = json.loads(response.text)

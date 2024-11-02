@@ -20,14 +20,12 @@ class UserInfoPipeline:
         self.repos = crawled_repos
 
     def process_item(self, item, spider):
-        # print("recvied item", item)
         if isinstance(item, TopicItem):
             if item["name"] not in self.topics:
                 item.insert_to_database()
                 self.topics.append(item["name"])
         elif isinstance(item, UserItem):
             if item["id"] not in self.users:
-                # print(f"recved user id {item['id']} name {item['name']}")
                 item.insert_to_database()
                 self.users.append(item["id"])
         elif isinstance(item, OrgItem):
