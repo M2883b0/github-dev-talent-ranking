@@ -4,8 +4,8 @@ from flask import request
 from flask import Flask
 from flask import render_template
 from utility.DatabaseManagerBackend import DatabaseManager, TableName
-from utility.models import Topic
-from sqlalchemy import and_, or_
+from utility.models import Topic,TopicUrl
+from sqlalchemy import and_, or_, func, desc, asc
 
 from utility.field_constants import UserFields, UserOrganizationFields, UserRelationshipFields, UserReposFields, \
     UserBlogFields, UserLoginNameFields, ReposFieldFields, ReposInfoFields, ReposParticipantFields, ReposUrlFields, \
@@ -35,7 +35,7 @@ def get_topics_page():
     page = request.args.get("page")    # 分页
     limit = request.args.get("limit")  # 每页的限制,建议9个,就是每个topic首字母，只返回9个
 
-    #操作数据库:单表
+    #操作数据库:多表【topic、topic_url表】
 
 
     # 例如得到：
@@ -355,19 +355,23 @@ def get_topic():
     limit = request.args.get("limit")    # 每页的限制，可以20个等
 
     db_manager = DatabaseManager()
-    filters = [
-        {
-            "field": UserFields.FOLLOWERS,
-            "op": ">",
-            "value": 100
-        },
-        {
-            "field": UserFields.REPOS_COUNT,
-            "op": ">",
-            "value": 100
-        },
-    ]
-    result = db_manager.query_with_filters(Topic, filters=filters)
+    session = self.get_session()
+    filters = []
+    filters.append(Topic.name.like(f'{topic}%'))
+    if is_feature:
+        filters.append(Topic.is_featured == bool(int(is_feature)))
+    query = session.query(Topic, TopicUrl.url) \
+        .join(TopicUrl, Topic.name == TopicUrl.name, isouter=True) \
+        .filter(and_(*filters))
+    if order:      #True
+        query = query.order_by(desc(Topic.repos_count))
+    else:
+        query = query.order_by(asc(Topic.repos_count))
+    # 添加分页
+    offset = (int(page) - 1) * int(limit)
+    query = query.offset(offset).limit(int(limit))
+    results = query.all()
+
 
 
     #查询数据库，多表【topic表和topic_url表】
@@ -631,10 +635,15 @@ def relate_topic():
     topic = request.args.get("topic")  # topic名字
     num = request.args.get("num")   #返回推荐的前几个，例如返回6个
 
+    #读取，统计表单，excel表
+    #读取num个最相关的topic，组成list。例如用户查询C，返回【C++，C#，....】
+    relate_list = ['C++','C#',...]
+    #调用数据库接口，得到test最终数据
+
     # 操作数据库，单表
     # 例如：
     test = {
-        "total_count": 6,
+        "total_count": len(relate_list),
         "relate_topic_list": [
             {
                 "tpoic_name": "python",
