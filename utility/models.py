@@ -182,7 +182,7 @@ class ReposField(Base):
 class Topic(Base):
     __tablename__ = 'topics'
     name = Column(String(50), primary_key=True)
-    descript = Column(String(255))
+    descript = Column(MEDIUMTEXT)
     avi = Column(String(255))
     repos_count = Column(Integer)
     is_featured = Column(Boolean)
@@ -237,7 +237,31 @@ LEFT JOIN
     organizations ON user_organization.organization_id = organizations.organization_id
 LEFT JOIN 
     blogs ON users.id = blogs.uid;
+WHERE 
+    users.followers > 500 and
+    users.nation != ""
 """
+
+# 定义视图SQL查询
+# user_relation_profile_view_sql = """
+# CREATE VIEW user_relation_profile_view AS
+# SELECT
+#     login_names.login_name AS login_name,
+#     users.location AS location,
+#
+# FROM
+#     login_names
+# LEFT JOIN
+#     users ON login_names.uid = users.id
+# LEFT JOIN
+#     user_organization ON users.id = user_organization.uid
+# LEFT JOIN
+#     organizations ON user_organization.organization_id = organizations.organization_id
+# LEFT JOIN
+#     blogs ON users.id = blogs.uid;
+# """
+#
+
 
 
 

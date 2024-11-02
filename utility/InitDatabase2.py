@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, text, Table, MetaData, Column, String
 from sqlalchemy.orm import sessionmaker
-from models import Base  # 假设你的模型定义在这里
+from utility.models import Base  # 假设你的模型定义在这里
 from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
 from utility.models import user_profile_view_sql
 
@@ -56,6 +56,12 @@ class DatabaseInitializer:
 
     def create_session(self):
         """创建并返回一个新会话"""
+        db_url = (
+            f"mysql+mysqlconnector://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}"
+            f"@{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"
+        )
+        engine = create_engine(db_url, echo=True)
+        self.Session = sessionmaker(bind=engine)
         return self.Session()
 
 
@@ -75,9 +81,9 @@ if __name__ == "__main__":
 
 
 
-
-    session = sessionmaker(bind=engine)
-    create_user_profile_view(session())
+    session = db_initializer.create_session()  # 获取新的会话
+    # session = sessionmaker(bind=engine)
+    create_user_profile_view(session)
     # db_initializer.create_database()
     class UserProfileView(Base):
         # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
@@ -93,14 +99,14 @@ if __name__ == "__main__":
 
 
 
-class UserProfileView(Base):
-    # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
-    # __table__ = Table("user_profile_view", metadata)
-    # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
-    # SQLAlchemy 不会强制要求主键
-    # __mapper_args__ = {"primary_key": []}
-    __tablename__ = "user_profile_view"
-    __table_args__ = {'autoload_with': engine}
-
-    # 将 login_name 设为伪主键
-    login_name = Column(String, primary_key=True)
+# class UserProfileView(Base):
+#     # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
+#     # __table__ = Table("user_profile_view", metadata)
+#     # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
+#     # SQLAlchemy 不会强制要求主键
+#     # __mapper_args__ = {"primary_key": []}
+#     __tablename__ = "user_profile_view"
+#     __table_args__ = {'autoload_with': engine}
+#
+#     # 将 login_name 设为伪主键
+#     login_name = Column(String, primary_key=True)

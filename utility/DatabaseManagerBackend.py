@@ -4,7 +4,7 @@ from sqlalchemy import join, select
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker, Session
 
-from InitDatabase2 import UserProfileView
+from utility.InitDatabase2 import UserProfileView
 from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
@@ -353,18 +353,19 @@ if __name__ == "__main__":
     # print(result)
     session = db_manager.get_session()
     results = session.query(UserProfileView).all()
+    print(type(results[0]))
     # 遍历结果并打印字段值
-    for row in results:
-        print(f"Login Name: {row.login_name}")
-        print(f"Name: {row.name}")
-        print(f"Bio: {row.bio}")
-        print(f"Location: {row.location}")
-        print(f"Email: {row.email_address}")
-        print(f"Company: {row.company}")
-        print(f"Organization Name: {row.organization_name}")
-        print(f"Organization Location: {row.organization_location}")
-        print(f"Blog HTML: {row.blog_html}")
-        print("-" * 40)  # 分隔符
+    # for row in results:
+    #     print(f"Login Name: {row.login_name}")
+    #     print(f"Name: {row.name}")
+    #     print(f"Bio: {row.bio}")
+    #     print(f"Location: {row.location}")
+    #     print(f"Email: {row.email_address}")
+    #     print(f"Company: {row.company}")
+    #     print(f"Organization Name: {row.organization_name}")
+    #     print(f"Organization Location: {row.organization_location}")
+    #     print(f"Blog HTML: {row.blog_html}")
+    #     print("-" * 40)  # 分隔符
 
     # 3.分页查询带条件的主题信息
     # 查询 is_featured 为 True 的主题，按分页返回，每页10条
