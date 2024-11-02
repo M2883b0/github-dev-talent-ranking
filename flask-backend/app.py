@@ -15,6 +15,10 @@ from utility.field_constants import UserFields, UserOrganizationFields, UserRela
 app = Flask(__name__)
 
 
+
+url="https://avatars.githubusercontent.com/u/{}?v=4"
+
+
 @app.route("/")
 def hello():  # 主页
     # return render_template("index.html", name='123')
