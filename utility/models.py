@@ -188,6 +188,7 @@ class Topic(Base):
     avi = Column(String(255))
     repos_count = Column(Integer)
     is_featured = Column(Boolean)
+    is_created = Column(Boolean)
 
 
 # topic url表
@@ -229,7 +230,9 @@ SELECT
     organizations.name AS organization_name,
     organizations.location AS organization_location,
     blogs.blog_html AS blog_html,
-    users.nation AS nation
+    users.nation AS nation,
+    followers_list,
+    following_list
 FROM 
     login_names
 LEFT JOIN 
@@ -252,16 +255,12 @@ SELECT
     relationships.related_id AS related_id,
     relationships.is_follower AS is_follower,
     u2.location AS locatioin,
-    followes_list,
-    following_list
 FROM 
     relationships
 LEFT JOIN 
     users u1 ON relationships.uid = u1.id
 LEFT JOIN 
     user u2 ON relationships.related_id = u2.uid;
-WHERE 
-    users.followers > 500 and users.nation = "";
 """
 
 
@@ -271,24 +270,4 @@ db_url = (
 )
 engine = create_engine(db_url, echo=True)
 
-class UserProfileView(Base):
-    # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
-    # __table__ = Table("user_profile_view", metadata)
-    # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
-    # SQLAlchemy 不会强制要求主键
-    # __mapper_args__ = {"primary_key": []}
-    __tablename__ = "user_profile_view"
-    __table_args__ = {'autoload_with': engine}
 
-    # 将 login_name 设为伪主键
-    login_name = Column(String, primary_key=True)
-
-
-class UserProfileView(Base):
-
-    __tablename__ = "user_relation_view"
-    __table_args__ = {'autoload_with': engine}
-
-    # 将 login_name 设为伪主键
-    uid = Column(String)
-    related_id = Column()

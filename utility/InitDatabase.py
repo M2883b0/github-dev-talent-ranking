@@ -13,6 +13,8 @@ from utility.config import *
 from DatabaseManager import DatabaseConnectionPool, DatabaseManager
 from utility.DatabaseInitializer import DatabaseInitializer
 import logging
+from config import user_profile_view_sql, user_relation_view_sql
+
 
 def generate_table_sql(table_field):
     """
@@ -64,6 +66,7 @@ if __name__ == "__main__":
     db_initializer.connect()
     # 初始化数据表
     db_initializer.create_all_tables()
+    db_initializer.create_all_views()
     # 设置外键
     # db_initializer.add_foreign_key_for_all_tables()
     # 关闭数据库连接

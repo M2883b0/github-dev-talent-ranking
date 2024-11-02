@@ -1,15 +1,41 @@
-from sqlalchemy import create_engine, text, Table, MetaData, Column, String
+from sqlalchemy import create_engine, text, Table, MetaData, Column, String, event, Engine, Integer, Boolean
 from sqlalchemy.orm import sessionmaker
 from utility.models import Base  # 假设你的模型定义在这里
 from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
-from utility.models import user_profile_view_sql
-
+from utility.models import user_profile_view_sql, user_relation_view_sql
 db_url = (
     f"mysql+mysqlconnector://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}"
     f"@{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"
 )
 engine = create_engine(db_url, echo=True)
 metadata = MetaData()
+
+
+
+class UserProfileView(Base):
+    # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
+    # __table__ = Table("user_profile_view", metadata)
+    # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
+    # SQLAlchemy 不会强制要求主键
+    # __mapper_args__ = {"primary_key": []}
+    __tablename__ = "user_profile_view"
+    __table_args__ = {'autoload_with': engine}
+
+    # 将 login_name 设为伪主键
+    login_name = Column(String, primary_key=True)
+
+
+class UserRelationView(Base):
+    __tablename__ = "user_relation_view"
+    __table_args__ = {'autoload_with': engine}
+
+    uid = Column(Integer, primary_key=True)
+    related_uid = Column(Integer, primary_key=True)
+    is_follower = Column(Boolean)
+    location = Column(String)
+
+
+
 
 
 class DatabaseInitializer:
@@ -65,37 +91,30 @@ class DatabaseInitializer:
         return self.Session()
 
 
-def create_user_profile_view(session):
-    # 如果视图已存在则删除旧视图
-    session.execute(text("DROP VIEW IF EXISTS user_profile_view"))
-    # 创建新的视图
-    session.execute(text(user_profile_view_sql))
-    session.commit()
 
 
 
 
 
 if __name__ == "__main__":
+
     db_initializer = DatabaseInitializer()
+    db_initializer.create_database()
 
 
-
-    session = db_initializer.create_session()  # 获取新的会话
     # session = sessionmaker(bind=engine)
-    create_user_profile_view(session)
     # db_initializer.create_database()
-    class UserProfileView(Base):
-        # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
-        # __table__ = Table("user_profile_view", metadata)
-        # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
-        # SQLAlchemy 不会强制要求主键
-        # __mapper_args__ = {"primary_key": []}
-        __tablename__ = "user_profile_view"
-        __table_args__ = {'autoload_with': engine}
-
-        # 将 login_name 设为伪主键
-        login_name = Column(String, primary_key=True)
+    # class UserProfileView(Base):
+    #     # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
+    #     # __table__ = Table("user_profile_view", metadata)
+    #     # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
+    #     # SQLAlchemy 不会强制要求主键
+    #     # __mapper_args__ = {"primary_key": []}
+    #     __tablename__ = "user_profile_view"
+    #     __table_args__ = {'autoload_with': engine}
+    #
+    #     # 将 login_name 设为伪主键
+    #     login_name = Column(String, primary_key=True)
 
 
 

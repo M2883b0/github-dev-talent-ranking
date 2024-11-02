@@ -10,7 +10,7 @@ class DatabaseInitializer:
             self, host=config.INIT_DATABASE_INFO['host'], database=config.INIT_DATABASE_INFO['database'],
             user=config.INIT_DATABASE_INFO['user'], passwd=config.INIT_DATABASE_INFO['passwd'],
             charset=config.INIT_DATABASE_INFO['charset'], collations=config.INIT_DATABASE_INFO['collations'],
-            all_table_field=config.ALL_TABLE_FIELD, master_slave_mapping_rule=config.MASTER_SLAVE_MAPPING_RULE
+            all_table_field=config.ALL_TABLE_FIELD, master_slave_mapping_rule=config.MASTER_SLAVE_MAPPING_RULE,
     ):
         """
         初始化数据库管理器
@@ -101,6 +101,11 @@ class DatabaseInitializer:
             logging.info("所有表创建成功")
         except Error as e:
             logging.info("创建表过程发生错误: %s", e)
+
+    def create_all_views(self, view_sql):
+        self.cursor.execute("DROP VIEW IF EXISTS user_profile_view")
+        self.cursor.execute("DROP VIEW IF EXISTS user_relation_view")
+        self.cursor.execute(view_sql)
 
     def __create_table(self, table_name, columns):
         """
