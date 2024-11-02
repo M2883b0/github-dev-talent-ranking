@@ -7,6 +7,9 @@ import asyncio
 import logging
 from openai import AsyncOpenAI
 import platform
+from utility.InitDatabase2 import UserProfileView
+
+from utility.DatabaseManagerBackend import DatabaseManager
 
 # import pandas as pd
 # df = pd.read_excel(r'C:\Users\luo20\Desktop\国家列表.xlsx')
@@ -55,7 +58,7 @@ client = AsyncOpenAI(
     api_key=QWEN_API_KEY,
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
-async def main(log_name,name=None,bio=None,location=None,email=None,company=None,oraganization_name=None,oraganization_loaction=None,blog_html=None,followers_list=None,following_list=None):
+async def task(log_name,name=None,bio=None,location=None,email=None,company=None,oraganization_name=None,oraganization_loaction=None,blog_html=None,followers_list=None,following_list=None):
     """
 
     :param log_name:  登录名（必填）
@@ -130,23 +133,35 @@ async def main(log_name,name=None,bio=None,location=None,email=None,company=None
     except (ValueError, SyntaxError) as e:
         logging.error("大模型预测国籍出错: {e}")
 
+
+async def main():
+
+    db_manager = DatabaseManager()
+    session = db_manager.get_session()
+    results = session.query(UserProfileView).all()
+
+    tasks = [task(q.login_name,name=q.name,bio=q.bio,location=q.location,email=q.email,company=q.company,oraganization_name=q.oraganization_name,oraganization_loaction=q.oraganization_loaction,blog_html=q.blog_html,followers_list=q.followers_list,following_list=q.following_list) for q in results]
+    await asyncio.gather(*tasks)
+
+
 if __name__ == '__main__':
     """
     异步预测用户的Nation
     """
 
-    log_name = "geenie97"
-    name = "유진"
-    bio = ""
-    location = ""
-    email = ""
-    company = ""
-    oraganization_name = ""
-    oraganization_loaction = ""
-    blog_html = ""
-    followers_list = "['Yonsei University  College of Artificial Intelligence','MICV Lab at Yonsei University',' Yonsei University - Computer Science  Seoul, South Korea','@kakao  Seoul, Korea','Korea','KFTC  Jeongja-dong, Korea']"
-    following_list = "['Yonsei University - Computer Science  Seoul, South Korea','Yonsei University  College of Artificial Intelligence','MICV Lab at Yonsei University','@bigdyl-yonsei  Daejeon,Korea','@kakao  Seoul, Korea','KFTC  Jeongja-dong, Korea','Seoul, Republic of Korea']"
+    # log_name = "geenie97"
+    # name = "유진"
+    # bio = ""
+    # location = ""
+    # email = ""
+    # company = ""
+    # oraganization_name = ""
+    # oraganization_loaction = ""
+    # blog_html = ""
+    # followers_list = "['Yonsei University  College of Artificial Intelligence','MICV Lab at Yonsei University',' Yonsei University - Computer Science  Seoul, South Korea','@kakao  Seoul, Korea','Korea','KFTC  Jeongja-dong, Korea']"
+    # following_list = "['Yonsei University - Computer Science  Seoul, South Korea','Yonsei University  College of Artificial Intelligence','MICV Lab at Yonsei University','@bigdyl-yonsei  Daejeon,Korea','@kakao  Seoul, Korea','KFTC  Jeongja-dong, Korea','Seoul, Republic of Korea']"
+
 
     if platform.system() == "Windows":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    asyncio.run(main(log_name=log_name, name=name))
+    asyncio.run(main())
