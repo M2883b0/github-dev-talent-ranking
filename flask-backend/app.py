@@ -15,6 +15,10 @@ from utility.field_constants import UserFields, UserOrganizationFields, UserRela
 app = Flask(__name__)
 
 
+
+user_image_url="https://avatars.githubusercontent.com/u/{}?v=4"
+
+
 @app.route("/")
 def hello():  # 主页
     # return render_template("index.html", name='123')
@@ -344,14 +348,34 @@ def get_topic():
   :return:这个topic的开发者的榜单
   """
     order = request.args.get("order")  # 按仓库数的排序方式【正序和逆序,不填的话，默认是正序】
-    topic = request.args.get("topic")    # topic名字，name
+    topic = request.args.get("topic")  # topic名字，name
     is_first_letter = request.args.get('is_first_letter')
     is_feature = request.args.get("is_feature")
     page = request.args.get("page")      # 分页
     limit = request.args.get("limit")    # 每页的限制，可以20个等
 
+    db_manager = DatabaseManager()
+    filters = [
+        {
+            "field": UserFields.FOLLOWERS,
+            "op": ">",
+            "value": 100
+        },
+        {
+            "field": UserFields.REPOS_COUNT,
+            "op": ">",
+            "value": 100
+        },
+    ]
+    result = db_manager.query_with_filters(Topic, filters=filters)
 
-    #查询数据库，单表
+
+    #查询数据库，多表【topic表和topic_url表】
+
+    if is_first_letter:  # 首字母模糊查询name，例如返回C开头的topic
+        print('')
+    else:
+        print('')        # 精确查询name，例如只返回C这一个topic
 
 
     #示例
@@ -367,7 +391,7 @@ def get_topic():
                 "topic_img_url": "",
                 "descrip": "sasdfadfsa",
                 "repos_num": 3411,
-                "is_feature":1,
+                "is_feature": 1,
             },
             {
                 "tpoic_name": "python",
