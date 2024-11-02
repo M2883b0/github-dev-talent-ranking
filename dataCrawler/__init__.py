@@ -8,7 +8,7 @@
 """
 from utility.DatabaseManager import DatabaseManager, DatabaseConnectionPool
 from utility.config import TOPICS_TABLE_NAME, TOPICS_URL_TABLE_NAME, USER_LOGIN_NAME_TABLE_NAME, \
-    USER_TABLE_NAME, ORGANIZATIONS_TABLE_NAME, REPOS_INFO_TABLE_NAME
+    USER_TABLE_NAME, ORGANIZATIONS_TABLE_NAME, REPOS_INFO_TABLE_NAME, REPOS_URL_TABLE_NAME
 from scrapy.signalmanager import SignalManager
 
 database = DatabaseManager(DatabaseConnectionPool())
@@ -37,9 +37,9 @@ if _orgs:
 else:
     crawled_orgs = dict()
 
-_repos = database.query_data(REPOS_INFO_TABLE_NAME)
-if _repos:
-    crawled_repos = {key["id"]: key['stargazers_count'] for key in _repos}
-else:
-    crawled_repos = dict()
+# _repos = database.query_data(REPOS_URL_TABLE_NAME)
+# if _repos:
+#     crawled_repos = [key['url'] for key in _repos]
+# else:
+#     crawled_repos = []
 

@@ -14,6 +14,7 @@ BOT_NAME = 'github-dev-talent-ranking-spider'  # scrapy项目名
 SPIDER_MODULES = [
     'dataCrawler.spiders.UserSpider',
     "dataCrawler.spiders.FeaturedTopicSpider",
+    "dataCrawler.spiders.TopicSpider",
     'dataCrawler.spiders.RepoSpider'
 ]
 

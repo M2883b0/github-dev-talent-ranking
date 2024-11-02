@@ -15,6 +15,7 @@ from scrapy.http import Response
 from dataCrawler.config import repos_info_config as config
 
 from dataCrawler import database
+from utility.config import USER_REPOS_TABLE_NAME
 from dataCrawler.item.ReposInfo import ReposInfo
 from dataCrawler.spiders.SpiderTemplate import SpiderTemplate
 from dataCrawler import crawled_repos
@@ -69,11 +70,11 @@ class RepoSpider(SpiderTemplate):
         if not result:
             return
         for repo in result["items"]:
-            if repo['id'] in crawled_repos.keys() and crawled_repos[repo['id']] < config["user_followers_begin"]:
+            if repo['url'] in crawled_repos:
                 continue
-            # self.logger.info (f"解析用户{user['id']}详细信息字段")
             yield self.request(url=repo["url"], callback=self.parse_detail,
                                meta=response.meta)
+
 
     def parse_detail(self, response: Response, **kwargs: Any) -> Any:
         data = json.loads(response.text)
@@ -94,7 +95,7 @@ class RepoSpider(SpiderTemplate):
         field = self.filter_dict(data, required_key)
         # "languages_percent"
         url = data["languages_url"]
-        yield self.request(url=url, callback=self.parse,
+        yield self.request(url=url, callback=self.parse_language,
                            meta={"field": field, "contributors_url": data["contributors_url"]})
 
     def parse_language(self, response: Response, **kwargs: Any) -> Any:
@@ -116,10 +117,20 @@ class RepoSpider(SpiderTemplate):
             personal_contribution_value = response.meta.get("personal_contribution_value")
         else:
             personal_contribution_value = dict()
+
         for user in data:
             personal_contribution_value[user["id"]] = user["contributions"]
         if len(data) == 100:
             yield self.request(url=url + "?page={}&per_page=100".format(page), callback=self.parse_contributors,
-                               meta={"field": field, "page": page+1, "contributors_url": url})
+                               meta={"field": field, "page": page + 1, "contributors_url": url})
         else:
+            field["personal_contribution_value"] = personal_contribution_value
             yield ReposInfo(**field)
+
+            #
+            _task = database.query_data(USER_REPOS_TABLE_NAME)
+            if _task:
+                task = [i["repos_url"] for i in _task]
+                for url in task:
+                    if url not in crawled_repos:
+                        yield self.request(url=url, callback=self.parse_detail)

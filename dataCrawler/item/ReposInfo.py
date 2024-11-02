@@ -10,7 +10,8 @@ import scrapy
 
 from dataCrawler import database
 from utility.config import REPOS_INFO_TABLE_NAME, REPOS_URL_TABLE_NAME, REPOS_LANGUAGE_PROPORTION_TABLE_NAME, \
-    REPOS_PARTICIPANTS_TABLE_NAME, REPOS_FIELDS_TABLE_NAME
+    REPOS_PARTICIPANTS_TABLE_NAME, REPOS_FIELDS_TABLE_NAME, REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_FIELD, \
+    REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME
 
 row_count = 0
 
@@ -34,13 +35,15 @@ class ReposInfo(scrapy.Item):
 
     def insert_to_database(self):
         global row_count
+        row_count += 1
+        print(row_count)
         for field in ["url", "language", "description"]:
             if not self.get(field):
                 self[field] = ""
         for field in ["forks_count", "stargazers_count", "subscribers_count", "open_issues_count"]:
             if not self.get(field):
                 self[field] = 0
-        for field in ["topics", "language"]:
+        for field in ["topics", "languages_percent"]:
             if not self.get(field):
                 self[field] = []
         if not self.get("owner"):
@@ -49,42 +52,59 @@ class ReposInfo(scrapy.Item):
             self["languages_percent"] = {"id": 0}
         if not self.get("personal_contribution_value"):
             self["personal_contribution_value"] = {0: 0}
-        database.insert_data(
-            REPOS_INFO_TABLE_NAME,
-            [
-                self["id"], self["language"], self["description"],
-                self["forks_count"], self["stargazers_count"], 0,
-                sum(self["personal_contribution_value"].values()), self["open_issues_count"]
-            ]
-        )
-        database.insert_data(
-            REPOS_URL_TABLE_NAME,
-            [
-                self["id"], self["url"]
-            ]
-        )
-        for language, proportion in self["languages_percent"].items():
+        total_value = sum(self["personal_contribution_value"].values())
+        try:
             database.insert_data(
-                REPOS_LANGUAGE_PROPORTION_TABLE_NAME,
+                REPOS_INFO_TABLE_NAME,
                 [
-                    self["id"], language, proportion
+                    self["id"], self["language"], self["description"], self["subscribers_count"],
+                    self["forks_count"], self["stargazers_count"], 0,
+                    total_value, self["open_issues_count"]
                 ]
             )
-        for uid in self["personal_contribution_value"].keys():
             database.insert_data(
-                REPOS_PARTICIPANTS_TABLE_NAME,
+                REPOS_URL_TABLE_NAME,
                 [
-                    uid, self["id"], uid == self["owner"]["id"]
+                    self["id"], self["url"]
                 ]
             )
-        for topic in set(self["topics"] + [self["language"]]):
-            database.insert_data(
-                REPOS_FIELDS_TABLE_NAME,
-                [
-                    self["id"], topic]
-            )
+            for language, proportion in self["languages_percent"].items():
+                database.insert_data(
+                    REPOS_LANGUAGE_PROPORTION_TABLE_NAME,
+                    [
+                        self["id"], language, proportion
+                    ]
+                )
+            # for uid in self["personal_contribution_value"].keys():
+            #     database.insert_data(
+            #         REPOS_PARTICIPANTS_TABLE_NAME,
+            #         [
+            #             uid, self["id"]
+            #         ]
+            #     )
 
-        row_count += 1
-        if row_count >= 100:
-            row_count = 0
-            database.commit()
+            for topic in set(self["topics"] + [self["language"]]):
+                database.insert_data(
+                    REPOS_FIELDS_TABLE_NAME,
+                    [
+                        self["id"], topic
+                    ]
+                )
+
+            for uid, contribute in self["personal_contribution_value"].items():
+                if uid == self["owner"]["id"]:
+                    is_owner = 1
+                else:
+                    is_owner = 0
+                database.insert_data(
+                    REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME,
+                    [
+                        self["id"], uid, is_owner, contribute
+                    ]
+                )
+        except:
+            pass
+
+        # if row_count >= 100:
+        #     row_count = 0
+        database.commit()

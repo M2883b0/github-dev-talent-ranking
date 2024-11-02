@@ -30,12 +30,11 @@ if __name__ == "__main__":
     process = CrawlerProcess(
         settings=settings
     )
-    # settings[""]
-    # logging.info("Starting spider1...")
+
     # process.crawl(TopicSpider)
     process.crawl("UserSpider")
-    # logging.info("Starting spider2...")
     # process.crawl(FeaturedTopicSpider)
+    # process.crawl("RepoSpider")
     # 启动爬虫引擎
     logging.info("Starting crawler process...")
     process.start()
