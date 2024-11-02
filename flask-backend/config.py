@@ -1,5 +1,5 @@
 mysql_host = "8..xxx.xxx"
-mysql_port = 3360
+mysql_port = 3306
 mysql_user = "xxx"
 mysql_ps = "xxx"
 mysql_database = "xxx"

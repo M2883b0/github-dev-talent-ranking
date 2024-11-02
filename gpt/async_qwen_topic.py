@@ -10,6 +10,7 @@ import os
 import asyncio
 from openai import AsyncOpenAI
 import platform
+from utility.DatabaseManagerBackend import DatabaseManager
 
 
 
@@ -80,6 +81,12 @@ async def task(topic_list, project_description, all_topic_list):
 
 # 主异步函数
 async def main():
+    """
+    异步预测项目的topic
+    传入3个参数：feature_topic_lists(200那个), description, all_topic_lists（2000那个）
+    """
+    db_manager = DatabaseManager()
+
     question = [description1, description2, description3]
     tasks = [task(feature_topic_lists, q, all_topic_lists) for q in question]
     await asyncio.gather(*tasks)
