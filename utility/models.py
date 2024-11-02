@@ -245,23 +245,25 @@ WHERE
 
 # 定义视图SQL查询
 # user_relation_profile_view_sql = """
-# CREATE VIEW user_relation_profile_view AS
-# SELECT
-#     login_names.login_name AS login_name,
-#     users.location AS location,
-#
-# FROM
-#     login_names
-# LEFT JOIN
-#     users ON login_names.uid = users.id
-# LEFT JOIN
-#     user_organization ON users.id = user_organization.uid
-# LEFT JOIN
-#     organizations ON user_organization.organization_id = organizations.organization_id
-# LEFT JOIN
-#     blogs ON users.id = blogs.uid;
-# """
-#
+
+"""
+CREATE VIEW user_relation_profile_view AS
+SELECT
+    login_names.login_name AS login_name,
+    users.location AS location,
+
+FROM
+    login_names
+LEFT JOIN
+    users ON login_names.uid = users.id
+LEFT JOIN
+    user_organization ON users.id = user_organization.uid
+LEFT JOIN
+    organizations ON user_organization.organization_id = organizations.organization_id
+LEFT JOIN
+    blogs ON users.id = blogs.uid;
+"""
+
 
 
 

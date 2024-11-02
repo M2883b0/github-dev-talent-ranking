@@ -76,37 +76,37 @@ def create_user_profile_view(session):
 
 
 
-if __name__ == "__main__":
-    db_initializer = DatabaseInitializer()
-
-
-
-    session = db_initializer.create_session()  # 获取新的会话
-    # session = sessionmaker(bind=engine)
-    create_user_profile_view(session)
-    # db_initializer.create_database()
-    class UserProfileView(Base):
-        # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
-        # __table__ = Table("user_profile_view", metadata)
-        # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
-        # SQLAlchemy 不会强制要求主键
-        # __mapper_args__ = {"primary_key": []}
-        __tablename__ = "user_profile_view"
-        __table_args__ = {'autoload_with': engine}
-
-        # 将 login_name 设为伪主键
-        login_name = Column(String, primary_key=True)
-
-
-
-# class UserProfileView(Base):
-#     # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
-#     # __table__ = Table("user_profile_view", metadata)
-#     # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
-#     # SQLAlchemy 不会强制要求主键
-#     # __mapper_args__ = {"primary_key": []}
-#     __tablename__ = "user_profile_view"
-#     __table_args__ = {'autoload_with': engine}
+# if __name__ == "__main__":
+#     db_initializer = DatabaseInitializer()
 #
-#     # 将 login_name 设为伪主键
-#     login_name = Column(String, primary_key=True)
+#
+#
+#     session = db_initializer.create_session()  # 获取新的会话
+#     # session = sessionmaker(bind=engine)
+#     create_user_profile_view(session)
+#     # db_initializer.create_database()
+#     class UserProfileView(Base):
+#         # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
+#         # __table__ = Table("user_profile_view", metadata)
+#         # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
+#         # SQLAlchemy 不会强制要求主键
+#         # __mapper_args__ = {"primary_key": []}
+#         __tablename__ = "user_profile_view"
+#         __table_args__ = {'autoload_with': engine}
+#
+#         # 将 login_name 设为伪主键
+#         login_name = Column(String, primary_key=True)
+
+
+
+class UserProfileView(Base):
+    # __table__ = Table("user_profile_view", metadata, autoload_with=engine)
+    # __table__ = Table("user_profile_view", metadata)
+    # __table_args__ = {'autoload_with': engine, 'extend_existing': True}
+    # SQLAlchemy 不会强制要求主键
+    # __mapper_args__ = {"primary_key": []}
+    __tablename__ = "user_profile_view"
+    __table_args__ = {'autoload_with': engine}
+
+    # 将 login_name 设为伪主键
+    login_name = Column(String, primary_key=True)
