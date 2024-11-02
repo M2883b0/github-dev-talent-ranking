@@ -225,7 +225,8 @@ SELECT
     users.company AS company,
     organizations.name AS organization_name,
     organizations.location AS organization_location,
-    blogs.blog_html AS blog_html
+    blogs.blog_html AS blog_html,
+    users.nation AS nation
 FROM 
     login_names
 LEFT JOIN 

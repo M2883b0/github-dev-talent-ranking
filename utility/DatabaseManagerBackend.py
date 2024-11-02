@@ -9,6 +9,9 @@ from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, Use
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
 import utility.config as config
+from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
+
+
 from typing import Optional, List, Dict, Any
 from sqlalchemy import and_, or_
 import pymysql
@@ -67,8 +70,8 @@ class DatabaseManager:
         初始化数据库管理器，包括连接池和会话工厂
         """
         # 连接信息从配置文件读取
-        database_url = f"mysql+pymysql://{config.INIT_DATABASE_INFO['user']}:{config.INIT_DATABASE_INFO['passwd']}@" \
-                       f"{config.INIT_DATABASE_INFO['host']}:{3306}/{config.INIT_DATABASE_INFO['database']}"
+        database_url = f"mysql+pymysql://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}@" \
+                       f"{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"
 
         # 创建SQLAlchemy引擎和连接池
         self.engine = create_engine(database_url, pool_size=20, max_overflow=0)
@@ -350,19 +353,18 @@ if __name__ == "__main__":
     # print(result)
     session = db_manager.get_session()
     results = session.query(UserProfileView).all()
+    # 遍历结果并打印字段值
     for row in results:
-        # 遍历结果并打印字段值
-        for row in results:
-            print(f"Login Name: {row.login_name}")
-            print(f"Name: {row.name}")
-            print(f"Bio: {row.bio}")
-            print(f"Location: {row.location}")
-            print(f"Email: {row.email_address}")
-            print(f"Company: {row.company}")
-            print(f"Organization Name: {row.organization_name}")
-            print(f"Organization Location: {row.organization_location}")
-            print(f"Blog HTML: {row.blog_html}")
-            print("-" * 40)  # 分隔符
+        print(f"Login Name: {row.login_name}")
+        print(f"Name: {row.name}")
+        print(f"Bio: {row.bio}")
+        print(f"Location: {row.location}")
+        print(f"Email: {row.email_address}")
+        print(f"Company: {row.company}")
+        print(f"Organization Name: {row.organization_name}")
+        print(f"Organization Location: {row.organization_location}")
+        print(f"Blog HTML: {row.blog_html}")
+        print("-" * 40)  # 分隔符
 
     # 3.分页查询带条件的主题信息
     # 查询 is_featured 为 True 的主题，按分页返回，每页10条

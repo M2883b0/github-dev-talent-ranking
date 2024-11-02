@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, text, Table, MetaData, Column, String
 from sqlalchemy.orm import sessionmaker
 from models import Base  # 假设你的模型定义在这里
-from utility.config import INIT_DATABASE_INFO
+from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
 from utility.models import user_profile_view_sql
 
 db_url = (

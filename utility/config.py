@@ -15,6 +15,17 @@ INIT_DATABASE_INFO = {
     'collations': 'utf8mb4_unicode_ci'
 }
 
+# 数据库相关连接信息
+INIT_DATABASE_INFO_DATABASE3306 = {
+    'host': '8.134.144.185',
+    'port': 3306,
+    'database': 'data',
+    'user': 'root',
+    'passwd': 'www.gzhu.edu.cn',
+    'charset': 'utf8mb4',
+    'collations': 'utf8mb4_unicode_ci'
+}
+
 # 数据库创建配置
 DATABASE_INFO = {
 
