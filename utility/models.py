@@ -24,27 +24,11 @@ class User(Base):
     blogs = relationship("UserBlog", backref="user", cascade="all, delete-orphan")
 
 
-    # 关联关系
-    blogs = relationship("UserBlog", backref="user", cascade="all, delete-orphan")
-    talents = relationship("Talent", backref="user", cascade="all, delete-orphan")
-    login_name = relationship("UserLoginName", backref="user", cascade="all, delete-orphan")
-    repos = relationship("UserRepos", backref="user", cascade="all, delete-orphan")
-    organizations = relationship("UserOrganization", backref="user", cascade="all, delete-orphan")
-    # 指定外键以避免多个路径冲突
-    relationships = relationship("UserRelationship",
-                                 primaryjoin="User.id == UserRelationship.uid",
-                                 backref="user",
-                                 cascade="all, delete-orphan")
-
-
-
-    repos_participation = relationship("ReposParticipant", backref="user", cascade="all, delete-orphan")
-
 
 # 能力表
 class Talent(Base):
     __tablename__ = 'talent'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
+    uid = Column(Integer)
     topic = Column(String(255))
     ability = Column(Integer)
     __table_args__ = (
@@ -55,21 +39,21 @@ class Talent(Base):
 # 个人博客表
 class UserBlog(Base):
     __tablename__ = 'blogs'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
+    uid = Column(Integer, primary_key=True)
     blog_html = Column(MEDIUMTEXT)
 
 
 # 用户登录名表
 class UserLoginName(Base):
     __tablename__ = 'login_names'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
+    uid = Column(Integer, primary_key=True)
     login_name = Column(String(255), unique=True)
 
 
 # 用户仓库关联表
 class UserRepos(Base):
     __tablename__ = 'user_repos'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
+    uid = Column(Integer)
     repos_url = Column(String(255), unique=True)
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'repos_url'),
@@ -88,7 +72,7 @@ class Organization(Base):
 # 用户组织关联表
 class UserOrganization(Base):
     __tablename__ = 'user_organization'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
+    uid = Column(Integer)
     # organization_id = Column(Integer,
     #                          ForeignKey('organizations.organization_id', onupdate='CASCADE', ondelete='CASCADE'),
     #                          )
@@ -101,7 +85,7 @@ class UserOrganization(Base):
 # 用户关系网表
 class UserRelationship(Base):
     __tablename__ = 'relationships'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
+    uid = Column(Integer)
     # related_uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
     related_uid = Column(Integer)
     is_fan = Column(Boolean)
@@ -115,8 +99,8 @@ class UserRelationship(Base):
 # 项目成员表
 class ReposParticipant(Base):
     __tablename__ = 'repos_participants'
-    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
-    rid = Column(Integer, ForeignKey('repos_info.id', onupdate='CASCADE', ondelete='CASCADE'))
+    uid = Column(Integer)
+    rid = Column(Integer)
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'rid'),
     )
@@ -135,11 +119,6 @@ class ReposInfo(Base):
     total_contribution_value = Column(Integer)
     issue_count = Column(Integer)
 
-    # 关联关系
-    urls = relationship("ReposUrl", backref="repo", cascade="all, delete-orphan")
-    languages = relationship("ReposLanguageProportion", backref="repo", cascade="all, delete-orphan")
-    participants = relationship("ReposParticipantContribution", backref="repo", cascade="all, delete-orphan")
-    fields = relationship("ReposField", backref="repo", cascade="all, delete-orphan")
 
 
 # 项目URL表

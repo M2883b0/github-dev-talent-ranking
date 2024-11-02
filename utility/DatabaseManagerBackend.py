@@ -291,10 +291,25 @@ class DatabaseManager:
     #     # 将结果转换为字典
     #     return [dict(row) for row in results]
 
+    def get_qwen_nation(self):
+        session = self.get_session()
+        results = session.query(UserProfileView).all()
+
+
+        print(type(results[0]))
+
 
 
 # 使用示例
 if __name__ == "__main__":
+    db_manager = DatabaseManager()
+
+    # 插入数据示例
+    # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
+    # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
+    # db_manager.insert_data(User, {"id": 3, "name": "王五", "nation": "英国"})
+
+
     db_manager = DatabaseManager()
 
     # 插入数据示例
