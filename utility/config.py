@@ -195,9 +195,9 @@ REPOS_FIELDS_TABLE_FIELD = {
 # topic表结构
 TOPICS_TABLE_FIELD = {
     'columns': ['name', 'descript', 'avi',
-                'repos_count', 'is_featured'],
+                'repos_count', 'is_featured', 'is_curated'],
     'columns_types': [SHORT_STRING_TYPES + PRIMARY_KEY, LONG_STRING_TYPES, MEDIUM_STRING_TYPES,
-                      INT, BOOLEAN]
+                      INT, BOOLEAN, BOOLEAN]
 }
 
 # topic url表结构
