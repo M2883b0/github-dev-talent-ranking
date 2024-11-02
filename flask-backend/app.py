@@ -458,7 +458,7 @@ def topic_rank():
 
     if topic:              #如果指定了topic，就返回这个topic的榜单talent排序的，开发者信息榜单
         print('')
-    else:                  #如果没指定topic，就返回按开发者综合talent的排行版。
+    else:                  #如果没指定topic，就返回按开发者综合talent的排行版。  #
         print('')
 
 
