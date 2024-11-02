@@ -108,7 +108,7 @@ USER_AGENT_LIST = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 ]
 
-PROXIES_LIST = ['http://127.0.0.1:7890']
+PROXIES_LIST = ['socks://127.0.0.1:7890']
 
 TOKEN = [
     "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",

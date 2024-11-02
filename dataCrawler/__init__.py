@@ -37,9 +37,9 @@ if _orgs:
 else:
     crawled_orgs = dict()
 
-# _repos = database.query_data(REPOS_URL_TABLE_NAME)
-# if _repos:
-#     crawled_repos = [key['url'] for key in _repos]
-# else:
-#     crawled_repos = []
+_repos = database.query_data(REPOS_URL_TABLE_NAME)
+if _repos:
+    crawled_repos = [key['repos_url'] for key in _repos]
+else:
+    crawled_repos = []
 
