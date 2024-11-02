@@ -1,10 +1,9 @@
 # models.py
 from sqlalchemy import Column, Integer, String, Text, Boolean, DECIMAL, ForeignKey, UniqueConstraint, \
-    PrimaryKeyConstraint, Table, MetaData
+    PrimaryKeyConstraint, Table, MetaData, create_engine
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-
 
 Base = declarative_base()
 metadata = MetaData()
@@ -239,4 +238,5 @@ LEFT JOIN
     blogs ON users.id = blogs.uid;
 """
 
-# 创建 SQLAlchemy 视图模型
+
+
