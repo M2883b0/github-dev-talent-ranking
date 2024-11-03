@@ -31,7 +31,6 @@ def get_topic_list(topic="", is_feature=False,
         ret.append(topic)
     return ret
 
-
 def get_specific_topic_rank(topic, nation):  #对有这个topic领域的用户，按照这个topic分，排序，
 
     return get_total_talent(nation)
@@ -136,7 +135,7 @@ def get_topics_page():
 def get_topic():
     """
   1、精确查询：【搜索框搜索，跳到topic榜单】；【点击某个topic跳转，跳到topic榜单】，这个榜单的第一个，就是返回单个topic的信息。
-  2、模糊查询，所有topic的列表，A只展示9个，点击A的所有topic。就需要模糊查询所有以A开头的topic，按仓库排序。
+  2、模糊查询，所有topic的列表，A只展示9个，点击A的所有topic。就需要模糊查询所有以A开头的topic，按仓库数量从大到小排序。
   :return:这个topic的开发者的榜单
   """
     if request.args.get("topic"):
