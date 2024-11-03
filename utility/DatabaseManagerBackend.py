@@ -123,44 +123,77 @@ class DatabaseManager:
         session.commit()
         session.close()
 
-    def get_topic(self, is_feature=False, is_curated=False):
+    def get_topic_list(self, query_topic, is_feature=False, is_curated=False):
         session = self.get_session()
-        res = []
+        # 初始化查询
+        query = session.query(
+            Topic.name,
+            TopicUrl.topic_url,
+            Topic.avi,
+            Topic.descript,
+            func.count(ReposField.rid).label("repos_num")
+        ).join(TopicUrl).join(ReposField)
+        # 按照repos降序排序
+        query = query.order_by((desc("repos_num")))
+
+        # 模糊查询 Topic.name 包含 "data" 的记录
+        query = query.filter(Topic.name.like(f'%{query_topic}%'))
+
+        # 添加条件
         if is_feature and is_curated:
-            res = (
-                session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, func.count(ReposField.rid)
-                              .label("repos_num")).group_by(Topic.name).filter(and_(
-                    Topic.is_featured == 1 and Topic.is_curated == 1))
-            )
-        # elif is_curated:
-        #     res = (
-        #         session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, func.count(ReposField.rid)
-        #                       .label("repos_num")).group_by(Topic.name).filter(Topic.is_curated == 1)
-        #     )
-        # elif is_feature:
-        #     res = (
-        #         session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, func.count(ReposField.rid)
-        #                       .label("repos_num")).group_by(Topic.name).filter(Topic.is_featured == 1)
-        #     )
-        res = [{"name": name, "topic_url": topic_url, "avi": avi, "descript": descript, "repos_num": repos_num,
-                "is_feature": is_feature} for name, topic_url, avi, descript, repos_num, is_feature in res]
+            query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 1))
+        elif is_curated:
+            query = query.filter(and_(Topic.is_curated == 1, Topic.is_featured == 0))
+        elif is_feature:
+            query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated ==0))
+
+        # 分组
+        query = query.group_by(Topic.name)
+
+        # 执行查询
+        res = query.all()
+
+        # 格式化结果
+        res = [{
+            "name": name,
+            "topic_url": topic_url,
+            "avi": avi,
+            "descript": descript,
+            "repos_num": repos_num,
+            "is_feature": is_feature
+        } for name, topic_url, avi, descript, repos_num in res]
+
         return res
 
+    def get_user_info(self,login_name):
+        session = self.get_session()
+        query = session.query(
+            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+            Organization.name, User.nation, func.count(ReposField.rid).label("repos_num")
+                              )
     def insert_topic(self, new_values):
         """
         :param new_values : 传入的列表,每个元素是字典 [{"rid": rid, "topic": "java"}, ]
         return: 无返回值
         """
         session = self.get_session()
+        i = 0
         for dic in new_values:
             rid = dic.get("rid")
             topic_value = dic.get("topic")
-            stmt = (
-                Insert(ReposField).
-                values(rid=rid, topics=topic_value)
-            )
+            if i == 0:
+                stmt = (
+                    update(ReposField).
+                    where(ReposField.topics=="").
+                    values(rid=rid, topics=topic_value)
+                )
+                i += 1
+            else:
+                stmt = (
+                    Insert(ReposField).
+                    values(rid=rid, topics=topic_value)
+                )
             session.execute(stmt)
-
         session.commit()
         session.close()
 
@@ -607,7 +640,7 @@ if __name__ == "__main__":
     # print(all_topic_lists)
     #
     # db_manager.update_topic([{"rid": 2, "topic": "vue"}, {"rid": 3, "topic": "云计算"}])
-
-    # topic = db_manager.get_topic(is_feature=True, is_curated=1)
-    # print(topic[0])
-    print(len(db_manager.get_qwen_topic_relevant_info()[1]))
+    # top = 'ja'
+    # topic = db_manager.get_topic_list(top, is_feature=1, is_curated=1)
+    # print(topic)
+    # print(len(db_manager.get_qwen_topic_relevant_info()[1]))
