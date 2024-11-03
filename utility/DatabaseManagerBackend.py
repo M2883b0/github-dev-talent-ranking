@@ -9,7 +9,7 @@ from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, Use
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
 import utility.config as config
-from utility.Testconfig import INIT_DATABASE_INFO as INIT_DATABASE_INFO
+from utility.config import INIT_DATABASE_INFO as INIT_DATABASE_INFO
 
 from typing import Optional, List, Dict, Any
 from sqlalchemy import and_, or_
@@ -374,7 +374,7 @@ class DatabaseManager:
                 meaningful_follower_locations = follower_locations[:10]
                 # 将列表转换为字符串，用逗号分隔
                 processed_result['follower_locations'] = ', '.join(meaningful_follower_locations)
-            if processed_result.get('nation') is "":
+            if processed_result.get('nation') == "":
                 return_res.append(processed_result)
         # 返回处理后的结果
         return results_dict
