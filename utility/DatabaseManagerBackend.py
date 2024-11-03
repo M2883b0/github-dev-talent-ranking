@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from sqlalchemy import join, select
+from sqlalchemy import join, select, update, Insert
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker, Session
 
@@ -9,8 +9,7 @@ from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, Use
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
 import utility.config as config
-from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
-
+from utility.Testconfig import INIT_DATABASE_INFO as INIT_DATABASE_INFO
 
 from typing import Optional, List, Dict, Any
 from sqlalchemy import and_, or_
@@ -105,6 +104,42 @@ class DatabaseManager:
         finally:
             session.close()
 
+    def update_nation(self, new_values):
+        """
+        :param new_values: 传入的列表,每个元素是字典 [{"uid": uid, "nation": "中国"}, ]
+        """
+        session = self.get_session()
+        for dic in new_values:
+            uid = dic.get("uid")
+            nation = dic.get("nation")
+
+            stmt = (
+                update(User).
+                where(User.id == uid).
+                values(nation=nation)
+            )
+            session.execute(stmt)
+
+        session.commit()
+        session.close()
+
+    def update_topic(self, new_values):
+        """
+        :param new_values : 传入的列表,每个元素是字典 [{"rid": rid, "topic": "java"}, ]
+        return: 无返回值
+        """
+        session = self.get_session()
+        for dic in new_values:
+            rid = dic.get("rid")
+            topic_value = dic.get("topic")
+            stmt = (
+                Insert(ReposField).
+                values(rid=rid, topics=topic_value)
+            )
+            session.execute(stmt)
+
+        session.commit()
+        session.close()
     def update_data(self, record_id, new_values):
         """
         更新数据
@@ -292,12 +327,70 @@ class DatabaseManager:
     #     return [dict(row) for row in results]
 
     def get_qwen_nation(self):
+        """
+        返回用于推测用户国籍的相关信息
+        return results_dict (list of dict) [{},{}]每个字典包含大模型推理所有所需的键
+        """
         session = self.get_session()
-        results = session.query(UserProfileView).all()
+        results_dict = session.query(UserProfileView).all()
+        return_res = []
+        # 处理结果并添加有意义的地理位置列表
+        for result in results_dict:
+            processed_result = {
+                'uid': result.uid,
+                'login_name': result.login_name,
+                'name': result.name,
+                'bio': result.bio,
+                'location': result.location,
+                'email_address': result.email_address,
+                'company': result.company,
+                'organization_name': result.organization_name,
+                "organizations_location": result.organization_location,
+                "blog_html": result.blog_html,
+                'following_locations': result.following_locations,
+                'follower_locations': result.follower_locations
+            }
+            # 获取 following_locations 字符串
+            following_locations = result.following_locations
+            follower_locations = result.follower_locations
+            if following_locations is not None:
+                # 处理字符串，按|分隔并去除空值
+                following_locations = [loc.strip() for loc in following_locations.split('|') if loc.strip()]
 
+                # 取前 10 个有意义的地理位置
+                meaningful_following_locations = following_locations[:10]
+                # 将列表转换为字符串，用逗号分隔
+                processed_result['following_locations'] = ', '.join(meaningful_following_locations)
+            if follower_locations is not None:
+                # 处理字符串，按|分隔并去除空值
+                follower_locations = [loc.strip() for loc in follower_locations.split('|') if loc.strip()]
+                # 取前 10 个有意义的地理位置
+                meaningful_follower_locations = follower_locations[:10]
+                # 将列表转换为字符串，用逗号分隔
+                processed_result['follower_locations'] = ', '.join(meaningful_follower_locations)
+            return_res.append(processed_result)
+        # 返回处理后的结果
+        return results_dict
 
-        print(type(results[0]))
-
+    def get_qwen_topic(self):
+        """
+        返回 热门topic列表,没有topic的repos描述列表,全部topic列表
+        return:
+            tuple: 包含三个元素的元组。
+                - feat_topic_str (str): 热门topic列表，以逗号分隔的字符串。
+                - topic_des_dict (list of dict): 没有topic的repos描述列表，每个元素是一个包含'id'和'descript'键的字典。
+                - all_topic_str (str): 全部topic列表，以逗号分隔的字符串。
+        """
+        session = self.get_session()
+        feat_topic_list = session.query(Topic.name).filter(Topic.is_featured == 1).all()
+        feat_topic_str_list = [str(topic_name).strip("(),'") for topic_name in feat_topic_list]
+        feat_topic_str = ','.join(feat_topic_str_list)
+        all_topic_list = session.query(Topic.name).all()
+        all_topic_str_list = [str(topic_name).strip("(),'") for topic_name in all_topic_list]
+        all_topic_str = ','.join(all_topic_str_list)
+        topic_des = session.query(ReposInfo.id, ReposInfo.descript).join(ReposField, ReposField.rid != ReposInfo.id).all()
+        topic_des_dict = [{"id": uid, "descript": descript} for uid, descript in topic_des]
+        return feat_topic_str, topic_des_dict, all_topic_str
 
 
 # 使用示例
@@ -309,15 +402,182 @@ if __name__ == "__main__":
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
     # db_manager.insert_data(User, {"id": 3, "name": "王五", "nation": "英国"})
 
-
-    db_manager = DatabaseManager()
-
     # 插入数据示例
     # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
     # db_manager.insert_data(User, {"id": 3, "name": "王五", "nation": "英国"})
 
+    #
+    # 插入数据示例
+    data_to_insert = [
+        {
+            "name": "Python编程",
+            "descript": "关于Python编程的各种教程和资源。",
+            "avi": "https://example.com/avatars/python.jpg",
+            "repos_count": 75,
+            "is_featured": True,
+            "is_curated": True
+        },
+        {
+            "name": "机器学习",
+            "descript": "关于机器学习的基础知识和最新进展。",
+            "avi": "https://example.com/avatars/ml.jpg",
+            "repos_count": 120,
+            "is_featured": False,
+            "is_curated": True
 
-    session = db_manager.get_session()
-    results = session.query(UserProfileView).all()
-    print(type(results[0]))
+        },
+        {
+            "name": "前端开发",
+            "descript": "关于前端开发的技术和最佳实践。",
+            "avi": "https://example.com/avatars/frontend.jpg",
+            "repos_count": 90,
+            "is_featured": True,
+            "is_curated": True
+
+        },
+        {
+            "name": "数据科学",
+            "descript": "关于数据科学的工具和技术。",
+            "avi": "https://example.com/avatars/data_science.jpg",
+            "repos_count": 50,
+            "is_featured": False,
+            "is_curated": True
+
+        },
+        {
+            "name": "云计算",
+            "descript": "关于云计算的服务和解决方案。",
+            "avi": "https://example.com/avatars/cloud.jpg",
+            "repos_count": 60,
+            "is_featured": True,
+            "is_curated": True
+
+        }
+    ]
+
+    data_to_insert = [
+        {
+            "name": "Python编程",
+            "descript": "关于Python编程的各种教程和资源。",
+            "avi": "https://example.com/avatars/python.jpg",
+            "repos_count": 75,
+            "is_featured": True,
+            "is_curated": True
+        },
+        {
+            "name": "机器学习",
+            "descript": "关于机器学习的基础知识和最新进展。",
+            "avi": "https://example.com/avatars/ml.jpg",
+            "repos_count": 120,
+            "is_featured": False,
+            "is_curated": True
+        },
+        {
+            "name": "前端开发",
+            "descript": "关于前端开发的技术和最佳实践。",
+            "avi": "https://example.com/avatars/frontend.jpg",
+            "repos_count": 90,
+            "is_featured": True,
+            "is_curated": True
+        },
+        {
+            "name": "数据科学",
+            "descript": "关于数据科学的工具和技术。",
+            "avi": "https://example.com/avatars/data_science.jpg",
+            "repos_count": 50,
+            "is_featured": False,
+            "is_curated": True
+        },
+        {
+            "name": "云计算",
+            "descript": "关于云计算的服务和解决方案。",
+            "avi": "https://example.com/avatars/cloud.jpg",
+            "repos_count": 60,
+            "is_featured": True,
+            "is_curated": True
+        }
+    ]
+
+    # 使用你的插入方法插入数据
+    db_manager.insert_data(Topic, data_to_insert[0])
+    db_manager.insert_data(Topic, data_to_insert[1])
+    db_manager.insert_data(Topic, data_to_insert[2])
+    db_manager.insert_data(Topic, data_to_insert[3])
+    db_manager.insert_data(Topic, data_to_insert[4])
+
+    data_to_insert = [
+        {
+            "id": 1,
+            "main_language": "Python",
+            "descript": "A comprehensive library of Python scripts and tools.",
+            "forks_count": 120,
+            "stargazers_count": 85,
+            "subscribers_count": 30,
+            "importance": 5,
+            "total_contribution_value": 100.00,
+            "issue_count": 15
+        },
+        {
+            "id": 2,
+            "main_language": "Java",
+            "descript": "Collection of Java frameworks and applications.",
+            "forks_count": 90,
+            "stargazers_count": 120,
+            "subscribers_count": 45,
+            "importance": 4,
+            "total_contribution_value": 150.00,
+            "issue_count": 20
+        },
+        {
+            "id": 3,
+            "main_language": "JavaScript",
+            "descript": "Various JavaScript libraries and plugins.",
+            "forks_count": 150,
+            "stargazers_count": 200,
+            "subscribers_count": 50,
+            "importance": 6,
+            "total_contribution_value": 200.00,
+            "issue_count": 25
+        },
+        {
+            "id": 4,
+            "main_language": "C++",
+            "descript": "Advanced C++ algorithms and data structures.",
+            "forks_count": 75,
+            "stargazers_count": 100,
+            "subscribers_count": 25,
+            "importance": 5,
+            "total_contribution_value": 120.00,
+            "issue_count": 10
+        },
+        {
+            "id": 5,
+            "main_language": "Ruby",
+            "descript": "Ruby on Rails projects and gems.",
+            "forks_count": 110,
+            "stargazers_count": 150,
+            "subscribers_count": 35,
+            "importance": 4,
+            "total_contribution_value": 180.00,
+            "issue_count": 18
+        }
+    ]
+    for i in range(len(data_to_insert)):
+        db_manager.insert_data(ReposInfo, data_to_insert[i])
+
+    # session = db_manager.get_session()
+    # results = session.query(UserProfileView).all()
+    # print(type(results[0]))
+    results = db_manager.get_qwen_nation()
+    for i in results:
+        print(i.follower_locations)
+        print(i.following_locations)
+    value = [{"uid": 1, "nation": "美国"}, {"uid": 2, "nation": "中国"}]
+    db_manager.update_nation(value)
+    feature_topic_lists, topic_description, all_topic_lists = db_manager.get_qwen_topic()
+    print(feature_topic_lists)
+    print(topic_description)
+    print(all_topic_lists)
+
+    db_manager.update_topic([{"rid": 2, "topic": "vue"}, {"rid": 3, "topic": "云计算"}])
