@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from sqlalchemy import join, select, update, Insert
+from sqlalchemy import join, select, update, Insert, func
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker, Session
 
@@ -125,8 +125,26 @@ class DatabaseManager:
 
     def get_topic(self, is_feature=False, is_curated=False):
         session = self.get_session()
-        session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, )
-
+        res = []
+        if is_feature and is_curated:
+            res = (
+                session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, func.count(ReposField.rid)
+                              .label("repos_num")).group_by(Topic.name).filter(and_(
+                    Topic.is_featured == 1 and Topic.is_curated == 1))
+            )
+        # elif is_curated:
+        #     res = (
+        #         session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, func.count(ReposField.rid)
+        #                       .label("repos_num")).group_by(Topic.name).filter(Topic.is_curated == 1)
+        #     )
+        # elif is_feature:
+        #     res = (
+        #         session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, func.count(ReposField.rid)
+        #                       .label("repos_num")).group_by(Topic.name).filter(Topic.is_featured == 1)
+        #     )
+        res = [{"name": name, "topic_url": topic_url, "avi": avi, "descript": descript, "repos_num": repos_num,
+                "is_feature": is_feature} for name, topic_url, avi, descript, repos_num, is_feature in res]
+        return res
 
     def insert_topic(self, new_values):
         """
@@ -395,7 +413,8 @@ class DatabaseManager:
         all_topic_list = session.query(Topic.name).all()
         all_topic_str_list = [str(topic_name).strip("(),'") for topic_name in all_topic_list]
         all_topic_str = ','.join(all_topic_str_list)
-        topic_des = session.query(ReposInfo.id, ReposInfo.descript).join(ReposField, ReposField.rid != ReposInfo.id).all()
+        topic_des = (session.query(ReposInfo.id, ReposInfo.descript).join(ReposField,ReposField.rid==ReposInfo.id).
+                     filter(ReposField.topics=="").all())
         topic_des_dict = [{"id": uid, "descript": descript} for uid, descript in topic_des]
         return feat_topic_str, topic_des_dict, all_topic_str
 
@@ -416,175 +435,179 @@ if __name__ == "__main__":
 
     #
     # 插入数据示例
-    data_to_insert = [
-        {
-            "name": "Python编程",
-            "descript": "关于Python编程的各种教程和资源。",
-            "avi": "https://example.com/avatars/python.jpg",
-            "repos_count": 75,
-            "is_featured": True,
-            "is_curated": True
-        },
-        {
-            "name": "机器学习",
-            "descript": "关于机器学习的基础知识和最新进展。",
-            "avi": "https://example.com/avatars/ml.jpg",
-            "repos_count": 120,
-            "is_featured": False,
-            "is_curated": True
+    # data_to_insert = [
+    #     {
+    #         "name": "Python编程",
+    #         "descript": "关于Python编程的各种教程和资源。",
+    #         "avi": "https://example.com/avatars/python.jpg",
+    #         "repos_count": 75,
+    #         "is_featured": True,
+    #         "is_curated": True
+    #     },
+    #     {
+    #         "name": "机器学习",
+    #         "descript": "关于机器学习的基础知识和最新进展。",
+    #         "avi": "https://example.com/avatars/ml.jpg",
+    #         "repos_count": 120,
+    #         "is_featured": False,
+    #         "is_curated": True
+    #
+    #     },
+    #     {
+    #         "name": "前端开发",
+    #         "descript": "关于前端开发的技术和最佳实践。",
+    #         "avi": "https://example.com/avatars/frontend.jpg",
+    #         "repos_count": 90,
+    #         "is_featured": True,
+    #         "is_curated": True
+    #
+    #     },
+    #     {
+    #         "name": "数据科学",
+    #         "descript": "关于数据科学的工具和技术。",
+    #         "avi": "https://example.com/avatars/data_science.jpg",
+    #         "repos_count": 50,
+    #         "is_featured": False,
+    #         "is_curated": True
+    #
+    #     },
+    #     {
+    #         "name": "云计算",
+    #         "descript": "关于云计算的服务和解决方案。",
+    #         "avi": "https://example.com/avatars/cloud.jpg",
+    #         "repos_count": 60,
+    #         "is_featured": True,
+    #         "is_curated": True
+    #
+    #     }
+    # ]
 
-        },
-        {
-            "name": "前端开发",
-            "descript": "关于前端开发的技术和最佳实践。",
-            "avi": "https://example.com/avatars/frontend.jpg",
-            "repos_count": 90,
-            "is_featured": True,
-            "is_curated": True
-
-        },
-        {
-            "name": "数据科学",
-            "descript": "关于数据科学的工具和技术。",
-            "avi": "https://example.com/avatars/data_science.jpg",
-            "repos_count": 50,
-            "is_featured": False,
-            "is_curated": True
-
-        },
-        {
-            "name": "云计算",
-            "descript": "关于云计算的服务和解决方案。",
-            "avi": "https://example.com/avatars/cloud.jpg",
-            "repos_count": 60,
-            "is_featured": True,
-            "is_curated": True
-
-        }
-    ]
-
-    data_to_insert = [
-        {
-            "name": "Python编程",
-            "descript": "关于Python编程的各种教程和资源。",
-            "avi": "https://example.com/avatars/python.jpg",
-            "repos_count": 75,
-            "is_featured": True,
-            "is_curated": True
-        },
-        {
-            "name": "机器学习",
-            "descript": "关于机器学习的基础知识和最新进展。",
-            "avi": "https://example.com/avatars/ml.jpg",
-            "repos_count": 120,
-            "is_featured": False,
-            "is_curated": True
-        },
-        {
-            "name": "前端开发",
-            "descript": "关于前端开发的技术和最佳实践。",
-            "avi": "https://example.com/avatars/frontend.jpg",
-            "repos_count": 90,
-            "is_featured": True,
-            "is_curated": True
-        },
-        {
-            "name": "数据科学",
-            "descript": "关于数据科学的工具和技术。",
-            "avi": "https://example.com/avatars/data_science.jpg",
-            "repos_count": 50,
-            "is_featured": False,
-            "is_curated": True
-        },
-        {
-            "name": "云计算",
-            "descript": "关于云计算的服务和解决方案。",
-            "avi": "https://example.com/avatars/cloud.jpg",
-            "repos_count": 60,
-            "is_featured": True,
-            "is_curated": True
-        }
-    ]
-
-    # 使用你的插入方法插入数据
-    db_manager.insert_data(Topic, data_to_insert[0])
-    db_manager.insert_data(Topic, data_to_insert[1])
-    db_manager.insert_data(Topic, data_to_insert[2])
-    db_manager.insert_data(Topic, data_to_insert[3])
-    db_manager.insert_data(Topic, data_to_insert[4])
-
-    data_to_insert = [
-        {
-            "id": 1,
-            "main_language": "Python",
-            "descript": "A comprehensive library of Python scripts and tools.",
-            "forks_count": 120,
-            "stargazers_count": 85,
-            "subscribers_count": 30,
-            "importance": 5,
-            "total_contribution_value": 100.00,
-            "issue_count": 15
-        },
-        {
-            "id": 2,
-            "main_language": "Java",
-            "descript": "Collection of Java frameworks and applications.",
-            "forks_count": 90,
-            "stargazers_count": 120,
-            "subscribers_count": 45,
-            "importance": 4,
-            "total_contribution_value": 150.00,
-            "issue_count": 20
-        },
-        {
-            "id": 3,
-            "main_language": "JavaScript",
-            "descript": "Various JavaScript libraries and plugins.",
-            "forks_count": 150,
-            "stargazers_count": 200,
-            "subscribers_count": 50,
-            "importance": 6,
-            "total_contribution_value": 200.00,
-            "issue_count": 25
-        },
-        {
-            "id": 4,
-            "main_language": "C++",
-            "descript": "Advanced C++ algorithms and data structures.",
-            "forks_count": 75,
-            "stargazers_count": 100,
-            "subscribers_count": 25,
-            "importance": 5,
-            "total_contribution_value": 120.00,
-            "issue_count": 10
-        },
-        {
-            "id": 5,
-            "main_language": "Ruby",
-            "descript": "Ruby on Rails projects and gems.",
-            "forks_count": 110,
-            "stargazers_count": 150,
-            "subscribers_count": 35,
-            "importance": 4,
-            "total_contribution_value": 180.00,
-            "issue_count": 18
-        }
-    ]
-    for i in range(len(data_to_insert)):
-        db_manager.insert_data(ReposInfo, data_to_insert[i])
+    # data_to_insert = [
+    #     {
+    #         "name": "Python编程",
+    #         "descript": "关于Python编程的各种教程和资源。",
+    #         "avi": "https://example.com/avatars/python.jpg",
+    #         "repos_count": 75,
+    #         "is_featured": True,
+    #         "is_curated": True
+    #     },
+    #     {
+    #         "name": "机器学习",
+    #         "descript": "关于机器学习的基础知识和最新进展。",
+    #         "avi": "https://example.com/avatars/ml.jpg",
+    #         "repos_count": 120,
+    #         "is_featured": False,
+    #         "is_curated": True
+    #     },
+    #     {
+    #         "name": "前端开发",
+    #         "descript": "关于前端开发的技术和最佳实践。",
+    #         "avi": "https://example.com/avatars/frontend.jpg",
+    #         "repos_count": 90,
+    #         "is_featured": True,
+    #         "is_curated": True
+    #     },
+    #     {
+    #         "name": "数据科学",
+    #         "descript": "关于数据科学的工具和技术。",
+    #         "avi": "https://example.com/avatars/data_science.jpg",
+    #         "repos_count": 50,
+    #         "is_featured": False,
+    #         "is_curated": True
+    #     },
+    #     {
+    #         "name": "云计算",
+    #         "descript": "关于云计算的服务和解决方案。",
+    #         "avi": "https://example.com/avatars/cloud.jpg",
+    #         "repos_count": 60,
+    #         "is_featured": True,
+    #         "is_curated": True
+    #     }
+    # ]
+    #
+    # # 使用你的插入方法插入数据
+    # db_manager.insert_data(Topic, data_to_insert[0])
+    # db_manager.insert_data(Topic, data_to_insert[1])
+    # db_manager.insert_data(Topic, data_to_insert[2])
+    # db_manager.insert_data(Topic, data_to_insert[3])
+    # db_manager.insert_data(Topic, data_to_insert[4])
+    #
+    # data_to_insert = [
+    #     {
+    #         "id": 1,
+    #         "main_language": "Python",
+    #         "descript": "A comprehensive library of Python scripts and tools.",
+    #         "forks_count": 120,
+    #         "stargazers_count": 85,
+    #         "subscribers_count": 30,
+    #         "importance": 5,
+    #         "total_contribution_value": 100.00,
+    #         "issue_count": 15
+    #     },
+    #     {
+    #         "id": 2,
+    #         "main_language": "Java",
+    #         "descript": "Collection of Java frameworks and applications.",
+    #         "forks_count": 90,
+    #         "stargazers_count": 120,
+    #         "subscribers_count": 45,
+    #         "importance": 4,
+    #         "total_contribution_value": 150.00,
+    #         "issue_count": 20
+    #     },
+    #     {
+    #         "id": 3,
+    #         "main_language": "JavaScript",
+    #         "descript": "Various JavaScript libraries and plugins.",
+    #         "forks_count": 150,
+    #         "stargazers_count": 200,
+    #         "subscribers_count": 50,
+    #         "importance": 6,
+    #         "total_contribution_value": 200.00,
+    #         "issue_count": 25
+    #     },
+    #     {
+    #         "id": 4,
+    #         "main_language": "C++",
+    #         "descript": "Advanced C++ algorithms and data structures.",
+    #         "forks_count": 75,
+    #         "stargazers_count": 100,
+    #         "subscribers_count": 25,
+    #         "importance": 5,
+    #         "total_contribution_value": 120.00,
+    #         "issue_count": 10
+    #     },
+    #     {
+    #         "id": 5,
+    #         "main_language": "Ruby",
+    #         "descript": "Ruby on Rails projects and gems.",
+    #         "forks_count": 110,
+    #         "stargazers_count": 150,
+    #         "subscribers_count": 35,
+    #         "importance": 4,
+    #         "total_contribution_value": 180.00,
+    #         "issue_count": 18
+    #     }
+    # ]
+    # for i in range(len(data_to_insert)):
+    #     db_manager.insert_data(ReposInfo, data_to_insert[i])
 
     # session = db_manager.get_session()
     # results = session.query(UserProfileView).all()
     # print(type(results[0]))
-    results = db_manager.get_qwen_nation_relevant_info()
-    for i in results:
-        print(type(i))
-        print(i.get("follower_locations"))
-    value = [{"uid": 1, "nation": "美国"}, {"uid": 2, "nation": "中国"}]
-    db_manager.update_nation(value)
-    feature_topic_lists, topic_description, all_topic_lists = db_manager.get_qwen_topic_relevant_info()
-    print(feature_topic_lists)
-    print(topic_description)
-    print(all_topic_lists)
+    # results = db_manager.get_qwen_nation_relevant_info()
+    # for i in results:
+    #     print(type(i))
+    #     print(i.get("follower_locations"))
+    # value = [{"uid": 1, "nation": "美国"}, {"uid": 2, "nation": "中国"}]
+    # db_manager.update_nation(value)
+    # feature_topic_lists, topic_description, all_topic_lists = db_manager.get_qwen_topic_relevant_info()
+    # print(feature_topic_lists)
+    # print(topic_description)
+    # print(all_topic_lists)
+    #
+    # db_manager.update_topic([{"rid": 2, "topic": "vue"}, {"rid": 3, "topic": "云计算"}])
 
-    db_manager.update_topic([{"rid": 2, "topic": "vue"}, {"rid": 3, "topic": "云计算"}])
+    # topic = db_manager.get_topic(is_feature=True, is_curated=1)
+    # print(topic[0])
+    print(len(db_manager.get_qwen_topic_relevant_info()[1]))
