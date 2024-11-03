@@ -163,7 +163,7 @@ def main():
         count = count + 1
         if insert:
             data.append(insert)
-        if count % 30 == 0 or count == total_records:
+        if count % 20 == 0 or count == total_records:
             print('插入数据')
             db_manager.update_nation(data)
             data = []

@@ -102,7 +102,7 @@ def main():
                     "topics": topic
                 }
                 data.append(temp_dict)
-        if count % 2 == 0 or count == total_records:
+        if count % 10 == 0 or count == total_records:
             print('插入数据')
             print(data)
             db_manager.insert_topic(data)
