@@ -4,7 +4,6 @@
         <div class="title">{{ "CompassBench Leaderboard" }}</div>
       </div>
       <div class="rank-items">
-            
           <div class="overall-score"><slot name="s1"/></div>
         <RankItem v-for="(item, index) in rankList" :key="`${item.github_url}-${index}`" :rank="index" :rankInfo="item"/>
       </div>
@@ -42,7 +41,8 @@
     flex-direction: column;
     align-items: center;
     padding:20px 0;
-  
+    max-height: 600px;
+    overflow-y: auto;
   }
   .overall-score{
       width:95%;

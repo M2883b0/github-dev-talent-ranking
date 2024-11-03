@@ -11,12 +11,7 @@ import TopicRankView from "./topicRank/index.vue";
 import Search from "./search/index.vue";
 import TopicRankList from "./topicRankList/index.vue";
 import RandomTopic from "./randomTopic/index.vue";
-import { useCounterStore } from "@/stores/topicRank";
-import { onMounted } from "vue";
-const store = useCounterStore();
-onMounted(() => {
-  store.getTopicRank();
-});
+
 </script>
 <style scoped>
 .cxk {

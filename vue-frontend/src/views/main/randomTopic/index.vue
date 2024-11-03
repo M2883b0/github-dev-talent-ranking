@@ -1,9 +1,9 @@
 <template>
   <div class="random-topic">
     <div class="领域">
-      <span class="Similarintegrations">Similar integrations</span
+      <span class="Similarintegrations">Similar integrations  &nbsp;  &nbsp;  &nbsp;</span
       >
-      <el-icon class="cxksxicon" @click="刷新"><RefreshRight /></el-icon>
+      <el-icon class="cxksxicon" @click="more"><CaretRight /></el-icon>
     </div>
     <div class="topic-list">
       <TopicItem v-for="item in store.randomTopicList" :topicInfo="item" />
@@ -14,12 +14,13 @@
 import { useCounterStore } from "@/stores/randomTopic";
 import TopicItem from "./topicItem.vue";
 import { onMounted } from "vue";
+import router from '@/router/index'
 const store = useCounterStore();
 onMounted(() => {
   store.getRandomTopicList();
 });
-const 刷新 = () => {
-
+const more = () => {    
+    router.push({name:"topic"})
 };
 </script>
 <style scoped>
