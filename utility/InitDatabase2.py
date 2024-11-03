@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, text, Table, MetaData, Column, String, event, Engine, Integer, Boolean
 from sqlalchemy.orm import sessionmaker
 from utility.models import Base  # 假设你的模型定义在这里
-from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
-from utility.models import user_profile_view_sql, user_relation_view_sql
+from utility.Testconfig import INIT_DATABASE_INFO as INIT_DATABASE_INFO
+from utility.models import user_profile_view_sql, user_relation_location_view_sql
 db_url = (
     f"mysql+mysqlconnector://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}"
     f"@{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"
@@ -26,13 +26,11 @@ class UserProfileView(Base):
 
 
 class UserRelationView(Base):
-    __tablename__ = "user_relation_view"
+    __tablename__ = "user_relation_location_view"
     __table_args__ = {'autoload_with': engine}
 
     uid = Column(Integer, primary_key=True)
     related_uid = Column(Integer, primary_key=True)
-    is_follower = Column(Boolean)
-    location = Column(String)
 
 
 

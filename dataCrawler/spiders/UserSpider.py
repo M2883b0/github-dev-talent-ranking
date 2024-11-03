@@ -25,8 +25,6 @@ from dataCrawler.spiders.SpiderTemplate import SpiderTemplate
 from utility.config import ERROR_TABLE_NAME
 
 
-
-
 class UserSpider(SpiderTemplate):
     name = "UserSpider"
     # allowed_domains = ["github.com"]
@@ -39,13 +37,14 @@ class UserSpider(SpiderTemplate):
         super().__init__(**kwargs)
 
     def start_requests(self) -> Iterable[Request]:
-        
+
         yield self.request(url=self.top1000url.format(1, 1), callback=self.init_parse)
         begin = config["user_followers_begin"]
         end = config["user_followers_end"]
         for lower_num in range(begin, end, config["user_followers_step"]):
-            yield self.request(url=self.user_list_url.format(lower_num, lower_num + config["user_followers_step"], 1, 1),
-                               callback=self.init_parse, meta={"begin": lower_num, "end": lower_num + config["user_followers_step"]})
+            yield self.request(
+                url=self.user_list_url.format(lower_num, lower_num + config["user_followers_step"], 1, 1),
+                callback=self.init_parse, meta={"begin": lower_num, "end": lower_num + config["user_followers_step"]})
 
     def init_parse(self, response: Response, **kwargs: Any) -> Any:
         result = json.loads(response.text)
@@ -106,6 +105,7 @@ class UserSpider(SpiderTemplate):
         field = self.filter_dict(data, required_key)
         if response.meta.get("is_follower"):
             field["following_id"] = response.meta["follower_id"]
+            field["repos_url"] = []
             yield UserInfo(**field)
         else:
             # "followers_url" 国籍判断
@@ -132,7 +132,8 @@ class UserSpider(SpiderTemplate):
         if not data:
             return
         for org in data:
-            yield self.request(url=org["url"] + "?per_page=100&page=1", callback=self._parse_organiztion, meta=response.meta)
+            yield self.request(url=org["url"] + "?per_page=100&page=1", callback=self._parse_organiztion,
+                               meta=response.meta)
 
     def _parse_organiztion(self, response: Response, **kwargs: Any) -> Any:
         data = json.loads(response.text)
@@ -169,23 +170,24 @@ class UserSpider(SpiderTemplate):
 
     def personal_page_parse(self, response: Response, **kwargs: Any) -> Any:
         field = response.meta["field"]
-        if field.get("blog_html"):
+        data = json.loads(response.text)
+        field["repos_url"] = []
+        # blog url in repos
+        url = field.get("blog_html")
+        for repo in data:
+            field["repos_url"].append(repo["url"])
+            if repo["name"].endswith("github.io"):
+                # xxx.github.io 优先
+                url = repo["name"]
+
+        if url:
+            url = self.url_check(url)
             need_proxy_url = ["twitter", "github.com"]
             is_proxy = False
             for i in need_proxy_url:
-                if i in field.get("blog_html"):
+                if i in url:
                     is_proxy = True
-            yield self.request(url=self.url_check(field["blog_html"]), callback=self._download_personal_blog,
+            yield self.request(url=url, callback=self._download_personal_blog,
                                meta={"field": field, "is_proxy": is_proxy, "download_timeout": 5})
         else:
-            data = json.loads(response.text)
-            field["repos_url"] = [field["repos_url"]]
-            for repo in data:
-                field["repos_url"].append(repo["url"])
-                if repo["name"].endswith("github.io"):
-                    yield self.request(url=self.url_check(repo["name"]), callback=self._download_personal_blog,
-                                       meta={"field": field})
-
             yield UserInfo(**field)
-
-

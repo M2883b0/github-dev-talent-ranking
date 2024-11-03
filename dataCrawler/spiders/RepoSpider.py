@@ -43,7 +43,10 @@ class RepoSpider(SpiderTemplate):
 
     def init_parse(self, response: Response, **kwargs: Any) -> Any:
         result = json.loads(response.text)
-        total_count = int(result["total_count"])
+        if isinstance(result, dict):
+            total_count = int(result["total_count"])
+        else:
+            total_count = len(result)
         page = 0
         if total_count // self.per_page > 10:
             print("repos list step need smaller ")
@@ -80,6 +83,7 @@ class RepoSpider(SpiderTemplate):
 
     def parse_detail(self, response: Response, **kwargs: Any) -> Any:
         data = json.loads(response.text)
+        print(data)
         assert isinstance(data, dict)
         # 提取项目所需要的字段
         required_key = (
@@ -110,6 +114,9 @@ class RepoSpider(SpiderTemplate):
                            meta={"field": field, "page": 1, "contributors_url": url})
 
     def parse_contributors(self, response: Response, **kwargs: Any) -> Any:
+        if not response.text:
+            yield ReposInfo(**response.meta["field"])
+            return
         data = json.loads(response.text)
         field = response.meta["field"]
         url = response.meta["contributors_url"]
@@ -135,4 +142,7 @@ class RepoSpider(SpiderTemplate):
                 task = [i["repos_url"] for i in _task]
                 for url in task:
                     if url not in crawled_repos:
-                        yield self.request(url=url, callback=self.parse_detail)
+                        if "/users/" in url:
+                            yield self.request(url=url, callback=self.init_parse)
+                        elif "/repos/" in url:
+                            yield self.request(url=url, callback=self.parse_detail)
