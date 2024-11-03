@@ -2,19 +2,10 @@ import json
 import random
 import string
 
-from flask import request
 from flask import Flask
-from flask import render_template
-from pandas.core.internals.blocks import NumpyBlock
+from flask import request
 
 # from utility.DatabaseManagerBackend import DatabaseManager, TableName
-from utility.models import Topic, TopicUrl
-from sqlalchemy import and_, or_, func, desc, asc
-
-from utility.field_constants import UserFields, UserOrganizationFields, UserRelationshipFields, UserReposFields, \
-    UserBlogFields, UserLoginNameFields, ReposFieldFields, ReposInfoFields, ReposParticipantFields, ReposUrlFields, \
-    ReposLanguageProportionFields, ReposParticipantContributionFields, OrganizationFields, TopicFields, \
-    CrawledUrlFields, TopicUrlFields, TalentFields, SpiderErrorFields
 
 app = Flask(__name__)
 
@@ -101,7 +92,7 @@ def get_total_talent(nation):  #对所有用户，按照"topic_talent"综合能�
 @app.route("/")
 def hello():  # 主页
     # return render_template("index.html", name='123')
-    return render_template("index.html")
+    return "server is ready"
 
 
 @app.route("/get_topics_page")
@@ -813,4 +804,4 @@ def search_users():
 if __name__ == "__main__":
     # database_manager = DatabaseManager()
     # database_manager.query_with_filters()
-    app.run(host="0.0.0.0", port=5780, debug=True)
+    app.run(host="0.0.0.0", port=80, debug=True)
