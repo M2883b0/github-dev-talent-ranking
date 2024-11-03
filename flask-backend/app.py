@@ -89,6 +89,9 @@ def get_total_talent(nation):  #对所有用户，按照"topic_talent"综合能�
     ]
 
 
+
+
+
 @app.route("/")
 def hello():  # 主页
     # return render_template("index.html", name='123')
