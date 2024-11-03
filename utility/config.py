@@ -110,9 +110,9 @@ CRAWLED_URL_TABLE_FIELD = {
 # 用户信息表结构
 USER_TABLE_FIELD = {
     'columns': ['id', 'name', 'email_address', 'followers', 'bio', 'repos_count',
-                'company', 'location', 'nation'],
+                'company', 'location', 'nation', 'total_ability'],
     'columns_types': [INT + PRIMARY_KEY, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, INT, LONG_STRING_TYPES, INT,
-                      MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES]
+                      MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, MEDIUM_STRING_TYPES, INT]
 }
 
 # 能力表结构
