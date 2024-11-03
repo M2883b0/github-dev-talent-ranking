@@ -352,7 +352,6 @@ class DatabaseManager:
                 'company': result.company,
                 'organization_name': result.organization_name,
                 "organizations_location": result.organization_location,
-                "blog_html": result.blog_html,
                 'following_locations': result.following_locations,
                 'follower_locations': result.follower_locations
             }
