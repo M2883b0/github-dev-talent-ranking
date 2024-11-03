@@ -123,7 +123,12 @@ class DatabaseManager:
         session.commit()
         session.close()
 
-    def update_topic(self, new_values):
+    def get_topic(self, is_feature=False, is_curated=False):
+        session = self.get_session()
+        session.query(Topic.name, TopicUrl.topic_url, Topic.avi, Topic.descript, )
+
+
+    def insert_topic(self, new_values):
         """
         :param new_values : 传入的列表,每个元素是字典 [{"rid": rid, "topic": "java"}, ]
         return: 无返回值
@@ -140,6 +145,7 @@ class DatabaseManager:
 
         session.commit()
         session.close()
+
     def update_data(self, record_id, new_values):
         """
         更新数据
@@ -326,7 +332,7 @@ class DatabaseManager:
     #     # 将结果转换为字典
     #     return [dict(row) for row in results]
 
-    def get_qwen_nation(self):
+    def get_qwen_nation_relevant_info(self):
         """
         返回用于推测用户国籍的相关信息
         return results_dict (list of dict) [{},{}]每个字典包含大模型推理所有所需的键
@@ -372,7 +378,7 @@ class DatabaseManager:
         # 返回处理后的结果
         return results_dict
 
-    def get_qwen_topic(self):
+    def get_qwen_topic_relevant_info(self):
         """
         返回 热门topic列表,没有topic的repos描述列表,全部topic列表
         return:
