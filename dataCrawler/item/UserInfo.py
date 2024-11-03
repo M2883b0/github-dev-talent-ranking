@@ -49,7 +49,7 @@ class UserInfo(scrapy.Item):
                 USER_TABLE_NAME,
                 [
                     self["id"], self["name"], self["email"],
-                    self["followers"], self["bio"], self["public_repos"], self["company"], self["location"], ""]
+                    self["followers"], self["bio"], self["public_repos"], self["company"], self["location"], "", 0]
             )
             database.insert_data(
                 USER_LOGIN_NAME_TABLE_NAME,
@@ -85,5 +85,4 @@ class UserInfo(scrapy.Item):
         if row_count >= 100:
             row_count = 0
             database.commit()
-
             logging.info("committed ")
