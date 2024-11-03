@@ -14,19 +14,19 @@ SPIDER_NUM = 2
 # 用户信息接口
 # TODO: 需要更改常量
 user_info_config = {
-    "user_info_api_top1000_template": "https://api.github.com/search/users?q=followers:>4500&per_page={}&page={}",
+    "user_info_api_top1000_template": "https://api.github.com/search/users?q=followers:>4700&per_page={}&page={}",
     # 4500
     "user_info_api_template": "https://api.github.com/search/users?q=followers:{}..{}&per_page={}&page={}",
     "user_detail_template": "https://api.github.com/users/",
     "user_followers_begin": 500,  # 500
-    "user_followers_end": 4500,  # 4500
+    "user_followers_end": 4700,  # 4500
     "user_followers_step": 20,
     "user_list_step": 100
 }
 
 # repos
 repos_info_config = {
-    "repos_info_api_top1000_template": "https://api.github.com/search/repositories?q=stars:%3E28000000&per_page={}&page={}",# 28000
+    "repos_info_api_top1000_template": "https://api.github.com/search/repositories?q=stars:%3E28000&per_page={}&page={}",# 28000
     # 4500
     "repos_info_api_template": "https://api.github.com/search/repositories?q=stars:{}..{}&per_page={}&page={}",
     # "repos_detail_template": "https://api.github.com/reposs/",
