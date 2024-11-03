@@ -109,16 +109,19 @@ class DatabaseManager:
         :param new_values: 传入的列表,每个元素是字典 [{"uid": uid, "nation": "中国"}, ]
         """
         session = self.get_session()
-        for dic in new_values:
-            uid = dic.get("uid")
-            nation = dic.get("nation")
-
-            stmt = (
-                update(User).
-                where(User.id == uid).
-                values(nation=nation)
-            )
-            session.execute(stmt)
+        # for dic in new_values:
+        #     uid = dic.get("uid")
+        #     nation = dic.get("nation")
+        #
+        #     stmt = (
+        #         update(User).
+        #         where(User.id == uid).
+        #         values(nation=nation)
+        #     )
+        #     session.execute(stmt)
+        # 批量更新
+        if new_values:
+            session.bulk_update_mappings(ReposField, new_values)
 
         session.commit()
         session.close()
@@ -177,23 +180,19 @@ class DatabaseManager:
         return: 无返回值
         """
         session = self.get_session()
-        i = 0
-        for dic in new_values:
-            rid = dic.get("rid")
-            topic_value = dic.get("topic")
-            if i == 0:
-                stmt = (
-                    update(ReposField).
-                    where(ReposField.topics=="").
-                    values(rid=rid, topics=topic_value)
-                )
-                i += 1
-            else:
-                stmt = (
-                    Insert(ReposField).
-                    values(rid=rid, topics=topic_value)
-                )
+        length = len(new_values)
+        if length >= 1:
+            rid = new_values[0].get("rid")
+            topic_value = new_values[0].get("topic")
+            stmt = (
+                update(ReposField).
+                where(ReposField.rid == rid, ReposField.topics == "").
+                values(topics=topic_value)
+            )
             session.execute(stmt)
+        if length >= 2:
+            # 批量插入
+            session.bulk_insert_mappings(ReposField, new_values[1:])
         session.commit()
         session.close()
 
