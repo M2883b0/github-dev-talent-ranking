@@ -281,7 +281,7 @@ LEFT JOIN
 LEFT JOIN
     user_relation_location_view ON user_relation_location_view.uid = users.id
 WHERE 
-    users.followers > 100  AND users.nation = ""
+    users.followers > 150  AND users.nation = ""
 """
 
 

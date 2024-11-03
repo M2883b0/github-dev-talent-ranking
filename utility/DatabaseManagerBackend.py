@@ -121,7 +121,7 @@ class DatabaseManager:
         #     session.execute(stmt)
         # 批量更新
         if new_values:
-            session.bulk_update_mappings(ReposField, new_values)
+            session.bulk_update_mappings(User, new_values)
 
         session.commit()
         session.close()
@@ -183,7 +183,7 @@ class DatabaseManager:
         length = len(new_values)
         if length >= 1:
             rid = new_values[0].get("rid")
-            topic_value = new_values[0].get("topic")
+            topic_value = new_values[0].get("topics")
             stmt = (
                 update(ReposField).
                 where(ReposField.rid == rid, ReposField.topics == "").
@@ -643,3 +643,22 @@ if __name__ == "__main__":
     # topic = db_manager.get_topic_list(top, is_feature=1, is_curated=1)
     # print(topic)
     # print(len(db_manager.get_qwen_topic_relevant_info()[1]))
+    ids = [
+        2429952, 4386126, 4520094, 6068358, 6559955, 8247227, 8829739, 9429712, 12486287, 13713302,
+        14363535, 14598571, 16886228, 18005291, 18498523, 19132789, 19901248, 21512530, 21674455,
+        21756415, 22374063, 23652091, 41654081, 47445046, 60710553, 65136177, 68442509, 69094410,
+        93629835, 99433554, 106912107, 113763143, 144719064, 147081519, 163591278, 221161068,
+        326174741, 328349603, 343106069, 349571915, 384219990, 391506048, 392921982, 445154758,
+        556527819, 588408304, 653609709, 704913027, 733140974, 762314119, 767985271
+    ]
+    session = db_manager.get_session()
+    lis = [{"rid":id, "topics":""} for id in ids]
+    session = db_manager.get_session()
+
+    session.bulk_insert_mappings(ReposField, lis)
+
+    # 提交事务
+    session.commit()
+
+    # 关闭会话
+    session.close()
