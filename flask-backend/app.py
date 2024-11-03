@@ -603,7 +603,7 @@ def relate_topic():
     # 读取num个最相关的topic，组成list。例如用户查询C，返回【C++，C#，....】
     relate_list = ['C++', 'C#', ...]
     # 调用数据库接口，得到test最终数据
-
+    print(relate_list)
     # 操作数据库，单表
     # 例如：
     test = {
