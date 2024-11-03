@@ -27,6 +27,7 @@ TOPIC_THRESHOLDS = 7
 
 # 通意千问账户信息===
 # QWEN_API_KEY = 'sk-98b82adf6c9a4f1193690b0fc4fe6e29'
-QWEN_API_KEY = 'sk-4105cea2ba734cf38fceac218cf24913'
+# QWEN_API_KEY = 'sk-4105cea2ba734cf38fceac218cf24913'
+QWEN_API_KEY = 'sk-02b9423a99404617ac6e5b07286af4b1'
 QWEN_TOPIC_MODEL = "qwen-plus"
 QWEN_NATION_MODEL = 'qwen-max'   # 【qwen-max，qwen-plus】 模型列表：https://help.aliyun.com/zh/model-studio/getting-started/models

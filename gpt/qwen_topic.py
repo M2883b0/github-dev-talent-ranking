@@ -116,4 +116,6 @@ def main():
 if __name__ == '__main__':
     main()
 
+# TODO：main_lanuage合并过来repos_files这边后，main_lanuage直接有了。我这边预测的，就插入重复了。
+#  1：所以要实现，判断一下，即使我预测了，如果表中有的话，就不插入这个条数据了。
 
