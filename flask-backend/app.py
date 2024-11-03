@@ -115,7 +115,7 @@ def get_topics_page():
     all_topic_classify = {
         key: [] for key in classify
     }
-    topic_li = get_topic_list('', False)  #不要精选，全部topic给我
+    topic_li = get_topic_list('', False,False)  #不要精选，全部topic给我
     for topic in topic_li:
         first_letter = topic["topic_name"][0].upper()
         if first_letter in classify:
@@ -148,7 +148,7 @@ def get_topic():
     else:
         is_feature = False
 
-    topic_li = get_topic_list(topic, is_feature)
+    topic_li = get_topic_list(topic, is_feature,False)
     ret = {"total_count": len(topic_li), "topic_list": topic_li}
     return json.dumps(ret)
 
@@ -206,6 +206,11 @@ def relate_topic():
   :return:这个topic的，相似的几个topic
   """
     topic = request.args.get("topic")  # topic名字
+    if not topic:
+        return {
+            "code": 1,
+            "msg": "please input topic name"
+        }
     num = int(request.args.get("num", 6))  # 返回推荐的前几个，例如返回6个
 
     # TODO: 先找统计信息，找出最相关的num个。
@@ -215,7 +220,7 @@ def relate_topic():
     # 调用数据库接口
     li = []
     for tp in specific_relate_list:
-        tmp = filter_topic(get_topic_list(tp, False), tp.upper())
+        tmp = filter_topic(get_topic_list(tp, False,False), tp.upper())
         if tmp:
             li.append(tmp[0])
     ret = {"total_count": len(li), "relate_topic_list": li}
@@ -244,6 +249,9 @@ def search_users():
             "code": 1,
             "msg": "please input name"
         }
+    # TODO: 关系圈：3个勾选项，例如：只查看粉丝的榜单，不看其他关系的。
+    # is_follower = request.args.get("is_follower")
+    # is_
     # TODO: 关系圈：先调用数据库，如果没有，就调用爬虫接口现场爬。
 
     # 操作数据库，多表
