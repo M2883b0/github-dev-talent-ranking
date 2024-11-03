@@ -377,7 +377,7 @@ class DatabaseManager:
             if processed_result.get('nation') == "":
                 return_res.append(processed_result)
         # 返回处理后的结果
-        return results_dict
+        return return_res
 
     def get_qwen_topic_relevant_info(self):
         """
@@ -576,13 +576,13 @@ if __name__ == "__main__":
     # session = db_manager.get_session()
     # results = session.query(UserProfileView).all()
     # print(type(results[0]))
-    results = db_manager.get_qwen_nation()
+    results = db_manager.get_qwen_nation_relevant_info()
     for i in results:
-        print(i.follower_locations)
-        print(i.following_locations)
+        print(type(i))
+        print(i.get("follower_locations"))
     value = [{"uid": 1, "nation": "美国"}, {"uid": 2, "nation": "中国"}]
     db_manager.update_nation(value)
-    feature_topic_lists, topic_description, all_topic_lists = db_manager.get_qwen_topic()
+    feature_topic_lists, topic_description, all_topic_lists = db_manager.get_qwen_topic_relevant_info()
     print(feature_topic_lists)
     print(topic_description)
     print(all_topic_lists)
