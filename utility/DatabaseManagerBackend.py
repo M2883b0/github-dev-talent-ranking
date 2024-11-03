@@ -350,6 +350,7 @@ class DatabaseManager:
                 'location': result.location,
                 'email_address': result.email_address,
                 'company': result.company,
+                'nation': result.nation,
                 'organization_name': result.organization_name,
                 "organizations_location": result.organization_location,
                 'following_locations': result.following_locations,
@@ -373,7 +374,8 @@ class DatabaseManager:
                 meaningful_follower_locations = follower_locations[:10]
                 # 将列表转换为字符串，用逗号分隔
                 processed_result['follower_locations'] = ', '.join(meaningful_follower_locations)
-            return_res.append(processed_result)
+            if processed_result.get('nation') is "":
+                return_res.append(processed_result)
         # 返回处理后的结果
         return results_dict
 
