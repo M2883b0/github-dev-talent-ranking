@@ -141,7 +141,7 @@ class DatabaseManager:
             func.count(ReposField.rid).label("repos_num"),
             Topic.is_featured,
             Topic.is_curated
-        ).join(TopicUrl, TopicUrl.name == Topic.name).join(ReposField, ReposField.topics == Topic.name)
+        ).join(TopicUrl, TopicUrl.name == Topic.name).outerjoin(ReposField, ReposField.topics == Topic.name)
         # 按照repos降序排序
         query = query.order_by((desc("repos_num")))
 
@@ -685,6 +685,8 @@ class DatabaseManager:
 # 使用示例
 if __name__ == "__main__":
     db_manager = DatabaseManager()
+    res = db_manager.get_topic_list("")
+    print(res[-1])
     # 插入数据示例
     # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
