@@ -127,7 +127,7 @@ class DatabaseManager:
         session.commit()
         session.close()
 
-    def get_topic_list(self, query_topic, is_feature=True, is_curated=True):
+    def get_topic_list(self, query_topic, is_feature=None, is_curated=None):
         """
         return 未检索到返回None
         """
@@ -150,12 +150,15 @@ class DatabaseManager:
         # if query.all() is None:
         #     return None
         # 添加条件
-        if is_feature and is_curated:
-            query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 1))
-        elif is_curated:
-            query = query.filter(and_(Topic.is_curated == 1, Topic.is_featured == 0))
-        elif is_feature:
-            query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 0))
+        if is_feature is None and is_curated is None:
+            pass
+        else:
+            if is_feature and is_curated:
+                query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 1))
+            elif is_curated:
+                query = query.filter(and_(Topic.is_curated == 1, Topic.is_featured == 0))
+            elif is_feature:
+                query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 0))
 
         # 分组
         query = query.group_by(Topic.name)
