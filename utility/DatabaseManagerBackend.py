@@ -156,9 +156,9 @@ class DatabaseManager:
             if is_feature and is_curated:
                 query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 1))
             elif is_curated:
-                query = query.filter(and_(Topic.is_curated == 1, Topic.is_featured == 0))
+                query = query.filter(Topic.is_curated == 1)
             elif is_feature:
-                query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 0))
+                query = query.filter(Topic.is_featured == 1)
 
         # 分组
         query = query.group_by(Topic.name)
@@ -685,8 +685,8 @@ class DatabaseManager:
 # 使用示例
 if __name__ == "__main__":
     db_manager = DatabaseManager()
-    res = db_manager.get_topic_list("")
-    print(res[-1])
+    res = db_manager.get_topic_list("",is_feature=True,is_curated=True)
+    print(res[-100:-1])
     # 插入数据示例
     # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
