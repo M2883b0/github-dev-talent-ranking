@@ -306,7 +306,7 @@ class DatabaseManager:
                 "total_talent": random.randint(50, 100)
             }
             users_info_list.append(parsed_user_info)
-        return users_info_list
+        return sorted(users_info_list, key=lambda x: x['total_talent'], reverse=True)
 
     def __parse_special_topic_rank(self, special_topic_rank):
         users_info_list = []
@@ -685,8 +685,11 @@ class DatabaseManager:
 # 使用示例
 if __name__ == "__main__":
     db_manager = DatabaseManager()
-    res = db_manager.get_topic_list("",is_feature=True,is_curated=True)
-    print(res[-100:-1])
+    # res = db_manager.get_topic_list("", is_feature=True, is_curated=True)
+    # print(res[-100:-1])
+    session = db_manager.get_session()
+    res = session.query(Topic.name).outerjoin(TopicUrl, TopicUrl.name == Topic.name).filter(TopicUrl.topic_url == None)
+    print(res.all())
     # 插入数据示例
     # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
@@ -892,7 +895,6 @@ if __name__ == "__main__":
     # print(topic)
     # special_topic_rank = db_manager.get_specific_topic_rank("Python编程")
     # print(special_topic_rank)
-
 
     # Step 10: Execute the query and return the results
 
