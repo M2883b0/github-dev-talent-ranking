@@ -7,3 +7,5 @@ twisted~=24.7.0
 asyncio~=3.4.3
 mysql~=0.0.3
 Flask
+flask_redis
+redis
