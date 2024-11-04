@@ -9,91 +9,13 @@ from flask_redis import FlaskRedis
 from utility.DatabaseManagerBackend import DatabaseManager
 
 app = Flask(__name__)
-# 配置redis
+# 配置redis的信息
 app.config['REDIS_URL'] = "redis://localhost:6379/0"
 # 初始化 Redis 客户端
 redis_client = FlaskRedis(app)
 
 user_image_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
-
-
-# def get_topic_list(topic="", is_feature=False,
-#                    is_curated=False):  #模糊查询所有的topic，返回以"xx"开头的所有topic，按照仓库数量从大到小排序；同时支持is_feature,is_curated筛选
-#     classify = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-#                 'V', 'W', 'X', 'Y', 'Z', '2', "3", "0", "."]
-#     name_li = [random.choice(classify) + random.choice(classify) + random.choice(classify) for _ in range(2000)]
-#     ret = []
-#     for name in name_li:
-#         topic = {
-#             "topic_name": name,
-#             "topic_url": f"https://github.com/topic/{name}",
-#             "topic_img_url": "https://raw.githubusercontent.com/github/explore/54ab64c16bdf4604d4fbb36326be6909d8088dcb/topics/abap2ui5/abap2ui5.png",
-#             "descrip": "abap2UI5 is a framework for developing UI5 apps purely in ABAP — no need for JavaScript, OData, or RAP! It is designed for both cloud and on-premise environments, offering a lightweight and easy-to-install solution that works across all ABAP systems, from NetWeaver 7.02 to ABAP Cloud.",
-#             "repos_num": 26,
-#             "is_feature": 0
-#         }
-#         ret.append(topic)
-#     return ret
-#
-# def get_specific_topic_rank(topic, nation):  #对有这个topic领域的用户，按照这个topic分，排序，
-#
-#     return get_total_talent(nation)
-#
-#
-# def get_related_rank(name, is_follower=True, is_following=True, is_collaborator=True):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
-#     return get_total_talent(name)
-#
-#
-# def get_user_info(login_name):  #返回一个用户的详细信息
-#
-#     return {
-#         "id": random.randint(1, 237892349823),
-#         "login_name": "".join(
-#             random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-#         "name": "".join(
-#             random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-#         "email": "xxxxx@xx.com",
-#         "bio": "I am a dog xxxx.",
-#         "company": "Google Inc",
-#         "organize": "dasdadea",
-#         "nation": "China",
-#         "repos_num": 7,
-#         "stars_num": 41341,
-#         "followers_num": 394,
-#         "fork_num": 32131,
-#         "have_topic": ["Linux", "C", "C++"],
-#         "have_topic_talent": [100, 110, 120],
-#         "total_talent": 330,
-#     }
-#
-#
-# def get_total_talent(nation):  #对所有用户，按照"topic_talent"综合能力，排序。
-#
-#     return [
-#         {
-#             "id": random.randint(1, 23093209),
-#             "login_name": "".join(
-#                 random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-#             "name": "".join(
-#                 random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-#             "email": "xxxxx@xx.com",
-#             "bio": "I am a dog xxxx.",
-#             "company": "Google Inc",
-#             "nation": "China",
-#             "repos_num": random.randint(1, 34),
-#             "stars_num": random.randint(2342, 23093209),
-#             "followers_num": random.randint(432, 293209),
-#             "fork_num": random.randint(234, 23093209),
-#             "topic": "",
-#             "topic_talent": random.randint(1, 23093209),
-#         }
-#
-#         for _ in range(100)
-#     ]
-
-
-
 
 
 @app.route("/")
