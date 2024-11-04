@@ -127,7 +127,7 @@ class DatabaseManager:
         session.commit()
         session.close()
 
-    def get_topic_list(self, query_topic, is_feature=False, is_curated=False):
+    def get_topic_list(self, query_topic, is_feature=True, is_curated=True):
         """
         return 未检索到返回None
         """
@@ -138,7 +138,9 @@ class DatabaseManager:
             TopicUrl.topic_url,
             Topic.avi,
             Topic.descript,
-            cast(func.sum(ReposField.rid), Integer).label("repos_num")
+            func.count(ReposField.rid).label("repos_num"),
+            Topic.is_featured,
+            Topic.is_curated
         ).join(TopicUrl, TopicUrl.name == Topic.name).join(ReposField, ReposField.topics == Topic.name)
         # 按照repos降序排序
         query = query.order_by((desc("repos_num")))
@@ -167,8 +169,9 @@ class DatabaseManager:
             "avi": avi,
             "descript": descript,
             "repos_num": repos_num,
-            "is_feature": is_feature
-        } for name, topic_url, avi, descript, repos_num in res]
+            "is_feature": is_featured,
+            "is_curated": is_curated
+        } for name, topic_url, avi, descript, repos_num, is_featured, is_curated in res]
         if len(res) == 0:
             return None
         return res
