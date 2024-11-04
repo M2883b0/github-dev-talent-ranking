@@ -30,4 +30,4 @@ TOPIC_THRESHOLDS = 7
 QWEN_API_KEY = 'sk-4105cea2ba734cf38fceac218cf24913'  #cy
 # QWEN_API_KEY = 'sk-02b9423a99404617ac6e5b07286af4b1'    #mlq
 QWEN_TOPIC_MODEL = "qwen-plus"
-QWEN_NATION_MODEL = 'qwen-max-2024-09-19'   # 【qwen-max-2024-09-19，qwen-max-latest，qwen-max，qwen-plus】 模型列表：https://help.aliyun.com/zh/model-studio/getting-started/models
+QWEN_NATION_MODEL = 'qwen-plus'   # 【qwen-max-2024-09-19，qwen-max-latest，qwen-max，qwen-plus】 模型列表：https://help.aliyun.com/zh/model-studio/getting-started/models

@@ -186,7 +186,7 @@ def topic_rank():
     # 定义把哪些数据放入redis，定义一个key
     redis_rank_name = ['', 'C', 'Python', 'Linux']  # 前端首页放固定的几个热门topic榜单。【""表示综合榜单】
     if topic in redis_rank_name:
-        cache_key = f"topics_rank:topic={topic}"
+        cache_key = f"topics_rank:topic={topic}:nation={nation}"
         # 尝试从 Redis 缓存中获取数据
         cached_data = redis_client.get(cache_key)
         # 如果拿得到数据，就直接return了
@@ -296,6 +296,13 @@ def search_users():
     user = get_user_info(name)
 
     # TODO: 先调用数据库，如果没有这个人，就调用爬虫接口现场爬。
+
+    if user is None:
+        return {
+            "code": 400,
+            "msg": "user does not exist"
+        }
+
 
     # 处理这个用户的信息
     user = generate_user_info(user)
