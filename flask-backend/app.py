@@ -4,10 +4,15 @@ import string
 
 from flask import Flask
 from flask import request
+from flask_redis import FlaskRedis
 
 # from utility.DatabaseManagerBackend import DatabaseManager, TableName
 
 app = Flask(__name__)
+# 配置redis
+app.config['REDIS_URL'] = "redis://localhost:6379/0"
+# 初始化 Redis 客户端
+redis_client = FlaskRedis(app)
 
 user_image_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
@@ -31,13 +36,12 @@ def get_topic_list(topic="", is_feature=False,
         ret.append(topic)
     return ret
 
-
 def get_specific_topic_rank(topic, nation):  #对有这个topic领域的用户，按照这个topic分，排序，
 
     return get_total_talent(nation)
 
 
-def get_related_rank(name):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
+def get_related_rank(name, is_follower=True, is_following=True, is_collaborator=True):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
     return get_total_talent(name)
 
 
@@ -109,6 +113,16 @@ def get_topics_page():
     else:
         num = 9
 
+    # Redis 代码[KEY ,VALUE]
+    # 定义一个key
+    cache_key = f"get_topics_page:num={num}"
+    # 尝试从 Redis 缓存中获取数据
+    cached_data = redis_client.get(cache_key)
+    # 如果拿得到数据，就直接return了
+    if cached_data:
+        return cached_data
+    # 如果拿不到，就执行下面的访问mysql的语句
+
     # 操作数据库:多表【topic、topic_url表】
     classify = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
                 'V', 'W', 'X', 'Y', 'Z', 'others']
@@ -129,15 +143,18 @@ def get_topics_page():
     ret = all_topic_classify
     ret["len"] = len(all_topic_classify)  #只要前9个
 
+    # Redis 代码
+    # 把自定义的key，和对应的值，存入redis里面
+    redis_client.set(cache_key, json.dumps(ret), ex=600)  # 设置过期时间为10分钟
+
     return json.dumps(ret)
 
 
 @app.route("/get_topic")
 def get_topic():
     """
-  1、精确查询：【搜索框搜索，跳到topic榜单】；【点击某个topic跳转，跳到topic榜单】，这个榜单的第一个，就是返回单个topic的信息。
-  2、模糊查询，所有topic的列表，A只展示9个，点击A的所有topic。就需要模糊查询所有以A开头的topic，按仓库排序。
-  :return:这个topic的开发者的榜单
+  1、模糊查询，所有topic的列表，A只展示9个，点击A的所有topic。就需要模糊查询所有以A开头的topic，按仓库数量从大到小排序。
+  :return:
   """
     if request.args.get("topic"):
         topic = request.args.get("topic")  # topic名字，name
@@ -159,8 +176,23 @@ def topic_rank():
   1、搜索框，搜索topic跳转过来，2、所有topic页面的点击某个topic跳转过来
   :return:这个topic的开发者的榜单
   """
-    topic = request.args.get("topic")  # topic名字
+    if request.args.get("topic"):
+        topic = request.args.get("topic")  # topic名字，name
+    else:
+        topic = ''
     nation = request.args.get("nation", "%%")  # 筛选项：国籍
+
+    # Redis 代码[KEY ,VALUE]
+    # 定义把哪些数据放入redis，定义一个key
+    redis_rank_name = ['', 'C', 'Python', 'Linux']  # 前端首页放固定的几个热门topic榜单。【""表示综合榜单】
+    if topic in redis_rank_name:
+        cache_key = f"topics_rank:topic={topic}:nation={nation}"
+        # 尝试从 Redis 缓存中获取数据
+        cached_data = redis_client.get(cache_key)
+        # 如果拿得到数据，就直接return了
+        if cached_data:
+            return cached_data
+        # 如果拿不到，就执行下面的访问mysql的语句
 
     if topic:  # 如果指定了topic，就返回这个topic的榜单talent排序的，开发者信息榜单
         data = get_specific_topic_rank(topic,
@@ -175,7 +207,12 @@ def topic_rank():
         users_info.append(user)
     # login_name id email bio company nation repos_num stars_num followers_num followers_num fork_num topic talent
     ret["rank_list"] = users_info
-    # 例如：
+
+    # Redis 代码
+    # 把自定义的key，和对应的值，存入redis里面
+    if topic in redis_rank_name:
+        redis_client.set(cache_key, json.dumps(ret), ex=600)  # 设置过期时间为10分钟
+
     return json.dumps(ret)
 
 
@@ -241,28 +278,37 @@ def generate_user_info(user):
 @app.route("/search_users")
 def search_users():
     """
-  :return:返回这个用户的页面信息【个人详细信息、】
+  :return:返回这个用户的页面信息【个人详细信息】
   """
     name = request.args.get("name")  # login名
     if not name:
         return {
-            "code": 1,
+            "code": 400,
             "msg": "please input name"
         }
     # TODO: 关系圈：3个勾选项，例如：只查看粉丝的榜单，不看其他关系的。
     # is_follower = request.args.get("is_follower")
-    # is_
-    # TODO: 关系圈：先调用数据库，如果没有，就调用爬虫接口现场爬。
+    # is_following = request.args.get("is_following")
+    # is_collaborator = request.args.get("is_collaborator")
 
     # 操作数据库，多表
     # 查user表，得到这个用户的详细信息
     user = get_user_info(name)
 
+    # TODO: 先调用数据库，如果没有这个人，就调用爬虫接口现场爬。
+
+    if user is None:
+        return {
+            "code": 400,
+            "msg": "user does not exist"
+        }
+
+
     # 处理这个用户的信息
     user = generate_user_info(user)
 
     # 关系榜单
-    li = get_related_rank(name)
+    li = get_related_rank(name, True, True, True)
     related_user_list = []
     for ur in li:
         # 处理【粉丝、合作者的信息】
@@ -280,4 +326,4 @@ def search_users():
 if __name__ == "__main__":
     # database_manager = DatabaseManager()
     # database_manager.query_with_filters()
-    app.run(host="0.0.0.0", port=80, debug=True)
+    app.run(host="0.0.0.0", port=80, debug=True, threaded=True)

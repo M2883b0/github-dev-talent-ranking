@@ -17,15 +17,6 @@
 const props = defineProps({
   topicInfo: Object,
 });
-// {
-//                 "tpoic_name": "abap2UI5",
-//                 "topic_url": "https://github.com/topic/abap2UI5",
-//                 "topic_img_url": "https://raw.githubusercontent.com/github/explore/54ab64c16bdf4604d4fbb36326be6909d8088dcb/topics/abap2ui5/abap2ui5.png",
-//                 "descrip": "abap2UI5 is a framework for developing UI5 apps purely in ABAP — no need for JavaScript, OData, or RAP! It is designed for both cloud and on-premise environments, offering a lightweight and easy-to-install solution that works across all ABAP systems, from NetWeaver 7.02 to ABAP Cloud.",
-//                 "repos_num": 26,
-//                 "is_feature": 0
-//             }
-
 const goGithub = () => {
   window.location = props.topicInfo.topic_url;
 };
@@ -43,7 +34,7 @@ const goGithub = () => {
   flex-direction: column;
   position: relative;
   align-items: center;
-  padding:20px;
+  padding: 20px;
 }
 .imagecxk {
   margin-top: 10px;
@@ -53,20 +44,20 @@ const goGithub = () => {
 .topic-item:hover {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* 鼠标悬停时增加阴影大小和模糊度 */
 }
-.cxknum{
-    position: absolute;
-    bottom:50px;
-    left:20px;
+.cxknum {
+  position: absolute;
+  bottom: 50px;
+  left: 20px;
 }
-.cxkjx{
-    position: absolute;
-      top: 0px;
-      right: 0px;
-      font-size: 15px;
-      height: 28px;
-      padding: 0 11px;
-      background-color: #e85a29;
-      border-radius: 0px 0px 0px 16px;
-      color: #FFF;
+.cxkjx {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  font-size: 15px;
+  height: 28px;
+  padding: 0 11px;
+  background-color: #e85a29;
+  border-radius: 0px 0px 0px 16px;
+  color: #fff;
 }
 </style>
