@@ -10,50 +10,53 @@ from config import SPARKAI_URL, SPARKAI_APP_ID, SPARKAI_API_SECRET, SPARKAI_API_
 import logging
 
 
-# def websocket_no_stream(bio, blog_html):
-#     """
-#
-#     :return:
-#     """
-#     spark = ChatSparkLLM(
-#         spark_api_url=SPARKAI_URL,
-#         spark_app_id=SPARKAI_APP_ID,
-#         spark_api_key=SPARKAI_API_KEY,
-#         spark_api_secret=SPARKAI_API_SECRET,
-#         spark_llm_domain=SPARKAI_DOMAIN,
-#         streaming=False,
-#     )
-#     messages = [
-#         ChatMessage(
-#             role="system",
-#             content='你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。'
-#         ),
-#         ChatMessage(
-#             role="user",
-#             content='技术名称列表:{}。项目文本描述:"{}"。请你根据项目文本描述，从技术列表中列出10个最相关的技术。用列表格式输出：'.format(
-#                 topic_list, project_description)
-#         )
-#     ]
-#     handler = ChunkPrintHandler()
-#     a = spark.generate([messages], callbacks=[handler])
-#     output = a.generations[0][0].text
-#     # print(output)
-#     predict_topic = output_to_topic(output, all_topic_list)
-#     threshold = TOPIC_THRESHOLDS  # 设置给项目最多打4个标签
-#     if len(predict_topic) > threshold:
-#         return predict_topic[:threshold]  # 给项目上topic，保守一点，最多预测threshold个topic
-#     else:
-#         return predict_topic
+def websocket_no_stream(bio, blog_html):
+    """
+
+    :return:
+    """
+    spark = ChatSparkLLM(
+        spark_api_url=SPARKAI_URL,
+        spark_app_id=SPARKAI_APP_ID,
+        spark_api_key=SPARKAI_API_KEY,
+        spark_api_secret=SPARKAI_API_SECRET,
+        spark_llm_domain=SPARKAI_DOMAIN,
+        streaming=False,
+    )
+    messages = [
+        ChatMessage(
+            role="system",
+            content='你现在是一名计算机领域的技术顾问，能够准确且简洁的回答用户的问题。'
+        ),
+        ChatMessage(
+            role="user",
+            content='用户简介:{}。用户博客网页爬取的内容:{}。请你根据上述信息，给这个用户的开发能力打分，满分100分。不要看html内容的长度，要根据内容的技术程度。如果是全是生活博客，开发者能力分数就很低，如果是是技术分享博客，则根据内容的图文丰富性和技术研究的深入程度，进行评分。结果用数字输出，例如输出:43分。'.format(
+                bio, blog_html)
+        )
+    ]
+    handler = ChunkPrintHandler()
+    a = spark.generate([messages], callbacks=[handler])
+    output = a.generations[0][0].text
+    number = re.findall(r'\d+', output)
+    if number:
+        blog_score = int(number[0])
+    else:
+        blog_score = 0
+    return blog_score
+
+
+
+
 
 
 def http_no_stream(bio, blog_html):
     url = SPARKAI_HTTP_URL
     data = {
-        "max_tokens": 10,
+        "max_tokens": 30,
         "top_p": 0.8,
-        "top_k": 2,
-        "temperature": 0.3,
-        "presence_penalty": 2,
+        "top_k": 1,
+        "temperature": 0.5,
+        "presence_penalty": 1,
         "messages": [
             {
                 "role": "system",
@@ -61,7 +64,7 @@ def http_no_stream(bio, blog_html):
             },
             {
                 "role": "user",
-                "content": "用户简介:{}。用户博客网页爬取的内容:{}。请你根据上述信息，给这个用户的开发能力打分，满分100分。不要看html内容的长度，要根据内容的技术程度。如果是全是生活博客，开发者能力分数就很低，如果是是技术分享博客，则根据内容的图文丰富性和技术研究的深入程度，进行评分。结果用数字输出，例如输出:83。".format(
+                "content": "用户简介:{}。用户博客网页爬取的内容:{}。请你根据上述信息，给这个用户的开发能力打分，满分100分。根据内容的技术程度。如果是生活记录博客，开发者能力分数就很低，如果是是技术分享博客，则根据内容的图文丰富性和技术研究的深入程度，进行评分。结果用数字输出，例如输出:43分。然后给出理由，为什么得到这个分数，是由哪些信息相加得到的".format(
                     bio, blog_html)
             }
         ],
@@ -88,7 +91,7 @@ def http_no_stream(bio, blog_html):
         return ""  # 大模型非正常输出，返回空     #====
     elif 'code' in output_json and output_json['code'] == 0:  # 正确
         output = output_json['choices'][0]['message']['content']
-        # print(output)
+        print(output)
         number = re.findall(r'\d+', output)
         if number:
             blog_score = int(number[0])

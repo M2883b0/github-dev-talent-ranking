@@ -134,7 +134,7 @@ def task(uid, login_name, name=None, bio=None, location=None, email_address=None
     print(output)
     try:
         output_list = ast.literal_eval(output)
-        if (output_list[1] >= 0.4) and (output_list[0] in Nation_list):  # 猜测概率
+        if (output_list[1] >= 0.7) and (output_list[0] in Nation_list):  # 猜测概率
             insert = {
                 "id": uid,
                 "nation": output_list[0]
@@ -183,3 +183,5 @@ if __name__ == '__main__':
     # following_list = "['Yonsei University - Computer Science  Seoul, South Korea','Yonsei University  College of Artificial Intelligence','MICV Lab at Yonsei University','@bigdyl-yonsei  Daejeon,Korea','@kakao  Seoul, Korea','KFTC  Jeongja-dong, Korea','Seoul, Republic of Korea']"
 
     main()
+
+    #TODO：对所有的N/A再预测一次，主要解决'中国台湾'变成N/A这个问题
