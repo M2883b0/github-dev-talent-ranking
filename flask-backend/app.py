@@ -4,10 +4,15 @@ import string
 
 from flask import Flask
 from flask import request
+from flask_redis import FlaskRedis
 
 # from utility.DatabaseManagerBackend import DatabaseManager, TableName
 
 app = Flask(__name__)
+# 配置redis
+app.config['REDIS_URL'] = "redis://localhost:6379/0"
+# 初始化 Redis 客户端
+redis_client = FlaskRedis(app)
 
 user_image_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
@@ -36,7 +41,7 @@ def get_specific_topic_rank(topic, nation):  #对有这个topic领域的用户�
     return get_total_talent(nation)
 
 
-def get_related_rank(name):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
+def get_related_rank(name, is_follower=True, is_following=True, is_collaborator=True):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
     return get_total_talent(name)
 
 
@@ -108,6 +113,16 @@ def get_topics_page():
     else:
         num = 9
 
+    # Redis 代码[KEY ,VALUE]
+    # 定义一个key
+    cache_key = f"get_topics_page:num={num}"
+    # 尝试从 Redis 缓存中获取数据
+    cached_data = redis_client.get(cache_key)
+    # 如果拿得到数据，就直接return了
+    if cached_data:
+        return cached_data
+    # 如果拿不到，就执行下面的访问mysql的语句
+
     # 操作数据库:多表【topic、topic_url表】
     classify = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
                 'V', 'W', 'X', 'Y', 'Z', 'others']
@@ -127,6 +142,10 @@ def get_topics_page():
     }
     ret = all_topic_classify
     ret["len"] = len(all_topic_classify)  #只要前9个
+
+    # Redis 代码
+    # 把自定义的key，和对应的值，存入redis里面
+    redis_client.set(cache_key, json.dumps(ret), ex=600)  # 设置过期时间为10分钟
 
     return json.dumps(ret)
 
@@ -261,7 +280,7 @@ def search_users():
     user = generate_user_info(user)
 
     # 关系榜单
-    li = get_related_rank(name)
+    li = get_related_rank(name,True,True,True)
     related_user_list = []
     for ur in li:
         # 处理【粉丝、合作者的信息】
@@ -279,4 +298,4 @@ def search_users():
 if __name__ == "__main__":
     # database_manager = DatabaseManager()
     # database_manager.query_with_filters()
-    app.run(host="0.0.0.0", port=80, debug=True)
+    app.run(host="0.0.0.0", port=80, debug=True, threaded=True)
