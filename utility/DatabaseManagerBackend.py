@@ -189,24 +189,24 @@ class DatabaseManager:
             specific_topic_rank = self.__parse_special_topic_rank(users_info)
         return specific_topic_rank
 
-    # def get_user_info(self, login_name):
-    #     """
-    #     param login_name :查询的登录名， 字符串
-    #     return parsed_result :该用户的相关信息   未检索到返回None
-    #     """
-    #     session = self.get_session()
-    #     user_id = (session.query(User.id).join(UserLoginName, UserLoginName.uid == User.id)
-    #                .where(UserLoginName.login_name == login_name).scalar())
-    #     if user_id is None:
-    #         return None
-    #     query = self.__get_users_info_query()
-    #     result = query.filter(User.id == user_id).first()
-    #
-    #     # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表
-    #     parsed_result = self.__parse_topic_and_talent([result])
-    #     return parsed_result
+    def get_user_info(self, login_name):
+        """
+        param login_name :查询的登录名， 字符串
+        return parsed_result :该用户的相关信息   未检索到返回None
+        """
+        session = self.get_session()
+        user_id = (session.query(User.id).join(UserLoginName, UserLoginName.uid == User.id)
+                   .where(UserLoginName.login_name == login_name).scalar())
+        if user_id is None:
+            return None
+        query = self.__get_users_info_query()
+        result = query.filter(User.id == user_id).first()
 
-    def get_user_info(self, id_list):
+        # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表
+        parsed_result = self.__parse_topic_and_talent([result])
+        return parsed_result
+
+    def get_users_info(self, id_list):
         """
         用于返回多个用户id的相关信息
         param id_list: 查询用户id组成的列表
@@ -219,10 +219,6 @@ class DatabaseManager:
         return users_info_list
 
     def __get_users_info_query(self):
-        """
-        创建查询用户所需的查询语句
-
-        """
         session = self.get_session()
         query = (session.query(
             User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
@@ -291,11 +287,6 @@ class DatabaseManager:
             else:
                 pass
 
-            # 测试用
-            topi_list = ["Java", "C", "js", "python", "transformer", "vue", "mysql", "redis"]
-            topi_list = random.sample(topi_list, random.randint(0, 8))
-            length = len(topi_list)
-            topi_talent_list = [random.randint(70, 100) for i in range(length)]
             parsed_user_info = {
                 "id": user.id,
                 "login_name": user.login_name,
@@ -309,13 +300,9 @@ class DatabaseManager:
                 "stars_num": user.stars_num,
                 "fork_num": user.fork_num,
                 "followers_num": user.followers,
-                # 测试用随机
-                "have_topic": topi_list,
-                "have_topic_talent": topi_talent_list,
-                # "have_topic": topic_list,
-                # "have_topic_talent": topic_talent_list,
+                "have_topic": topic_list,
+                "have_topic_talent": topic_talent_list,
                 # "total_talent": user.total_ability
-                # 测试用随机
                 "total_talent": random.randint(50, 100)
             }
             users_info_list.append(parsed_user_info)
@@ -701,13 +688,8 @@ if __name__ == "__main__":
     # res = db_manager.get_topic_list("", is_feature=True, is_curated=True)
     # print(res[-100:-1])
     session = db_manager.get_session()
-    res = db_manager.get_total_talent()
-    count = 0
-    for i in res:
-        print(i)
-        count+=1
-        if count==20:
-            break
+    res = session.query(Topic.name).outerjoin(TopicUrl, TopicUrl.name == Topic.name).filter(TopicUrl.topic_url == None)
+    print(res.all())
     # 插入数据示例
     # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
