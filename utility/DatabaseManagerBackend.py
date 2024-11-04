@@ -1,6 +1,7 @@
 import logging
+import random
 from enum import Enum
-from sqlalchemy import join, select, update, Insert, func
+from sqlalchemy import join, select, update, Insert, func, cast, Integer
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker, Session
 
@@ -127,6 +128,9 @@ class DatabaseManager:
         session.close()
 
     def get_topic_list(self, query_topic, is_feature=False, is_curated=False):
+        """
+        return 未检索到返回None
+        """
         session = self.get_session()
         # 初始化查询
         query = session.query(
@@ -134,28 +138,28 @@ class DatabaseManager:
             TopicUrl.topic_url,
             Topic.avi,
             Topic.descript,
-            func.count(ReposField.rid).label("repos_num")
-        ).join(TopicUrl).join(ReposField)
+            cast(func.sum(ReposField.rid), Integer).label("repos_num")
+        ).join(TopicUrl, TopicUrl.name == Topic.name).join(ReposField, ReposField.topics == Topic.name)
         # 按照repos降序排序
         query = query.order_by((desc("repos_num")))
 
         # 模糊查询 Topic.name 包含 "data" 的记录
         query = query.filter(Topic.name.like(f'%{query_topic}%'))
-
+        # if query.all() is None:
+        #     return None
         # 添加条件
         if is_feature and is_curated:
             query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 1))
         elif is_curated:
             query = query.filter(and_(Topic.is_curated == 1, Topic.is_featured == 0))
         elif is_feature:
-            query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated ==0))
+            query = query.filter(and_(Topic.is_featured == 1, Topic.is_curated == 0))
 
         # 分组
         query = query.group_by(Topic.name)
 
         # 执行查询
         res = query.all()
-
         # 格式化结果
         res = [{
             "name": name,
@@ -165,15 +169,236 @@ class DatabaseManager:
             "repos_num": repos_num,
             "is_feature": is_feature
         } for name, topic_url, avi, descript, repos_num in res]
-
+        if len(res) == 0:
+            return None
         return res
 
-    def get_user_info(self,login_name):
+    def get_specific_topic_rank(self, topic, nation=None):
         session = self.get_session()
-        query = session.query(
+        specific_topic_rank = []
+        if nation is None:
+            query = self.__get_users_topic_info_query(topic)
+            users_info = query.all()
+            print(users_info)
+            specific_topic_rank = self.__parse_special_topic_rank(users_info)
+        return specific_topic_rank
+
+    def get_user_info(self, login_name):
+        """
+        param login_name :查询的登录名， 字符串
+        return parsed_result :该用户的相关信息   未检索到返回None
+        """
+        session = self.get_session()
+        user_id = (session.query(User.id).join(UserLoginName, UserLoginName.uid == User.id)
+                   .where(UserLoginName.login_name == login_name).scalar())
+        if user_id is None:
+            return None
+        query = self.__get_users_info_query()
+        result = query.filter(User.id == user_id).first()
+
+        # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表
+        parsed_result = self.__parse_topic_and_talent([result])
+        return parsed_result
+
+    def get_users_info(self, id_list):
+        """
+        用于返回多个用户id的相关信息
+        param id_list: 查询用户id组成的列表
+        return users_info_list(list of dict): 每个元素都是一个包含用户相关信息的字典
+        """
+        session = self.get_session()
+        query = self.__get_users_info_query()
+        result = query.filter(User.id.in_(id_list)).all()
+        users_info_list = self.__parse_topic_and_talent(result)
+        return users_info_list
+
+    def __get_users_info_query(self):
+        session = self.get_session()
+        query = (session.query(
             User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
-            Organization.name, User.nation, func.count(ReposField.rid).label("repos_num")
-                              )
+            Organization.name.label("organization_name"), User.nation, User.repos_count,
+            cast(func.sum(ReposInfo.forks_count), Integer).label("fork_num"),
+            cast(func.sum(ReposInfo.stargazers_count), Integer).label("stars_num"),
+            User.followers, func.group_concat(Talent.topic.distinct(), ',').label("have_topic"),
+            func.group_concat(Talent.ability.distinct(), ',').label("have_topic_talent"), User.total_ability
+        )
+        .join(UserLoginName, UserLoginName.uid == User.id)
+        .outerjoin(UserOrganization, UserOrganization.uid == User.id)
+        .outerjoin(Organization, Organization.organization_id == UserOrganization.organization_id)
+        .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
+        .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
+        .outerjoin(Talent, Talent.uid == User.id)
+        .group_by(
+            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+            Organization.name, User.nation, User.repos_count, User.followers, User.total_ability
+        )
+        )
+        return query
+
+    def __get_users_topic_info_query(self, topic):
+        session = self.get_session()
+        query = (session.query(
+            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+            Organization.name.label("organization_name"), User.nation,
+            func.count(ReposField.rid).label("repos_num"),
+            cast(func.sum(ReposInfo.forks_count), Integer).label("fork_num"),
+            cast(func.sum(ReposInfo.stargazers_count), Integer).label("stars_num"),
+            User.followers, Talent.topic, Talent.ability
+        )
+        .outerjoin(UserLoginName, UserLoginName.uid == User.id)
+        .outerjoin(UserOrganization, UserOrganization.uid == User.id)
+        .outerjoin(Organization, Organization.organization_id == UserOrganization.organization_id)
+        .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
+        .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
+        .outerjoin(Talent, Talent.uid == User.id)
+        .outerjoin(ReposField, ReposField.rid == ReposInfo.id)
+        .filter(ReposField.topics == topic)
+        .filter(Talent.topic == topic)
+        .group_by(
+            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+            Organization.name, User.nation, User.followers, Talent.topic, Talent.ability
+        )
+        )
+        return query
+
+    def __parse_topic_and_talent(self, users_info):
+        users_info_list = []
+        for user in users_info:
+            # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表
+            topic_str = user.have_topic
+            topic_list = []
+            # 如果topic_str字符串不为空
+            if topic_str is not None and topic_str.strip() is not None:
+                topic_list = [topic for topic in topic_str.split(',') if topic]
+            else:
+                pass
+
+            topic_talent_str = user.have_topic_talent
+            topic_talent_list = []
+            # 如果topic_talent_str字符串不为空:
+            if topic_talent_str is not None and topic_talent_str.strip() is not None:
+                topic_talent_list = [int(talent) for talent in topic_talent_str.split(',') if talent]
+            else:
+                pass
+
+            parsed_user_info = {
+                "id": user.id,
+                "login_name": user.login_name,
+                "name": user.name,
+                "email_address": user.email_address,
+                "bio": user.bio,
+                "company": user.company,
+                "organization_name": user.organization_name,
+                "nation": user.nation,
+                "repos_num": user.repos_count,
+                "stars_num": user.stars_num,
+                "fork_num": user.fork_num,
+                "followers_num": user.followers,
+                "have_topic": topic_list,
+                "have_topic_talent": topic_talent_list,
+                # "total_talent": user.total_ability
+                "total_talent": random.randint(50, 100)
+            }
+            users_info_list.append(parsed_user_info)
+        return users_info_list
+
+    def __parse_special_topic_rank(self, special_topic_rank):
+        users_info_list = []
+        for user in special_topic_rank:
+            parsed_user_info = {
+                "id": user.id,
+                "login_name": user.login_name,
+                "name": user.name,
+                "email_address": user.email_address,
+                "bio": user.bio,
+                "company": user.company,
+                "organization_name": user.organization_name,
+                "nation": user.nation,
+                "repos_num": user.repos_num,
+                "stars_num": user.stars_num,
+                "fork_num": user.fork_num,
+                "followers_num": user.followers,
+                'topic': user.topic,
+                # "topic_talent": user.ability
+                'topic_talent': random.randint(50, 100)
+            }
+            users_info_list.append(parsed_user_info)
+        return sorted(users_info_list, key=lambda x: x['topic_talent'], reverse=True)
+
+    def get_related_rank(self, name, is_follower=True, is_following=True,
+                         is_collaborator=True):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
+        """
+        返回name相关的粉丝，关注的人，合作者的相关信息
+        param name: 用户名
+        param is follower: 返回数据包含粉丝
+        param is following: 返回数据包含关注的人
+        param is collaborator: 返回数据包含合作者
+        return related_users_info: 返回所有上述勾选的人的相关信息
+        """
+        session = self.get_session()
+        # 首先通过 login_name 查找对应的 user_id
+        user_id = session.query(UserLoginName.uid).where(UserLoginName.login_name == name).scalar()
+        if user_id is None:
+            return None
+        # 创建粉丝和关注者的别名
+        follower_rel = aliased(UserRelationship)
+        following_rel = aliased(UserRelationship)
+        follower_login = aliased(UserLoginName)
+        following_login = aliased(UserLoginName)
+
+        following_list = []
+        follower_list = []
+        collaborator_list = []
+        if is_following:
+            # 查询正在关注的 uid 和 login_name
+            following_query = (session.
+                               query(following_rel.uid, following_login.login_name)
+                               .join(following_login, following_rel.uid == following_login.uid)
+                               .where(following_rel.related_uid == user_id and following_rel.is_follower == 1)
+                               .all())
+            following_list = [following.uid for following in following_query]
+
+        if is_follower:
+            # 查询粉丝的 uid 和 login_name
+            follower_query = (session.query(follower_rel.related_uid, follower_login.login_name)
+                              .join(follower_login, follower_rel.related_uid == follower_login.uid)
+                              .where(follower_rel.uid == user_id and follower_rel.is_follower == 1)
+                              .all())
+            follower_list = [follower.related_uid for follower in follower_query]
+        # 查询关注者的uid 和 login_name
+        # 创建别名
+        pm1 = aliased(ReposParticipantContribution)
+        pm2 = aliased(ReposParticipantContribution)
+
+        if is_collaborator:
+            # 进行查询
+            collaborators = (session.query(pm2.uid, UserLoginName.login_name)
+                             .join(pm1, pm1.rid == pm2.rid)
+                             .join(UserLoginName, UserLoginName.uid == pm2.uid)
+                             .filter(pm1.uid == user_id, pm2.uid != user_id)
+                             .distinct().all())
+            collaborator_list = [collaborator.uid for collaborator in collaborators]
+
+        # 转成id列表
+        all_list = set(follower_list + following_list + collaborator_list)
+        all_list.add(user_id)
+        related_users_info = self.get_users_info(all_list)
+        return sorted(related_users_info, key=lambda x: x["total_talent"], reverse=True)
+
+    def get_total_talent(self, nation=None):
+        if nation:
+            query = self.__get_users_info_query()
+            # 模糊查询 国家 包含 param: nation 的记录
+            all_users_info_nation = query.filter(User.nation.like(f'%{nation}%'))
+            all_users_info = self.__parse_topic_and_talent(all_users_info_nation)
+        else:
+            query = self.__get_users_info_query()
+            all_users = query.all()
+            all_users_info = self.__parse_topic_and_talent(all_users)
+        if len(all_users_info) == 0:
+            return None
+        return all_users_info
+
     def insert_topic(self, new_values):
         """
         :param new_values : 传入的列表,每个元素是字典 [{"rid": rid, "topic": "java"}, ]
@@ -445,8 +670,8 @@ class DatabaseManager:
         all_topic_list = session.query(Topic.name).all()
         all_topic_str_list = [str(topic_name).strip("(),'") for topic_name in all_topic_list]
         all_topic_str = ','.join(all_topic_str_list)
-        topic_des = (session.query(ReposInfo.id, ReposInfo.descript).join(ReposField,ReposField.rid==ReposInfo.id).
-                     filter(ReposField.topics=="").all())
+        topic_des = (session.query(ReposInfo.id, ReposInfo.descript).join(ReposField, ReposField.rid == ReposInfo.id).
+                     filter(ReposField.topics == "").all())
         topic_des_dict = [{"id": uid, "descript": descript} for uid, descript in topic_des]
         return feat_topic_str, topic_des_dict, all_topic_str
 
@@ -454,7 +679,6 @@ class DatabaseManager:
 # 使用示例
 if __name__ == "__main__":
     db_manager = DatabaseManager()
-
     # 插入数据示例
     # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
@@ -642,23 +866,37 @@ if __name__ == "__main__":
     # top = 'ja'
     # topic = db_manager.get_topic_list(top, is_feature=1, is_curated=1)
     # print(topic)
+
+    # following, follower, coll = db_manager.get_related_rank("zhangsan")
+    # print(following)
+    # print(follower)
+    # print(coll)
+    # user_info = db_manager.get_user_info("liwu")
+    # print(user_info)
+    # related_users_info = db_manager.get_related_rank("zhangsanfs")
+    # for user in related_users_info:
+    #     print(user)
+    # print('----------------------------------------')
+    # all_users_info = db_manager.get_total_talent("中guo ")
+    # print(all_users_info)
+    #
+    # topic = db_manager.get_topic_list("java")
+    # print(topic)
+    # special_topic_rank = db_manager.get_specific_topic_rank("Python编程")
+    # print(special_topic_rank)
+
+
+    # Step 10: Execute the query and return the results
+
     # print(len(db_manager.get_qwen_topic_relevant_info()[1]))
-    ids = [
-        2429952, 4386126, 4520094, 6068358, 6559955, 8247227, 8829739, 9429712, 12486287, 13713302,
-        14363535, 14598571, 16886228, 18005291, 18498523, 19132789, 19901248, 21512530, 21674455,
-        21756415, 22374063, 23652091, 41654081, 47445046, 60710553, 65136177, 68442509, 69094410,
-        93629835, 99433554, 106912107, 113763143, 144719064, 147081519, 163591278, 221161068,
-        326174741, 328349603, 343106069, 349571915, 384219990, 391506048, 392921982, 445154758,
-        556527819, 588408304, 653609709, 704913027, 733140974, 762314119, 767985271
-    ]
-    session = db_manager.get_session()
-    lis = [{"rid":id, "topics":""} for id in ids]
-    session = db_manager.get_session()
-
-    session.bulk_insert_mappings(ReposField, lis)
-
-    # 提交事务
-    session.commit()
-
-    # 关闭会话
-    session.close()
+    # session = db_manager.get_session()
+    # lis = [{"rid":id, "topics":""} for id in ids]
+    # session = db_manager.get_session()
+    #
+    # session.bulk_insert_mappings(ReposField, lis)
+    #
+    # # 提交事务
+    # session.commit()
+    #
+    # # 关闭会话
+    # session.close()
