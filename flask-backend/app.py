@@ -6,7 +6,7 @@ from flask import Flask
 from flask import request
 from flask_redis import FlaskRedis
 
-# from utility.DatabaseManagerBackend import DatabaseManager, TableName
+from utility.DatabaseManagerBackend import DatabaseManager
 
 app = Flask(__name__)
 # 配置redis
@@ -18,79 +18,79 @@ user_image_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 
 
-def get_topic_list(topic="", is_feature=False,
-                   is_curated=False):  #模糊查询所有的topic，返回以"xx"开头的所有topic，按照仓库数量从大到小排序；同时支持is_feature,is_curated筛选
-    classify = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-                'V', 'W', 'X', 'Y', 'Z', '2', "3", "0", "."]
-    name_li = [random.choice(classify) + random.choice(classify) + random.choice(classify) for _ in range(2000)]
-    ret = []
-    for name in name_li:
-        topic = {
-            "topic_name": name,
-            "topic_url": f"https://github.com/topic/{name}",
-            "topic_img_url": "https://raw.githubusercontent.com/github/explore/54ab64c16bdf4604d4fbb36326be6909d8088dcb/topics/abap2ui5/abap2ui5.png",
-            "descrip": "abap2UI5 is a framework for developing UI5 apps purely in ABAP — no need for JavaScript, OData, or RAP! It is designed for both cloud and on-premise environments, offering a lightweight and easy-to-install solution that works across all ABAP systems, from NetWeaver 7.02 to ABAP Cloud.",
-            "repos_num": 26,
-            "is_feature": 0
-        }
-        ret.append(topic)
-    return ret
-
-def get_specific_topic_rank(topic, nation):  #对有这个topic领域的用户，按照这个topic分，排序，
-
-    return get_total_talent(nation)
-
-
-def get_related_rank(name, is_follower=True, is_following=True, is_collaborator=True):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
-    return get_total_talent(name)
-
-
-def get_user_info(login_name):  #返回一个用户的详细信息
-
-    return {
-        "id": random.randint(1, 237892349823),
-        "login_name": "".join(
-            random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-        "name": "".join(
-            random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-        "email": "xxxxx@xx.com",
-        "bio": "I am a dog xxxx.",
-        "company": "Google Inc",
-        "organize": "dasdadea",
-        "nation": "China",
-        "repos_num": 7,
-        "stars_num": 41341,
-        "followers_num": 394,
-        "fork_num": 32131,
-        "have_topic": ["Linux", "C", "C++"],
-        "have_topic_talent": [100, 110, 120],
-        "total_talent": 330,
-    }
-
-
-def get_total_talent(nation):  #对所有用户，按照"topic_talent"综合能力，排序。
-
-    return [
-        {
-            "id": random.randint(1, 23093209),
-            "login_name": "".join(
-                random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-            "name": "".join(
-                random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
-            "email": "xxxxx@xx.com",
-            "bio": "I am a dog xxxx.",
-            "company": "Google Inc",
-            "nation": "China",
-            "repos_num": random.randint(1, 34),
-            "stars_num": random.randint(2342, 23093209),
-            "followers_num": random.randint(432, 293209),
-            "fork_num": random.randint(234, 23093209),
-            "topic": "",
-            "topic_talent": random.randint(1, 23093209),
-        }
-
-        for _ in range(100)
-    ]
+# def get_topic_list(topic="", is_feature=False,
+#                    is_curated=False):  #模糊查询所有的topic，返回以"xx"开头的所有topic，按照仓库数量从大到小排序；同时支持is_feature,is_curated筛选
+#     classify = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+#                 'V', 'W', 'X', 'Y', 'Z', '2', "3", "0", "."]
+#     name_li = [random.choice(classify) + random.choice(classify) + random.choice(classify) for _ in range(2000)]
+#     ret = []
+#     for name in name_li:
+#         topic = {
+#             "topic_name": name,
+#             "topic_url": f"https://github.com/topic/{name}",
+#             "topic_img_url": "https://raw.githubusercontent.com/github/explore/54ab64c16bdf4604d4fbb36326be6909d8088dcb/topics/abap2ui5/abap2ui5.png",
+#             "descrip": "abap2UI5 is a framework for developing UI5 apps purely in ABAP — no need for JavaScript, OData, or RAP! It is designed for both cloud and on-premise environments, offering a lightweight and easy-to-install solution that works across all ABAP systems, from NetWeaver 7.02 to ABAP Cloud.",
+#             "repos_num": 26,
+#             "is_feature": 0
+#         }
+#         ret.append(topic)
+#     return ret
+#
+# def get_specific_topic_rank(topic, nation):  #对有这个topic领域的用户，按照这个topic分，排序，
+#
+#     return get_total_talent(nation)
+#
+#
+# def get_related_rank(name, is_follower=True, is_following=True, is_collaborator=True):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
+#     return get_total_talent(name)
+#
+#
+# def get_user_info(login_name):  #返回一个用户的详细信息
+#
+#     return {
+#         "id": random.randint(1, 237892349823),
+#         "login_name": "".join(
+#             random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
+#         "name": "".join(
+#             random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
+#         "email": "xxxxx@xx.com",
+#         "bio": "I am a dog xxxx.",
+#         "company": "Google Inc",
+#         "organize": "dasdadea",
+#         "nation": "China",
+#         "repos_num": 7,
+#         "stars_num": 41341,
+#         "followers_num": 394,
+#         "fork_num": 32131,
+#         "have_topic": ["Linux", "C", "C++"],
+#         "have_topic_talent": [100, 110, 120],
+#         "total_talent": 330,
+#     }
+#
+#
+# def get_total_talent(nation):  #对所有用户，按照"topic_talent"综合能力，排序。
+#
+#     return [
+#         {
+#             "id": random.randint(1, 23093209),
+#             "login_name": "".join(
+#                 random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
+#             "name": "".join(
+#                 random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(random.randint(4, 8))),
+#             "email": "xxxxx@xx.com",
+#             "bio": "I am a dog xxxx.",
+#             "company": "Google Inc",
+#             "nation": "China",
+#             "repos_num": random.randint(1, 34),
+#             "stars_num": random.randint(2342, 23093209),
+#             "followers_num": random.randint(432, 293209),
+#             "fork_num": random.randint(234, 23093209),
+#             "topic": "",
+#             "topic_talent": random.randint(1, 23093209),
+#         }
+#
+#         for _ in range(100)
+#     ]
 
 
 
@@ -129,9 +129,10 @@ def get_topics_page():
     all_topic_classify = {
         key: [] for key in classify
     }
-    topic_li = get_topic_list('', False,False)  #不要精选，全部topic给我
+    topic_li = database_manager.get_topic_list('')  #全部topic给我
+    print(len(topic_li))
     for topic in topic_li:
-        first_letter = topic["topic_name"][0].upper()
+        first_letter = topic["name"][0].upper()
         if first_letter in classify:
             all_topic_classify[first_letter].append(topic)
         else:
@@ -145,7 +146,7 @@ def get_topics_page():
 
     # Redis 代码
     # 把自定义的key，和对应的值，存入redis里面
-    redis_client.set(cache_key, json.dumps(ret), ex=600)  # 设置过期时间为10分钟
+    redis_client.set(cache_key, json.dumps(ret), ex=5)  # 设置过期时间为10分钟
 
     return json.dumps(ret)
 
@@ -161,11 +162,11 @@ def get_topic():
     else:
         topic = ""
     if request.args.get("is_feature"):
-        is_feature = bool(request.args["is_feature"])
+        is_feature = (True if request.args.get("is_feature").lower() == 'true' else False)
     else:
         is_feature = False
 
-    topic_li = get_topic_list(topic, is_feature,False)
+    topic_li = filter_first_topic(database_manager.get_topic_list(topic, is_feature, False), topic)
     ret = {"total_count": len(topic_li), "topic_list": topic_li}
     return json.dumps(ret)
 
@@ -180,7 +181,7 @@ def topic_rank():
         topic = request.args.get("topic")  # topic名字，name
     else:
         topic = ''
-    nation = request.args.get("nation", "%%")  # 筛选项：国籍
+    nation = request.args.get("nation", "")  # 筛选项：国籍
 
     # Redis 代码[KEY ,VALUE]
     # 定义把哪些数据放入redis，定义一个key
@@ -195,10 +196,12 @@ def topic_rank():
         # 如果拿不到，就执行下面的访问mysql的语句
 
     if topic:  # 如果指定了topic，就返回这个topic的榜单talent排序的，开发者信息榜单
-        data = get_specific_topic_rank(topic,
+        data = database_manager.get_specific_topic_rank(topic,
                                        nation)  # login_name id email bio company nation repos_num stars_num followers_num followers_num fork_num topic have_topic_talent total_talent
     else:  # 如果没指定topic，就返回按开发者综合talent的榜单。
-        data = get_total_talent(nation)
+        data = database_manager.get_total_talent(nation)
+    if len(data)>100:
+        data=data[:100]
     ret = {}
     users_info = []
     ret["total_count"] = len(data)
@@ -211,7 +214,7 @@ def topic_rank():
     # Redis 代码
     # 把自定义的key，和对应的值，存入redis里面
     if topic in redis_rank_name:
-        redis_client.set(cache_key, json.dumps(ret), ex=600)  # 设置过期时间为10分钟
+        redis_client.set(cache_key, json.dumps(ret), ex=5)  # 设置过期时间为10分钟
 
     return json.dumps(ret)
 
@@ -223,7 +226,7 @@ def random_topic():
   """
     num = int(request.args.get("num", 5))  # 随机返回几个topic，得有介绍和url的。【从被人修改过的topic中随机选】
 
-    curated_topics = get_topic_list("", is_curated=True)
+    curated_topics = database_manager.get_topic_list("", is_curated=True)
     topic_li = random.choices(curated_topics, k=num)
     ret = {}
     ret["total_count"] = len(topic_li)
@@ -233,9 +236,11 @@ def random_topic():
     return json.dumps(ret)
 
 
-def filter_topic(topic_li: list, letter):
-    return [topic for topic in topic_li if topic["topic_name"].startswith(letter)]
+def filter_first_topic(topic_li: list, letter):
+    return [topic for topic in topic_li if topic["name"].startswith(letter.upper()) or topic["name"].startswith(letter.lower())]
 
+def filter_topic(topic_li: list, letter):
+    return [topic for topic in topic_li if topic["name"] == letter]
 
 @app.route("/relate_topic")
 def relate_topic():
@@ -253,11 +258,11 @@ def relate_topic():
     # TODO: 先找统计信息，找出最相关的num个。
     # 1、读取，统计表，【excel表,NxN】
     # 读取num个最相关的topic，组成list。例如用户查询C，返回【C++，C#，....】
-    specific_relate_list = ['d', 'B', 'C', "a"]
+    specific_relate_list = ['C++', 'C', 'Linux']
     # 调用数据库接口
     li = []
     for tp in specific_relate_list:
-        tmp = filter_topic(get_topic_list(tp, False,False), tp.upper())
+        tmp = filter_topic(database_manager.get_topic_list(tp, False,False), tp)
         if tmp:
             li.append(tmp[0])
     ret = {"total_count": len(li), "relate_topic_list": li}
@@ -293,7 +298,7 @@ def search_users():
 
     # 操作数据库，多表
     # 查user表，得到这个用户的详细信息
-    user = get_user_info(name)
+    user = database_manager.get_user_info(name)
 
     # TODO: 先调用数据库，如果没有这个人，就调用爬虫接口现场爬。
 
@@ -305,10 +310,10 @@ def search_users():
 
 
     # 处理这个用户的信息
-    user = generate_user_info(user)
+    user = generate_user_info(user[0])
 
     # 关系榜单
-    li = get_related_rank(name, True, True, True)
+    li = database_manager.get_related_rank(name, True, True, True)
     related_user_list = []
     for ur in li:
         # 处理【粉丝、合作者的信息】
@@ -324,6 +329,6 @@ def search_users():
 
 
 if __name__ == "__main__":
-    # database_manager = DatabaseManager()
+    database_manager = DatabaseManager()
     # database_manager.query_with_filters()
     app.run(host="0.0.0.0", port=80, debug=True, threaded=True)
