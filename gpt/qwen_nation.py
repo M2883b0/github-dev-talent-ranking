@@ -139,7 +139,14 @@ def task(uid, login_name, name=None, bio=None, location=None, email_address=None
         if output_list[0] in zg_list:
             output_list[0] = "中国"
 
-        if (output_list[1] >= 0.7) and (output_list[0] in Nation_list):  # 猜测概率
+        if output_list[1] >= 0.7:  # 猜测概率
+            for nation in Nation_list:
+                if output_list[1] in nation:
+                    insert = {
+                        "id": uid,
+                        "nation": output_list[0]
+                    }
+                    break
             insert = {
                 "id": uid,
                 "nation": output_list[0]
