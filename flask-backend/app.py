@@ -217,9 +217,19 @@ def search_users():
             "msg": "please input name"
         }
     # TODO: 关系圈：3个勾选项，例如：只查看粉丝的榜单，不看其他关系的。
-    # is_follower = request.args.get("is_follower")
-    # is_following = request.args.get("is_following")
-    # is_collaborator = request.args.get("is_collaborator")
+    is_follower = request.args.get("is_follower", True)
+    is_following = request.args.get("is_following", True)
+    is_collaborator = request.args.get("is_collaborator", True)
+
+    # # 将字符串转换为布尔值
+    # if is_follower is None:
+    #     return False
+    # elif is_follower.lower() == 'true':
+    #     is_follower = True
+    # elif is_follower.lower() == 'false':
+    #     is_follower = False
+    # else:
+
 
     # 操作数据库，多表
     # 查user表，得到这个用户的详细信息
@@ -238,7 +248,7 @@ def search_users():
     user = generate_user_info(user[0])
 
     # 关系榜单
-    li = database_manager.get_related_rank(name, True, True, True)
+    li = database_manager.get_related_rank(name, is_follower, is_following, is_collaborator)
     related_user_list = []
     for ur in li:
         # 处理【粉丝、合作者的信息】
