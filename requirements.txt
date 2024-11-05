@@ -9,3 +9,4 @@ mysql~=0.0.3
 Flask
 flask_redis
 redis
+pandas
