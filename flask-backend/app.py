@@ -13,6 +13,8 @@ app = Flask(__name__)
 app.config['REDIS_URL'] = "redis://localhost:6379/0"
 # 初始化 Redis 客户端
 redis_client = FlaskRedis(app)
+# redis中数据的保留时间(秒)
+redis_time = 60   # 1分钟
 
 user_image_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
@@ -64,11 +66,11 @@ def get_topics_page():
         key: value[:num] for key, value in all_topic_classify.items()
     }
     ret = all_topic_classify
-    ret["len"] = len(all_topic_classify)  #只要前9个
+    ret["len"] = len(all_topic_classify)  #只要前num个
 
     # Redis 代码
     # 把自定义的key，和对应的值，存入redis里面
-    redis_client.set(cache_key, json.dumps(ret), ex=60)  # 设置过期时间为1分钟
+    redis_client.set(cache_key, json.dumps(ret), ex=redis_time)  # 设置过期时间为1分钟
 
     return json.dumps(ret)
 
@@ -104,12 +106,14 @@ def topic_rank():
     else:
         topic = ''
     nation = request.args.get("nation", "")  # 筛选项：国籍
+    if nation == "\"\"" or nation == "''":
+        nation = ""
 
     # Redis 代码[KEY ,VALUE]
     # 定义把哪些数据放入redis，定义一个key
-    redis_rank_name = ['', 'C', 'Python', 'Linux']  # 前端首页放固定的几个热门topic榜单。【""表示综合榜单】
-    if topic in redis_rank_name:
-        cache_key = f"topics_rank:topic={topic}:nation={nation}"
+    redis_rank_name = ['', 'C', 'Python', 'Linux']  # 前端首页放固定的几个热门topic榜单。【''表示综合榜单】
+    cache_key = f"topics_rank:topic={topic}:nation={nation}"
+    if topic in redis_rank_name and nation == "":
         # 尝试从 Redis 缓存中获取数据
         cached_data = redis_client.get(cache_key)
         # 如果拿得到数据，就直接return了
@@ -118,8 +122,7 @@ def topic_rank():
         # 如果拿不到，就执行下面的访问mysql的语句
 
     if topic:  # 如果指定了topic，就返回这个topic的榜单talent排序的，开发者信息榜单
-        data = database_manager.get_specific_topic_rank(topic,
-                                       nation)  # login_name id email bio company nation repos_num stars_num followers_num followers_num fork_num topic have_topic_talent total_talent
+        data = database_manager.get_specific_topic_rank(topic, nation)
     else:  # 如果没指定topic，就返回按开发者综合talent的榜单。
         data = database_manager.get_total_talent(nation)
     if len(data) > 100:     # 只返回top100榜单
@@ -135,8 +138,8 @@ def topic_rank():
 
     # Redis 代码
     # 把自定义的key，和对应的值，存入redis里面
-    if topic in redis_rank_name:
-        redis_client.set(cache_key, json.dumps(ret), ex=60)  # 设置过期时间为1分钟
+    if topic in redis_rank_name and nation == "":
+        redis_client.set(cache_key, json.dumps(ret), ex=redis_time)  # 设置过期时间为1分钟
 
     return json.dumps(ret)
 
@@ -180,7 +183,7 @@ def relate_topic():
     # TODO: 先找统计信息，找出最相关的num个。
     # 1、读取，统计表，【excel表,NxN】
     # 读取num个最相关的topic，组成list。例如用户查询C，返回【C++，C#，....】
-    specific_relate_list = ['C++', 'C', 'Linux','3D','C#','Code']
+    specific_relate_list = ['C++', 'C', 'Linux', '3D', 'C#', 'Code']
     # 调用数据库接口
     li = []
     for tp in specific_relate_list:
