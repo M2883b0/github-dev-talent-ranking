@@ -68,7 +68,7 @@ def get_topics_page():
 
     # Redis 代码
     # 把自定义的key，和对应的值，存入redis里面
-    redis_client.set(cache_key, json.dumps(ret), ex=5)  # 设置过期时间为10分钟
+    redis_client.set(cache_key, json.dumps(ret), ex=60)  # 设置过期时间为1分钟
 
     return json.dumps(ret)
 
@@ -122,8 +122,8 @@ def topic_rank():
                                        nation)  # login_name id email bio company nation repos_num stars_num followers_num followers_num fork_num topic have_topic_talent total_talent
     else:  # 如果没指定topic，就返回按开发者综合talent的榜单。
         data = database_manager.get_total_talent(nation)
-    if len(data)>100:
-        data=data[:100]
+    if len(data) > 100:     # 只返回top100榜单
+        data = data[:100]
     ret = {}
     users_info = []
     ret["total_count"] = len(data)
@@ -136,7 +136,7 @@ def topic_rank():
     # Redis 代码
     # 把自定义的key，和对应的值，存入redis里面
     if topic in redis_rank_name:
-        redis_client.set(cache_key, json.dumps(ret), ex=5)  # 设置过期时间为10分钟
+        redis_client.set(cache_key, json.dumps(ret), ex=60)  # 设置过期时间为1分钟
 
     return json.dumps(ret)
 
@@ -180,7 +180,7 @@ def relate_topic():
     # TODO: 先找统计信息，找出最相关的num个。
     # 1、读取，统计表，【excel表,NxN】
     # 读取num个最相关的topic，组成list。例如用户查询C，返回【C++，C#，....】
-    specific_relate_list = ['C++', 'C', 'Linux']
+    specific_relate_list = ['C++', 'C', 'Linux','3D','C#','Code']
     # 调用数据库接口
     li = []
     for tp in specific_relate_list:
