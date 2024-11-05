@@ -23,7 +23,7 @@ user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 @app.route("/")
 def hello():  # 主页
     # return render_template("index.html", name='123')
-    return "server is ready"
+    return "cnm"
 
 
 @app.route("/get_topics_page")
@@ -265,5 +265,4 @@ def search_users():
 
 if __name__ == "__main__":
     database_manager = DatabaseManager()
-    # database_manager.query_with_filters()
     app.run(host="0.0.0.0", port=80, debug=True, threaded=True)
