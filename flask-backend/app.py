@@ -1,5 +1,7 @@
 import json
+import pandas as pd
 import random
+import pickle
 import string
 
 from flask import Flask
@@ -165,7 +167,40 @@ def filter_first_topic(topic_li: list, letter):
     return [topic for topic in topic_li if topic["name"].startswith(letter.upper()) or topic["name"].startswith(letter.lower())]
 
 def filter_topic(topic_li: list, letter):
-    return [topic for topic in topic_li if topic["name"] == letter]
+    return [topic for topic in topic_li if topic["name"].lower() == letter.lower()]
+
+def load_excel(file_path):
+    df = pd.read_excel(file_path, index_col=0)
+    return df
+
+# 查找与指定属性最相关的属性
+def find_most_related_attributes(df, target_attribute, num=5):
+    if target_attribute not in df.index:
+        return []
+
+    target_row = df.loc[target_attribute]
+    related_attributes = []
+
+    for attr, prob in target_row.items():
+        if prob > 0 and attr != target_attribute:
+            related_attributes.append((attr, prob))
+
+    # 按概率从大到小排序
+    related_attributes.sort(key=lambda x: x[1], reverse=True)
+
+    # 返回前num个属性
+    if len(related_attributes) >= num:
+        return related_attributes[:num]
+    else:
+        # 如果不足num个，随机找其他的属性凑够num个
+        remaining_attributes = [attr for attr in df.index if
+                                attr != target_attribute and attr not in [a[0] for a in related_attributes]]
+        random.shuffle(remaining_attributes)
+        additional_attributes = remaining_attributes[:num - len(related_attributes)]
+        for attr in additional_attributes:
+            related_attributes.append((attr, 0.0))
+
+        return related_attributes
 
 @app.route("/relate_topic")
 def relate_topic():
@@ -180,16 +215,41 @@ def relate_topic():
         }
     num = int(request.args.get("num", 6))  # 返回推荐的前几个，例如返回6个
 
-    # TODO: 先找统计信息，找出最相关的num个。
-    # 1、读取，统计表，【excel表,NxN】
-    # 读取num个最相关的topic，组成list。例如用户查询C，返回【C++，C#，....】
-    specific_relate_list = ['C++', 'C', 'Linux', '3D', 'C#', 'Code']
+    file_name = 'correlation_matrix.xlsx'
+
+    # Redis,定义一个key
+    cache_key = "correlation_matrix.xlsx"
+    # 尝试从 Redis 缓存中拿数据
+    cached_data = redis_client.get(cache_key)
+    if cached_data:
+        df = pickle.loads(cached_data)
+    else:  # 现场加载数据
+        df = load_excel(file_name)
+        # 使用 pickle 序列化 DataFrame
+        pickled_df = pickle.dumps(df)
+        # 再写入 redis
+        redis_client.set(cache_key, pickled_df, ex=60*100)  # 设置100分钟的过期时间
+
+    if topic == 'C  ':
+        topic = 'C++'
+    related_attributes = find_most_related_attributes(df, topic, num*5)
+    if related_attributes and len(related_attributes)!=0:
+        specific_relate_list = [attr for attr, prob in related_attributes]
+    else:
+        return {
+            "code": 1,
+            "msg": "NxN矩阵，没有这个目标topic"
+        }
     # 调用数据库接口
     li = []
     for tp in specific_relate_list:
-        tmp = filter_topic(database_manager.get_topic_list(tp, False,False), tp)
-        if tmp:
-            li.append(tmp[0])
+        relate_data_list = database_manager.get_topic_list(tp, False,False)
+        if relate_data_list and len(relate_data_list)!=0:
+            tmp = filter_topic(relate_data_list, tp)
+            if tmp:
+                li.append(tmp[0])
+    if len(li)>num:
+        li=li[:num]
     ret = {"total_count": len(li), "relate_topic_list": li}
     # 操作数据库，单表
     return json.dumps(ret)

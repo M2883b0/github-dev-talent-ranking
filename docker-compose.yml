@@ -1,21 +1,41 @@
 
-services:
-  database:
-    image: mysql:latest
-    build:
+version: '3'
 
+services:
+  database_niuniu:
+    image: mysql:latest
     ports:
       - "3306:3306"
-
     environment:
-      - MYSQL_ROOT_PASSWORD=www.gzhu.edu.cn
+      - MYSQL_ROOT_PASSWORD:www.gzhu.edu.cn
+      - MYSQL_DATABASE:data
+      - MYSQL_USER:root
+      - MYSQL_PASSWORD:www.gzhu.edu.cn
     volumes:
-      - ./
+      - ./data:/var/lib/mysql  # 持久化数据到宿主机
 
-  web_and_sipder:
-    build:
-      dockerfile: ./
+  redis:
+    image: redis:latest  # 使用最新版本的 Redis
     ports:
-      - "5000:80"
+      - "6379:6379"  # 映射 Redis 默认端口
+    volumes:
+      - redis_data:/data  # 数据持久化
+
+  web_and_spider:
+    build: .  # 使用当前目录的 Dockerfile
+    ports:
+      - "10072:80"
     depends_on:
-      - database
+      - database_niuniu
+      - redis  # 确保 web_and_spider 在数据库和 Redis 之后启动
+    environment:
+      - REDIS_HOST=redis
+      - MYSQL_HOST=database_niuniu
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=www.gzhu.edu.cn
+      - MYSQL_DATABASE=data
+    volumes:
+      - ./falsk-backend:/app
+
+volumes:
+  redis_data:  # 定义一个持久化存储卷

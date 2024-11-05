@@ -44,9 +44,8 @@ def main(file_path, target_attribute, num=5):
     related_attributes = find_most_related_attributes(df, target_attribute, num)
 
     if related_attributes:
-        print(f"与属性 '{target_attribute}' 最相关的属性及概率:")
-        for attr, prob in related_attributes:
-            print(f"{attr}: {prob:.2f}")
+        related_topic_list = [attr for attr, prob in related_attributes]
+        print(related_topic_list)
     else:
         print(f"没有找到与属性 '{target_attribute}' 相关的其他属性。")
 
