@@ -134,6 +134,11 @@ def task(uid, login_name, name=None, bio=None, location=None, email_address=None
     print(output)
     try:
         output_list = ast.literal_eval(output)
+
+        zg_list = ["台湾","中国台湾","香港","中国香港","澳门","中国澳门"]
+        if output_list[0] in zg_list:
+            output_list[0] = "中国"
+
         if (output_list[1] >= 0.7) and (output_list[0] in Nation_list):  # 猜测概率
             insert = {
                 "id": uid,
