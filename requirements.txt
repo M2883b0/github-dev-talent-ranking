@@ -2,11 +2,15 @@ Scrapy~=2.11.2
 
 requests~=2.32.3
 mysql-connector-python~=9.1.0
-redis~=5.0.4
+redis~=5.2.0
 twisted~=24.7.0
 asyncio~=3.4.3
 mysql~=0.0.3
 Flask
 flask_redis
 redis
+
+SQLAlchemy~=2.0.36
+PyMySQL~=1.1.1
+pandas~=2.2.3
 pandas

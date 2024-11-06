@@ -4,13 +4,12 @@ from enum import Enum
 from sqlalchemy import join, select, update, Insert, func, cast, Integer
 from sqlalchemy import create_engine, asc, desc
 from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker, Session
-
+import time
 from utility.InitDatabase2 import UserProfileView
 from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
-import utility.config as config
-from utility.config import INIT_DATABASE_INFO as INIT_DATABASE_INFO
+from utility.config import INIT_DATABASE_INFO
 
 from typing import Optional, List, Dict, Any
 from sqlalchemy import and_, or_
@@ -145,7 +144,7 @@ class DatabaseManager:
         # 按照repos降序排序
         query = query.order_by((desc("repos_num")))
 
-        # 模糊查询 Topic.name 包含 "data" 的记录
+        # 模糊查询 Topic.name 包含 "query_topic" 的记录
         query = query.filter(Topic.name.like(f'%{query_topic}%'))
         # if query.all() is None:
         #     return None
@@ -179,16 +178,6 @@ class DatabaseManager:
             return None
         return res
 
-    def get_specific_topic_rank(self, topic, nation=None):
-        session = self.get_session()
-        specific_topic_rank = []
-        if nation is None:
-            query = self.__get_users_topic_info_query(topic)
-            users_info = query.all()
-            print(users_info)
-            specific_topic_rank = self.__parse_special_topic_rank(users_info)
-        return specific_topic_rank
-
     def get_user_info(self, login_name):
         """
         param login_name :查询的登录名， 字符串
@@ -199,10 +188,10 @@ class DatabaseManager:
                    .where(UserLoginName.login_name == login_name).scalar())
         if user_id is None:
             return None
-        query = self.__get_users_info_query()
+        # 指定查询单人
+        query = self.__get_users_info_query(single=True)
         result = query.filter(User.id == user_id).first()
-
-        # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表
+        # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表, 将topic详细信息添加在结果中
         parsed_result = self.__parse_topic_and_talent([result])
         return parsed_result
 
@@ -212,124 +201,30 @@ class DatabaseManager:
         param id_list: 查询用户id组成的列表
         return users_info_list(list of dict): 每个元素都是一个包含用户相关信息的字典
         """
-        session = self.get_session()
-        query = self.__get_users_info_query()
+        # 查询多人
+        query = self.__get_users_info_query(single=False)
         result = query.filter(User.id.in_(id_list)).all()
         users_info_list = self.__parse_topic_and_talent(result)
         return users_info_list
 
-    def __get_users_info_query(self):
+    def get_specific_topic_rank(self, topic, nation=None):
+        """
+        得到指定topic下的所有用户排名
+        """
         session = self.get_session()
-        query = (session.query(
-            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
-            Organization.name.label("organization_name"), User.nation, User.repos_count,
-            cast(func.sum(ReposInfo.forks_count), Integer).label("fork_num"),
-            cast(func.sum(ReposInfo.stargazers_count), Integer).label("stars_num"),
-            User.followers, func.group_concat(Talent.topic.distinct(), ',').label("have_topic"),
-            func.group_concat(Talent.ability.distinct(), ',').label("have_topic_talent"), User.total_ability
-        )
-        .join(UserLoginName, UserLoginName.uid == User.id)
-        .outerjoin(UserOrganization, UserOrganization.uid == User.id)
-        .outerjoin(Organization, Organization.organization_id == UserOrganization.organization_id)
-        .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
-        .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
-        .outerjoin(Talent, Talent.uid == User.id)
-        .group_by(
-            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
-            Organization.name, User.nation, User.repos_count, User.followers, User.total_ability
-        )
-        )
-        return query
+        specific_topic_rank = []
+        if nation is None:
+            query = self.__get_users_topic_info_query(topic)
+            users_info = query.all()
+            specific_topic_rank = self.__parse_special_topic_rank(users_info)
+        elif nation:
+            query = self.__get_users_topic_info_query(topic)
+            # 指定国家过滤
+            query = query.filter(User.nation.like(f'%{nation}%'))
+            users_info = query.all()
+            specific_topic_rank = self.__parse_special_topic_rank(users_info)
 
-    def __get_users_topic_info_query(self, topic):
-        session = self.get_session()
-        query = (session.query(
-            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
-            Organization.name.label("organization_name"), User.nation,
-            func.count(ReposField.rid).label("repos_num"),
-            cast(func.sum(ReposInfo.forks_count), Integer).label("fork_num"),
-            cast(func.sum(ReposInfo.stargazers_count), Integer).label("stars_num"),
-            User.followers, Talent.topic, Talent.ability
-        )
-        .outerjoin(UserLoginName, UserLoginName.uid == User.id)
-        .outerjoin(UserOrganization, UserOrganization.uid == User.id)
-        .outerjoin(Organization, Organization.organization_id == UserOrganization.organization_id)
-        .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
-        .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
-        .outerjoin(Talent, Talent.uid == User.id)
-        .outerjoin(ReposField, ReposField.rid == ReposInfo.id)
-        .filter(ReposField.topics == topic)
-        .filter(Talent.topic == topic)
-        .group_by(
-            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
-            Organization.name, User.nation, User.followers, Talent.topic, Talent.ability
-        )
-        )
-        return query
-
-    def __parse_topic_and_talent(self, users_info):
-        users_info_list = []
-        for user in users_info:
-            # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表
-            topic_str = user.have_topic
-            topic_list = []
-            # 如果topic_str字符串不为空
-            if topic_str is not None and topic_str.strip() is not None:
-                topic_list = [topic for topic in topic_str.split(',') if topic]
-            else:
-                pass
-
-            topic_talent_str = user.have_topic_talent
-            topic_talent_list = []
-            # 如果topic_talent_str字符串不为空:
-            if topic_talent_str is not None and topic_talent_str.strip() is not None:
-                topic_talent_list = [int(talent) for talent in topic_talent_str.split(',') if talent]
-            else:
-                pass
-
-            parsed_user_info = {
-                "id": user.id,
-                "login_name": user.login_name,
-                "name": user.name,
-                "email_address": user.email_address,
-                "bio": user.bio,
-                "company": user.company,
-                "organization_name": user.organization_name,
-                "nation": user.nation,
-                "repos_num": user.repos_count,
-                "stars_num": user.stars_num,
-                "fork_num": user.fork_num,
-                "followers_num": user.followers,
-                "have_topic": topic_list,
-                "have_topic_talent": topic_talent_list,
-                # "total_talent": user.total_ability
-                "total_talent": random.randint(50, 100)
-            }
-            users_info_list.append(parsed_user_info)
-        return sorted(users_info_list, key=lambda x: x['total_talent'], reverse=True)
-
-    def __parse_special_topic_rank(self, special_topic_rank):
-        users_info_list = []
-        for user in special_topic_rank:
-            parsed_user_info = {
-                "id": user.id,
-                "login_name": user.login_name,
-                "name": user.name,
-                "email_address": user.email_address,
-                "bio": user.bio,
-                "company": user.company,
-                "organization_name": user.organization_name,
-                "nation": user.nation,
-                "repos_num": user.repos_num,
-                "stars_num": user.stars_num,
-                "fork_num": user.fork_num,
-                "followers_num": user.followers,
-                'topic': user.topic,
-                # "topic_talent": user.ability
-                'topic_talent': random.randint(50, 100)
-            }
-            users_info_list.append(parsed_user_info)
-        return sorted(users_info_list, key=lambda x: x['topic_talent'], reverse=True)
+        return specific_topic_rank
 
     def get_related_rank(self, name, is_follower=True, is_following=True,
                          is_collaborator=True):  # 返回这个用户的所有【粉丝、合作者....】个人信息，按照total_talent综合分分排序。
@@ -395,15 +290,216 @@ class DatabaseManager:
         if nation:
             query = self.__get_users_info_query()
             # 模糊查询 国家 包含 param: nation 的记录
-            all_users_info_nation = query.filter(User.nation.like(f'%{nation}%'))
+            # query = query.order_by(desc(User.total_ability))
+            query = query.filter(User.nation.like(f'%{nation}%'))
+            all_users_info_nation = query.limit(100).all()
             all_users_info = self.__parse_topic_and_talent(all_users_info_nation)
         else:
             query = self.__get_users_info_query()
-            all_users = query.all()
+            # query = query.order_by(desc(User.total_ability))
+            query = query.order_by(desc(User.followers))
+            all_users = query.limit(100).all()
             all_users_info = self.__parse_topic_and_talent(all_users)
         if len(all_users_info) == 0:
             return None
         return all_users_info
+
+    def __get_users_info_query(self, single=False):
+
+        session = self.get_session()
+        query = (session.query(
+            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+            Organization.name.label("organization_name"), User.nation, User.repos_count,
+            cast(func.sum(ReposInfo.forks_count), Integer).label("fork_num"),
+            cast(func.sum(ReposInfo.stargazers_count), Integer).label("stars_num"),
+            User.followers, func.group_concat(Talent.topic.distinct(), ',').label("have_topic"),
+            func.group_concat(Talent.ability.distinct(), ',').label("have_topic_talent"), User.total_ability
+        ))
+        if single:
+            query = (query.outerjoin(UserLoginName, UserLoginName.uid == User.id)
+            .outerjoin(UserOrganization, UserOrganization.uid == User.id)
+            .outerjoin(Organization, Organization.organization_id == UserOrganization.organization_id)
+            .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
+            .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
+            .outerjoin(Talent, Talent.uid == User.id)
+            .group_by(
+                User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+                Organization.name, User.nation, User.repos_count, User.followers, User.total_ability
+            ))
+        else:
+            # 过滤掉小于500的user
+            query = query.filter(User.followers > 500)
+            query = (query.outerjoin(UserLoginName, UserLoginName.uid == User.id)
+            .outerjoin(UserOrganization, UserOrganization.uid == User.id)
+            .outerjoin(Organization, Organization.organization_id == UserOrganization.organization_id)
+            .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
+            .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
+            .outerjoin(Talent, Talent.uid == User.id)
+            .group_by(
+                User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+                Organization.name, User.nation, User.repos_count, User.followers, User.total_ability
+            ))
+        return query
+
+    def __get_one_people_topic_info(self, user_id, topic):
+        """
+        得到指定指定用户的指定topic信息
+        return
+        """
+        session = self.get_session()
+        query = (session.query(
+            User.id,
+            Topic.name,
+            Topic.descript,
+            Topic.avi,
+            Topic.is_featured,
+            Topic.is_curated,
+            TopicUrl.topic_url,
+            func.count(ReposField.rid).label("topic_repos_num"),
+            cast(func.sum(ReposInfo.forks_count), Integer).label("topic_forks_num"),
+            cast(func.sum(ReposInfo.stargazers_count), Integer).label("topic_stars_num"),
+            Talent.ability
+        )
+        .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
+        .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
+        .outerjoin(Talent, Talent.uid == User.id)
+        .outerjoin(Topic, Topic.name == Talent.topic)
+        .outerjoin(TopicUrl, TopicUrl.name == Talent.topic)
+        .outerjoin(ReposField, ReposField.rid == ReposInfo.id)
+        .filter(ReposField.topics == topic)
+        .filter(Talent.topic == topic)
+        .filter(User.id == user_id)
+        .group_by(
+            User.id,
+            Topic.name,
+            TopicUrl.topic_url,
+            Topic.avi,
+            Topic.descript,
+            Topic.is_featured,
+            Topic.is_curated,
+            Talent.ability
+
+        )
+        )
+
+        return query.all()
+
+    def __get_users_topic_info_query(self, topic):
+        session = self.get_session()
+        query = (session.query(
+            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+            Organization.name.label("organization_name"), User.nation,
+            func.count(ReposField.rid).label("repos_num"),
+            cast(func.sum(ReposInfo.forks_count), Integer).label("fork_num"),
+            cast(func.sum(ReposInfo.stargazers_count), Integer).label("stars_num"),
+            User.followers, Talent.topic, Talent.ability
+        )
+        .outerjoin(UserLoginName, UserLoginName.uid == User.id)
+        .outerjoin(UserOrganization, UserOrganization.uid == User.id)
+        .outerjoin(Organization, Organization.organization_id == UserOrganization.organization_id)
+        .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
+        .outerjoin(ReposInfo, ReposInfo.id == ReposParticipantContribution.rid)
+        .outerjoin(Talent, Talent.uid == User.id)
+        .outerjoin(ReposField, ReposField.rid == ReposInfo.id)
+        .filter(ReposField.topics == topic)
+        .filter(Talent.topic == topic)
+        .group_by(
+            User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
+            Organization.name, User.nation, User.followers, Talent.topic, Talent.ability
+        )
+        )
+        return query
+
+    def __parse_topic_and_talent(self, users_info):
+        users_info_list = []
+        for user in users_info:
+            # 将 have_topic解析为字符串列表，将have_topic_talent 解析为数字列表
+            topic_str = user.have_topic
+            topic_list = []
+            # 如果topic_str字符串不为空
+            if topic_str is not None and topic_str.strip() is not None:
+                topic_list = [topic for topic in topic_str.split(',') if topic]
+            else:
+                pass
+
+            topic_talent_str = user.have_topic_talent
+            topic_talent_list = []
+            # 如果topic_talent_str字符串不为空:
+            if topic_talent_str is not None and topic_talent_str.strip() is not None:
+                topic_talent_list = [int(talent) for talent in topic_talent_str.split(',') if talent]
+            else:
+                pass
+
+            # 取到某位用户的相关topic
+            topics_info = []
+            for topic in topic_list:
+                topic_info = self.__get_one_people_topic_info(user_id=user.id, topic=topic)
+                if topic_info:
+                    # 解析topics_info为字典
+                    topic_info_dict = self.__parse_topics_info(topic_info[0])
+                    topics_info.append(topic_info_dict)
+                else:
+                    topics_info.append({})
+            parsed_user_info = {
+                "id": user.id,
+                "login_name": user.login_name,
+                "name": user.name,
+                "email_address": user.email_address,
+                "bio": user.bio,
+                "company": user.company,
+                "organization_name": user.organization_name,
+                "nation": user.nation,
+                "repos_num": user.repos_count,
+                "stars_num": user.stars_num,
+                "fork_num": user.fork_num,
+                "followers_num": user.followers,
+                "have_topic": topic_list,
+                "have_topic_talent": topic_talent_list,
+                "topics_info_list": topics_info,
+                "total_talent": user.total_ability
+            }
+            users_info_list.append(parsed_user_info)
+        return users_info_list
+
+    def __parse_special_topic_rank(self, special_topic_rank):
+        users_info_list = []
+        for user in special_topic_rank:
+            parsed_user_info = {
+                "id": user.id,
+                "login_name": user.login_name,
+                "name": user.name,
+                "email_address": user.email_address,
+                "bio": user.bio,
+                "company": user.company,
+                "organization_name": user.organization_name,
+                "nation": user.nation,
+                "repos_num": user.repos_num,
+                "stars_num": user.stars_num,
+                "fork_num": user.fork_num,
+                "followers_num": user.followers,
+                'topic': user.topic,
+                # "topic_talent": user.ability
+                'topic_talent': random.randint(50, 100)
+            }
+            users_info_list.append(parsed_user_info)
+        return sorted(users_info_list, key=lambda x: x['topic_talent'], reverse=True)
+
+    def __parse_topics_info(self, topic_info):
+        """
+        把topics的相关信息转成字典
+        topics_info: topics的相关信息组成的列表
+        """
+        parse_topic_info = {
+            "topic_name": topic_info.name,
+            "topic_url": topic_info.topic_url,
+            "topic_avi": topic_info.avi,
+            "topic_descript": topic_info.descript,
+            "topic_repos_num": topic_info.topic_repos_num,
+            "topic_stars_num": topic_info.topic_stars_num,
+            "topic_forks_num": topic_info.topic_forks_num
+        }
+
+        return parse_topic_info
 
     def insert_topic(self, new_values):
         """
@@ -688,8 +784,7 @@ if __name__ == "__main__":
     # res = db_manager.get_topic_list("", is_feature=True, is_curated=True)
     # print(res[-100:-1])
     session = db_manager.get_session()
-    res = session.query(Topic.name).outerjoin(TopicUrl, TopicUrl.name == Topic.name).filter(TopicUrl.topic_url == None)
-    print(res.all())
+
     # 插入数据示例
     # db_manager.insert_data(User, {"id": 1, "name": "张三", "nation": "中国"})
     # db_manager.insert_data(User, {"id": 2, "name": "李四", "nation": "美国"})
@@ -896,8 +991,6 @@ if __name__ == "__main__":
     # special_topic_rank = db_manager.get_specific_topic_rank("Python编程")
     # print(special_topic_rank)
 
-    # Step 10: Execute the query and return the results
-
     # print(len(db_manager.get_qwen_topic_relevant_info()[1]))
     # session = db_manager.get_session()
     # lis = [{"rid":id, "topics":""} for id in ids]
@@ -910,3 +1003,40 @@ if __name__ == "__main__":
     #
     # # 关闭会话
     # session.close()
+    # start_time = time.time()
+    # res = db_manager.get_total_talent()
+    # end_time = time.time()
+    # time = end_time - start_time
+    # print("spend_time", time)
+    # print(res)
+
+    # res = db_manager.get_user_info("zhangsan")
+    # print(res)
+    res2 = db_manager.get_specific_topic_rank("vue")
+    for user in res2:
+        print(user)
+    # 更新每个用户的 total_ability 字段
+
+    # count = 0
+    # num=1
+    # try:
+    #     for user in session.query(User).all():
+    #         # 随机选择 70 或 100
+    #         total_ability_value = random.randint(40, 100)  # 例如根据用户 ID 偶数或奇数来选择
+    #         user.total_ability = total_ability_value
+    #         count += 1
+    #         if count%100==0:
+    #             session.commit()
+    #             print("提交了",num)
+    #             num+=1
+    #     # 提交更改
+    #
+    #     session.commit()
+    #     print("更新成功！")
+    #
+    # except Exception as e:
+    #     print(f"发生错误：{e}")
+    #     session.rollback()
+    #
+    # finally:
+    #     session.close()
