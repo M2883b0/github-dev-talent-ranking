@@ -1,5 +1,5 @@
 <template>
-  <TopicRankComp :rankList="store.topicRankList" >
+  <TopicRankComp :rankList="store.topicRankList" @cxk-select="onCxkSelect">
     <template #s1>
         Overall Score
     </template>
@@ -13,6 +13,9 @@ const store = useCounterStore();
 onMounted(() => {
   store.getTopicRank();
 });
+const onCxkSelect = (_,nation)=>{
+  store.getTopicRank(nation);
+}
 </script>
 <style scoped>
 

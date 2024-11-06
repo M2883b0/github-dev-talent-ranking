@@ -63,7 +63,6 @@ const routeName = computed(() => {
 watch(  
   () => store.searchData, // 要观察的数据源，这里是一个 getter 函数  
   (newData, oldData) => { // 当数据源变化时执行的回调函数  
-    console.log("newdata",newData)
     console.log(routeName.value)
       router.push({ name: routeName.value });  
   },  
@@ -71,14 +70,10 @@ watch(
 watch(  
   () => store2.searchData, // 要观察的数据源，这里是一个 getter 函数  
   (newData, oldData) => { // 当数据源变化时执行的回调函数  
-    console.log("newdata",newData)
     console.log(routeName.value)
       router.push({ name: routeName.value });  
   },  
 );  
-function isObjectEmpty(obj) {  
-    return Object.keys(obj).length === 0 ;  
-}  
 </script>
 <style scoped>
 ::v-deep .el-select__wrapper {

@@ -3,7 +3,7 @@
     <div class="领域">
       <span class="Similarintegrations">Similar integrations  &nbsp;  &nbsp;  &nbsp;</span
       >
-      <el-icon class="cxksxicon" @click="more"><CaretRight /></el-icon>
+     
     </div>
     <div class="topic-list">
       <TopicItem v-for="item in store.randomTopicList" :topicInfo="item" />
@@ -12,16 +12,12 @@
 </template>
 <script setup>
 import { useCounterStore } from "@/stores/randomTopic";
-import TopicItem from "./topicItem.vue";
+import TopicItem from "../../../components/topicitem/topicItem.vue";
 import { onMounted } from "vue";
-import router from '@/router/index'
 const store = useCounterStore();
 onMounted(() => {
   store.getRandomTopicList();
 });
-const more = () => {    
-    router.push({name:"topic"})
-};
 </script>
 <style scoped>
 .random-topic {
