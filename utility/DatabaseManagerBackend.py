@@ -646,7 +646,7 @@ class DatabaseManager:
         all_topic_str_list = [str(topic_name).strip("(),'") for topic_name in all_topic_list]
         all_topic_str = ','.join(all_topic_str_list)
         topic_des = (session.query(ReposInfo.id, ReposInfo.descript).join(ReposField, ReposField.rid == ReposInfo.id).
-                     filter(ReposField.topics == "").all())
+                     filter(ReposField.topics == "").order_by(ReposInfo.stargazers_count.desc()).all())
         topic_des_dict = [{"id": uid, "descript": descript} for uid, descript in topic_des]
         return feat_topic_str, topic_des_dict, all_topic_str
 
@@ -907,6 +907,11 @@ if __name__ == "__main__":
     res3 = db_manager.get_related_rank("bkeepers")
     for i in res3:
         print(i)
+
+
+
+
+
     # 更新每个用户的 total_ability 字段
 
     # count = 0
@@ -932,3 +937,5 @@ if __name__ == "__main__":
     #
     # finally:
     #     session.close()
+    res = db_manager.get_qwen_topic_relevant_info()
+    print(res)
