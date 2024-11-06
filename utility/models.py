@@ -1,6 +1,6 @@
 # models.py
 from sqlalchemy import Column, Integer, String, Text, Boolean, DECIMAL, ForeignKey, UniqueConstraint, \
-    PrimaryKeyConstraint, Table, MetaData, create_engine
+    PrimaryKeyConstraint, Table, MetaData, create_engine, Index
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -22,6 +22,10 @@ class User(Base):
     location = Column(String(255))
     nation = Column(String(255))
     total_ability = Column(Integer)
+    # 索引
+    __table_args__ = (
+        Index('idx_total_ability', 'total_ability'),  # 添加索引
+    )
     # 关联关系
     blogs = relationship("UserBlog", backref="user", cascade="all, delete-orphan")
     talents = relationship("Talent", backref="user", cascade="all, delete-orphan")
