@@ -9,6 +9,7 @@ from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
 Base = declarative_base()
 metadata = MetaData()
 
+
 # 用户信息表
 class User(Base):
     __tablename__ = 'users'
@@ -29,6 +30,7 @@ class User(Base):
     # 关联关系
     blogs = relationship("UserBlog", backref="user", cascade="all, delete-orphan")
     talents = relationship("Talent", backref="user", cascade="all, delete-orphan")
+    blog_score = relationship("BlogScore", backref="user", cascade="all, delete-orphan")
     login_name = relationship("UserLoginName", backref="user", cascade="all, delete-orphan")
     repos = relationship("UserRepos", backref="user", cascade="all, delete-orphan")
     organizations = relationship("UserOrganization", backref="user", cascade="all, delete-orphan")
@@ -50,6 +52,7 @@ class Talent(Base):
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'topic'),
     )
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
@@ -59,16 +62,20 @@ class UserBlog(Base):
     __tablename__ = 'blogs'
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     blog_html = Column(MEDIUMTEXT)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 用户登录名表
 class UserLoginName(Base):
     __tablename__ = 'login_names'
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     login_name = Column(String(255), unique=True)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 用户仓库关联表
 class UserRepos(Base):
@@ -78,8 +85,10 @@ class UserRepos(Base):
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'repos_url'),
     )
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class Organization(Base):
     __tablename__ = 'organizations'
@@ -88,8 +97,10 @@ class Organization(Base):
     descript = Column(MEDIUMTEXT)
     location = Column(String(255))
     organization_blog_html = Column(MEDIUMTEXT)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 用户组织关联表
 class UserOrganization(Base):
@@ -102,8 +113,10 @@ class UserOrganization(Base):
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'organization_id'),
     )
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 用户关系网表
 class UserRelationship(Base):
@@ -117,8 +130,10 @@ class UserRelationship(Base):
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'related_uid'),
     )
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 项目成员表
 class ReposParticipant(Base):
@@ -128,8 +143,10 @@ class ReposParticipant(Base):
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'rid'),
     )
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 项目基本信息表
 class ReposInfo(Base):
@@ -149,16 +166,20 @@ class ReposInfo(Base):
     languages = relationship("ReposLanguageProportion", backref="repo", cascade="all, delete-orphan")
     participants = relationship("ReposParticipantContribution", backref="repo", cascade="all, delete-orphan")
     fields = relationship("ReposField", backref="repo", cascade="all, delete-orphan")
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 项目URL表
 class ReposUrl(Base):
     __tablename__ = 'repos_url'
     rid = Column(Integer, ForeignKey('repos_info.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     repos_url = Column(String(255))
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 项目语言占比表
 class ReposLanguageProportion(Base):
@@ -169,8 +190,10 @@ class ReposLanguageProportion(Base):
     __table_args__ = (
         PrimaryKeyConstraint('rid', 'language'),
     )
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 项目参与者贡献表
 class ReposParticipantContribution(Base):
@@ -183,16 +206,20 @@ class ReposParticipantContribution(Base):
     __table_args__ = (
         PrimaryKeyConstraint('rid', 'uid'),
     )
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # 项目领域表
 class ReposField(Base):
     __tablename__ = 'repos_fields'
     rid = Column(Integer, ForeignKey('repos_info.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     topics = Column(String(255), ForeignKey('topics.name', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # topic表
 class Topic(Base):
@@ -203,18 +230,29 @@ class Topic(Base):
     repos_count = Column(Integer)
     is_featured = Column(Boolean)
     is_curated = Column(Boolean)
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 # topic url表
 class TopicUrl(Base):
     __tablename__ = 'topics_url'
     name = Column(String(50), ForeignKey('topics.name', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     topic_url = Column(String(255))
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-# 组织表
+
+# blog分数表
+class BlogScore(Base):
+    __tablename__ = 'blog_score'
+    uid = Column(Integer, ForeignKey('users.id'), onupdate='CASCADE', ondelete='CASCADE'),
+    blog_score = Column(Integer)
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 # 爬虫错误日志表
@@ -253,9 +291,6 @@ GROUP BY
     u1.id;
 """
 
-
-
-
 user_profile_view_sql = """
 CREATE VIEW user_profile_view AS
 SELECT 
@@ -288,15 +323,8 @@ WHERE
     users.followers > 150  AND users.nation = ""
 """
 
-
-
-
-
-
 db_url = (
     f"mysql+mysqlconnector://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}"
     f"@{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"
 )
 engine = create_engine(db_url, echo=True)
-
-
