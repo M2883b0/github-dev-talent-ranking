@@ -248,7 +248,7 @@ class TopicUrl(Base):
 # blog分数表
 class BlogScore(Base):
     __tablename__ = 'blog_score'
-    uid = Column(Integer, ForeignKey('users.id'), onupdate='CASCADE', ondelete='CASCADE'),
+    uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
     blog_score = Column(Integer)
 
     def as_dict(self):
