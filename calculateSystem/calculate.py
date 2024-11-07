@@ -146,8 +146,15 @@ if __name__ == "__main__":
     # print("----------计算个人在某个项目中的能力值---------------")
     # calc_personal_repos_ability(calc_system, db_manager)
 
+    # 对repos_ability做
+
+
+    #
     # 计算topic能力值并插入
     # print("---------计算个人topic能力值并插入")
+
+
+
     # calculate_topic_ability(calc_system, db_manager)
     # 计算总能力值并插入
     print('--------计算总能力并更新------------')

@@ -22,7 +22,7 @@ class CalculateSystem:
             personal_repos_ability = repos_importance * personal_contribution
         return personal_repos_ability
 
-    def calculate_topic_ability(self, followers, all_topic_repos_ability, blog=0, **kargs):
+    def calculate_topic_ability(self, followers, all_topic_repos_ability, blog = 0, **kargs):
         if all_topic_repos_ability:
             topic_ability = followers / 100 + all_topic_repos_ability + blog
             topic_ability = int(topic_ability)

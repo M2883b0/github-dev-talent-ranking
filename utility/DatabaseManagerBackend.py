@@ -2,8 +2,8 @@ import logging
 import random
 from enum import Enum
 from sqlalchemy import join, select, update, Insert, func, cast, Integer
-from sqlalchemy import create_engine, asc, desc
-from sqlalchemy.orm import joinedload, aliased, scoped_session, sessionmaker, Session
+from sqlalchemy import create_engine, desc
+from sqlalchemy.orm import aliased, scoped_session, sessionmaker
 import time
 from utility.InitDatabase2 import UserProfileView
 from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
@@ -11,13 +11,9 @@ from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, Use
     ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl, BlogScore
 from utility.config import INIT_DATABASE_INFO
 
-from typing import Optional, List, Dict, Any
-from sqlalchemy import and_, or_
-import pymysql
-from utility.field_constants import UserFields, UserOrganizationFields, UserRelationshipFields, UserReposFields, \
-    UserBlogFields, UserLoginNameFields, ReposFieldFields, ReposInfoFields, ReposParticipantFields, ReposUrlFields, \
-    ReposLanguageProportionFields, ReposParticipantContributionFields, OrganizationFields, TopicFields, \
-    CrawledUrlFields, TopicUrlFields, TalentFields, SpiderErrorFields
+from bs4 import BeautifulSoup
+from sqlalchemy import and_
+
 
 
 class TableName(Enum):
@@ -671,8 +667,7 @@ class DatabaseManager:
         session = self.get_session()
         query = (session.query(UserBlog)
                  .join(User, User.id == UserBlog.uid)
-                 .join(BlogScore, BlogScore.uid == User.id)
-                 .filter(BlogScore.blog_score == 0)
+                 .filter(User.followers > 500)
                  .order_by(User.followers.desc()))
         spark_blog_relevant_info = query.all()
         spark_blog_relevant_info_list = []
@@ -942,13 +937,19 @@ if __name__ == "__main__":
     # for i in res3:
     #     print(i)
 
+    # res4 = db_manager.get_specific_topic_rank("c")
     res4 = db_manager.get_spark_blog_relevant_info()
     count = 0
     for i in res4:
         count += 1
         print(i)
+        print('-------------------------------开始')
         if count == 5:
             break
+        soup = BeautifulSoup(i['blog_html'], 'html.parser')
+        # 提取纯文本内容并清理多余的空白字符
+        print(soup.get_text(separator=' ', strip=True))
+        print('-------------------------------结束')
 
 
     test = [{
@@ -961,6 +962,8 @@ if __name__ == "__main__":
         }
 ]
 
+
+    # session.query(ReposParticipantContribution).update({ReposParticipantContribution.repos_ability: 0})
 
     # 更新每个用户的 total_ability 字段
 
