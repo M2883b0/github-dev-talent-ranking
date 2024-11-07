@@ -1,1 +1,0 @@
-import{d as n,r as s,o as c,c as a,a as r}from"./index-6yoQlpHK.js";const i=n("AllTopic",()=>{const o=s([]);async function e(){await(await fetch("/api/get_topic")).json()}return{allTopic:o,getAllTopic:e}}),u={__name:"index",setup(o){const e=i();return c(()=>{e.getAllTopic()}),(t,p)=>(r(),a("div"))}};export{u as default};
