@@ -22,12 +22,21 @@ class CalculateSystem:
             personal_repos_ability = repos_importance * personal_contribution
         return personal_repos_ability
 
-    def calculate_topic_ability(self, followers, all_topic_repos_ability, blog):
-        topic_ability = followers / 100 + all_topic_repos_ability + blog
+    def calculate_topic_ability(self, followers, all_topic_repos_ability, blog=0, **kargs):
+        if all_topic_repos_ability:
+            topic_ability = followers / 100 + all_topic_repos_ability + blog
+            topic_ability = int(topic_ability)
+        else:
+            return 0
         return topic_ability
 
-    def calculate_ability(self, followers, all_repos_ability, blog):
-        ability = followers / 100 + all_repos_ability + blog
+    def calculate_ability(self, followers, ability, blog = 0, **kargs):
+        if ability:
+            pass
+        else:
+            ability = 0
+        ability = followers / 100 + ability + blog
+        ability = int(ability)
         return ability
 
     def calculate_coefficient(self, mean_fork, mean_star, mean_sub, mean_issue):

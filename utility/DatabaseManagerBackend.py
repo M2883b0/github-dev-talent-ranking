@@ -8,7 +8,7 @@ import time
 from utility.InitDatabase2 import UserProfileView
 from utility.models import User, Talent, UserBlog, UserLoginName, UserRepos, UserOrganization, UserRelationship, \
     ReposParticipant, ReposInfo, ReposUrl, ReposLanguageProportion, ReposParticipantContribution, \
-    ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl
+    ReposField, Topic, TopicUrl, Organization, SpiderError, CrawledUrl, BlogScore
 from utility.config import INIT_DATABASE_INFO
 
 from typing import Optional, List, Dict, Any
@@ -549,6 +549,23 @@ class DatabaseManager:
         session.commit()
         session.close()
 
+    def insert_blog_score(self, new_values):
+        """
+        更新数据
+        :param new_values: 新值，字典形式
+        """
+        session = self.get_session()
+        try:
+            # 批量更新
+            print(new_values)
+            session.bulk_insert_mappings(BlogScore, new_values)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            logging.error("更新记录失败：%s", e)
+        finally:
+            session.close()
+
     def update_data(self, record_id, new_values):
         """
         更新数据
@@ -649,6 +666,23 @@ class DatabaseManager:
                      filter(ReposField.topics == "").order_by(ReposInfo.stargazers_count.desc()).all())
         topic_des_dict = [{"id": uid, "descript": descript} for uid, descript in topic_des]
         return feat_topic_str, topic_des_dict, all_topic_str
+
+    def get_spark_blog_relevant_info(self):
+        session = self.get_session()
+        query = (session.query(UserBlog)
+                 .join(User, User.id == UserBlog.uid)
+                 .join(BlogScore, BlogScore.uid == User.id)
+                 .filter(BlogScore.blog_score == 0)
+                 .filter(User.followers > 500))
+        spark_blog_relevant_info = query.all()
+        spark_blog_relevant_info_list = []
+        for blog in spark_blog_relevant_info:
+            spark_blog_relevant_info_dict = UserBlog.as_dict(blog)
+            spark_blog_relevant_info_list.append(spark_blog_relevant_info_dict)
+        return spark_blog_relevant_info_list
+
+
+
 
     def get_repos_info(self):
         session = self.get_session()
@@ -896,20 +930,36 @@ if __name__ == "__main__":
     # res = db_manager.get_user_info("zhangsan")
     # print(res)
 
-    res2 = db_manager.get_specific_topic_rank("c")
+    # res2 = db_manager.get_specific_topic_rank("c")
+    # count = 0
+    # for user in res2:
+    #     count += 1
+    #     print(user)
+    #     if count == 5:
+    #         break
+    #
+    # res3 = db_manager.get_related_rank("bkeepers")
+    # for i in res3:
+    #     print(i)
+
+    res4 = db_manager.get_spark_blog_relevant_info()
     count = 0
-    for user in res2:
+    for i in res4:
         count += 1
-        print(user)
+        print(i)
         if count == 5:
             break
 
-    res3 = db_manager.get_related_rank("bkeepers")
-    for i in res3:
-        print(i)
 
-
-
+    test = [{
+        "uid":1,
+        "blog_score":10
+    },
+        {
+            "uid":2,
+            "blog_score":10
+        }
+]
 
 
     # 更新每个用户的 total_ability 字段
@@ -937,5 +987,3 @@ if __name__ == "__main__":
     #
     # finally:
     #     session.close()
-    res = db_manager.get_qwen_topic_relevant_info()
-    print(res)
