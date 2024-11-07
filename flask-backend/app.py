@@ -4,19 +4,26 @@ import random
 import pickle
 import string
 
-from flask import Flask
-from flask import request
+from flask import Flask,send_from_directory
+from flask import request,render_template
 from flask_redis import FlaskRedis
+import sys
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+
 
 from utility.DatabaseManagerBackend import DatabaseManager
 
+# app = Flask(__name__, static_folder='/static/dist', static_url_path='/')
 app = Flask(__name__)
 # 配置redis的信息
 app.config['REDIS_URL'] = "redis://localhost:6379/0"
 # 初始化 Redis 客户端
 redis_client = FlaskRedis(app)
 # redis中数据的保留时间(秒)
-redis_time = 60   # 1分钟
+redis_time = 60   # 20分钟
 
 user_image_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
@@ -24,8 +31,9 @@ user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 
 @app.route("/")
 def hello():  # 主页
-    # return render_template("index.html", name='123')
-    return "cnm"
+    return render_template("index.html")
+    # return "hello lyx"
+    # return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route("/get_topics_page")
@@ -49,6 +57,7 @@ def get_topics_page():
         return cached_data
     # 如果拿不到，就执行下面的访问mysql的语句
 
+
     # 操作数据库:多表【topic、topic_url表】
     classify = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
                 'V', 'W', 'X', 'Y', 'Z', 'others']
@@ -68,7 +77,7 @@ def get_topics_page():
         key: value[:num] for key, value in all_topic_classify.items()
     }
     ret = all_topic_classify
-    ret["len"] = len(all_topic_classify)  #只要前num个
+    # ret["len"] = len(all_topic_classify)  #只要前num个
 
     # Redis 代码
     # 把自定义的key，和对应的值，存入redis里面
@@ -87,13 +96,24 @@ def get_topic():
         topic = request.args.get("topic")  # topic名字，name
     else:
         topic = ""
+    if topic == 'C  ':
+        topic = 'C++'
     if request.args.get("is_feature"):
         is_feature = (True if request.args.get("is_feature").lower() == 'true' else False)
     else:
         is_feature = False
-
-    topic_li = filter_first_topic(database_manager.get_topic_list(topic, is_feature, False), topic)
-    ret = {"total_count": len(topic_li), "topic_list": topic_li}
+    data_temp=database_manager.get_topic_list(topic, is_feature, False)
+    if data_temp is None or len(data_temp)==0:
+        return {
+                    "code": 1,
+                    "msg": "name no in topic list"
+                }
+    if len(topic)==1:  #字母
+        topic_li = filter_first_topic(data_temp, topic)
+        ret = {"total_count": len(topic_li), "topic_list": topic_li, "is_letter":True}
+    else:
+        topic_li = filter_topic(data_temp, topic)
+        ret = {"total_count": len(topic_li), "topic_list": topic_li, "is_letter":False}
     return json.dumps(ret)
 
 
@@ -111,9 +131,14 @@ def topic_rank():
     if nation == "\"\"" or nation == "''":
         nation = ""
 
+    if topic == 'C  ':
+        topic = 'C++'
+
+    print(topic)
+    print(nation)
     # Redis 代码[KEY ,VALUE]
     # 定义把哪些数据放入redis，定义一个key
-    redis_rank_name = ['', 'C', 'Python', 'Linux']  # 前端首页放固定的几个热门topic榜单。【''表示综合榜单】
+    redis_rank_name = ['', 'C', 'Python', 'C++']  # 前端首页放固定的几个热门topic榜单。【''表示综合榜单】
     cache_key = f"topics_rank:topic={topic}:nation={nation}"
     if topic in redis_rank_name and nation == "":
         # 尝试从 Redis 缓存中获取数据
@@ -127,6 +152,11 @@ def topic_rank():
         data = database_manager.get_specific_topic_rank(topic, nation)
     else:  # 如果没指定topic，就返回按开发者综合talent的榜单。
         data = database_manager.get_total_talent(nation)
+    if data is None or len(data)==0:
+        return {
+            "code": 1,
+            "msg": "no people"
+        }
     if len(data) > 100:     # 只返回top100榜单
         data = data[:100]
     ret = {}
@@ -215,7 +245,7 @@ def relate_topic():
         }
     num = int(request.args.get("num", 6))  # 返回推荐的前几个，例如返回6个
 
-    file_name = 'correlation_matrix.xlsx'
+    file_name = './flask-backend/correlation_matrix.xlsx'
 
     # Redis,定义一个key
     cache_key = "correlation_matrix.xlsx"
@@ -228,18 +258,16 @@ def relate_topic():
         # 使用 pickle 序列化 DataFrame
         pickled_df = pickle.dumps(df)
         # 再写入 redis
-        redis_client.set(cache_key, pickled_df, ex=60*100)  # 设置100分钟的过期时间
+        redis_client.set(cache_key, pickled_df, ex=redis_time*2)  # 设置过期时间
 
     if topic == 'C  ':
         topic = 'C++'
-    related_attributes = find_most_related_attributes(df, topic, num*5)
+    related_attributes = find_most_related_attributes(df, topic, num*10)
     if related_attributes and len(related_attributes)!=0:
         specific_relate_list = [attr for attr, prob in related_attributes]
     else:
-        return {
-            "code": 1,
-            "msg": "NxN矩阵，没有这个目标topic"
-        }
+        return random_topic()
+
     # 调用数据库接口
     li = []
     for tp in specific_relate_list:
@@ -273,7 +301,7 @@ def search_users():
     name = request.args.get("name")  # login名
     if not name:
         return {
-            "code": 400,
+            "code": 1,
             "msg": "please input name"
         }
     # TODO: 关系圈：3个勾选项，例如：只查看粉丝的榜单，不看其他关系的。
@@ -299,7 +327,7 @@ def search_users():
 
     if user is None:
         return {
-            "code": 400,
+            "code": 1,
             "msg": "user does not exist"
         }
 
@@ -325,4 +353,5 @@ def search_users():
 
 if __name__ == "__main__":
     database_manager = DatabaseManager()
-    app.run(host="0.0.0.0", port=80, debug=True, threaded=True)
+    app.run(host="0.0.0.0", port=80)
+    # app.run(host="0.0.0.0", port=10072)
