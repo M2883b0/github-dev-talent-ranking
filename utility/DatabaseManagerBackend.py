@@ -209,16 +209,18 @@ class DatabaseManager:
         """
         session = self.get_session()
         specific_topic_rank = []
-        if nation is None:
-            query = self.__get_users_topic_info_query(topic)
-            users_info = query.all()
-            specific_topic_rank = self.__parse_special_topic_rank(users_info)
-        elif nation:
+        if nation:
             query = self.__get_users_topic_info_query(topic)
             # 指定国家过滤
             query = query.filter(User.nation.like(f'%{nation}%'))
             users_info = query.all()
             specific_topic_rank = self.__parse_special_topic_rank(users_info)
+
+        else:
+            query = self.__get_users_topic_info_query(topic)
+            users_info = query.all()
+            specific_topic_rank = self.__parse_special_topic_rank(users_info)
+
 
         return specific_topic_rank
 
