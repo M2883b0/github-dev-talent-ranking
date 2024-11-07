@@ -1,5 +1,4 @@
 import logging
-import random
 from enum import Enum
 from sqlalchemy import join, select, update, Insert, func, cast, Integer
 from sqlalchemy import create_engine, desc
@@ -479,8 +478,7 @@ class DatabaseManager:
                 "fork_num": user.fork_num,
                 "followers_num": user.followers,
                 'topic': user.topic,
-                # "topic_talent": user.ability
-                'topic_talent': random.randint(50, 100)
+                "topic_talent": user.ability
             }
             users_info_list.append(parsed_user_info)
         return sorted(users_info_list, key=lambda x: x['topic_talent'], reverse=True)
