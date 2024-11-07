@@ -673,7 +673,7 @@ class DatabaseManager:
                  .join(User, User.id == UserBlog.uid)
                  .join(BlogScore, BlogScore.uid == User.id)
                  .filter(BlogScore.blog_score == 0)
-                 .filter(User.followers > 500))
+                 .order_by(User.followers.desc()))
         spark_blog_relevant_info = query.all()
         spark_blog_relevant_info_list = []
         for blog in spark_blog_relevant_info:
