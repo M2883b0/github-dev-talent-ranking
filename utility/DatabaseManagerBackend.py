@@ -361,6 +361,7 @@ class DatabaseManager:
             User.repos_count,
             User.total_ability)
                  .join(UserLoginName, UserLoginName.uid == User.id)
+                 .order_by(User.total_ability.desc())
                  .filter(User.id.in_(user_id_list)))
         return query
 
