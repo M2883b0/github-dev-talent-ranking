@@ -2,13 +2,55 @@
   <div class="rank-item" @click="goGithub">
     <img :src="getTopImgSrc" v-if="rank <= 2" class="rank-image" />
     <div v-else class="rank">{{ rank + 1 }}</div>
-    <el-avatar :size="30" :src="rankInfo.image_url" class="avatar-view">
+    <el-avatar :size="30" :src="rankInfo.github_url" class="avatar-view">
       <img
         src="https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg"
       />
     </el-avatar>
-    <div class="name">{{ rankInfo.login_name }}</div>
-    <div class="total_talent">{{ rankInfo.total_talent }}</div>
+    <div class="name">{{ rankInfo.name }}</div>
+    <div class="name" style="margin-left: 20px" v-if="rankInfo.followers_num">
+      粉丝数：{{ rankInfo.followers_num }}
+    </div>
+    <div class="name" style="margin-left: 20px"  v-if="rankInfo.fork_num">
+      fork数：{{ rankInfo.fork_num }}
+    </div>
+   
+    <div class="name" style="margin-left: 20px" v-if="rankInfo.repos_num">
+      仓库数：{{ rankInfo.repos_num }}
+    </div>
+    <div class="name" style="margin-left: 20px" v-if="rankInfo.nation">
+      所属国家或地区：{{ rankInfo.nation }}
+    </div>
+    <div class="name" style="margin-left: 20px" v-if="rankInfo.email_address">
+      邮箱：{{ rankInfo.email_address }}
+    </div>
+    <div
+      class="name"
+      style="
+        margin-left: 20px;
+        max-width: 250px;
+        white-space: nowrap;
+        overflow: hidden; /* 隐藏溢出内容 */
+        text-overflow: ellipsis;
+      "
+      v-if="rankInfo.company"
+    >
+      公司：{{ rankInfo.company }}
+    </div>
+    <div
+      class="name"
+      style="
+        margin-left: 20px;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden; /* 隐藏溢出内容 */
+        text-overflow: ellipsis;
+      "
+      v-if="rankInfo.bio"
+    >
+      简介：{{ rankInfo.bio }}
+    </div>
+    <div class="total_talent">综合分数：{{ rankInfo.total_talent }}</div>
   </div>
 </template>
 <script setup>
@@ -25,7 +67,7 @@ const getTopImgSrc = computed(() => {
   return topImageList[props.rank];
 });
 const goGithub = () => {
-  window.location = props.rankInfo.github_url;
+  window.location = props.rankInfo.image_url;
 };
 </script>
 <style scoped>
