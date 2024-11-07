@@ -6,14 +6,10 @@
 ------------      --------    -----------
 2024/10/26 11:00    1.0         None
 """
-import mysql.connector
-from mysql.connector import Error
 import utility.config as config
 from utility.config import *
-from DatabaseManager import DatabaseConnectionPool, DatabaseManager
 from utility.DatabaseInitializer import DatabaseInitializer
-import logging
-from config import user_profile_view_sql, user_relation_view_sql
+
 
 
 def generate_table_sql(table_field):
