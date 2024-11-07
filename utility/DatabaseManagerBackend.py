@@ -221,7 +221,6 @@ class DatabaseManager:
             users_info = query.all()
             specific_topic_rank = self.__parse_special_topic_rank(users_info)
 
-
         return specific_topic_rank
 
     def get_related_rank(self, name, is_follower=True, is_following=True,
@@ -289,19 +288,17 @@ class DatabaseManager:
 
     def get_total_talent(self, nation=None):
         if nation:
-            query = self.__get_users_info_query()
+            query = self.__get_total_base_info_query()
             # 模糊查询 国家 包含 param: nation 的记录
             # query = query.order_by(desc(User.total_ability))
             query = query.filter(User.nation.like(f'%{nation}%'))
-            all_users_info_nation = query.limit(100).all()
-            all_users_info = self.__parse_topic_and_talent(all_users_info_nation)
+            all_users_info_nation = query.all()
+            all_users_info = self.__parse_total_user_info(all_users_info_nation)
         else:
-            query = self.__get_users_info_query()
+            query = self.__get_total_base_info_query()
             # query = query.order_by(desc(User.total_ability))
-            query = query.order_by(desc(User.followers)).limit(100)
-            print(query)
             all_users = query.all()
-            all_users_info = self.__parse_topic_and_talent(all_users)
+            all_users_info = self.__parse_total_user_info(all_users)
         if len(all_users_info) == 0:
             return None
         return all_users_info
@@ -342,6 +339,29 @@ class DatabaseManager:
                 User.id, UserLoginName.login_name, User.name, User.email_address, User.bio, User.company,
                 Organization.name, User.nation, User.repos_count, User.followers, User.total_ability
             ))
+        return query
+
+    def __get_total_base_info_query(self):
+        session = self.get_session()
+        user_id_list = []
+        user_ids = (session.query(User.id)
+                    .order_by(User.total_ability.desc())
+                    .limit(150).all())
+        for user_id in user_ids:
+            user_id_list.append(user_id.id)
+        query = (session.query(
+            User.id,
+            UserLoginName.login_name,
+            User.name,
+            User.email_address,
+            User.bio,
+            User.company,
+            User.followers,
+            User.nation,
+            User.repos_count,
+            User.total_ability)
+                 .join(UserLoginName, UserLoginName.uid == User.id)
+                 .filter(User.id.in_(user_id_list)))
         return query
 
     def __get_one_people_topic_info(self, user_id, topic):
@@ -463,6 +483,26 @@ class DatabaseManager:
             }
             users_info_list.append(parsed_user_info)
         return users_info_list
+
+
+    def __parse_total_user_info(self, users_info):
+        users_info_list = []
+        for user in users_info:
+            parse_user_info_dict = {
+                "id": user.id,
+                "login_name": user.login_name,
+                "name": user.name,
+                "email_address": user.email_address,
+                "bio": user.bio,
+                "company": user.company,
+                "nation": user.nation,
+                "repos_num": user.repos_count,
+                "followers_num": user.followers,
+                "total_talent": user.total_ability
+            }
+            users_info_list.append(parse_user_info_dict)
+        return users_info_list
+
 
     def __parse_special_topic_rank(self, special_topic_rank):
         users_info_list = []
@@ -683,9 +723,10 @@ class DatabaseManager:
             all_repos_info_list.append(repos_info_dict)
         return all_repos_info_list
 
+
 if __name__ == "__main__":
     db_manager = DatabaseManager()
-    # res = db_manager.get_total_talent()
-    # print(res)
-    res2 = db_manager.get_specific_topic_rank("c", "")
-    print(res2)
+    res = db_manager.get_total_talent()
+    print(res)
+    # res2 = db_manager.get_specific_topic_rank("c", "")
+    # print(res2)
