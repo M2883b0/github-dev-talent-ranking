@@ -296,8 +296,9 @@ class DatabaseManager:
         else:
             query = self.__get_users_info_query()
             # query = query.order_by(desc(User.total_ability))
-            query = query.order_by(desc(User.followers))
-            all_users = query.limit(100).all()
+            query = query.order_by(desc(User.followers)).limit(100)
+            print(query)
+            all_users = query.all()
             all_users_info = self.__parse_topic_and_talent(all_users)
         if len(all_users_info) == 0:
             return None
@@ -478,10 +479,10 @@ class DatabaseManager:
                 "fork_num": user.fork_num,
                 "followers_num": user.followers,
                 'topic': user.topic,
-                "topic_talent": user.ability
+                "total_talent": user.ability
             }
             users_info_list.append(parsed_user_info)
-        return sorted(users_info_list, key=lambda x: x['topic_talent'], reverse=True)
+        return sorted(users_info_list, key=lambda x: x['total_talent'], reverse=True)
 
     def __parse_topics_info(self, topic_info):
         """
@@ -679,3 +680,10 @@ class DatabaseManager:
             repos_info_dict = ReposInfo.as_dict(repos_info)
             all_repos_info_list.append(repos_info_dict)
         return all_repos_info_list
+
+if __name__ == "__main__":
+    db_manager = DatabaseManager()
+    # res = db_manager.get_total_talent()
+    # print(res)
+    res2 = db_manager.get_specific_topic_rank("c", "")
+    print(res2)
