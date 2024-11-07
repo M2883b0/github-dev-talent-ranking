@@ -1,9 +1,14 @@
 # dev-github-talent-ranking
 根据 GitHub 的开源项目数据，对进行开发者评估和排名。
 
+前端演示地址 ： http://1024.viwipiediema.com:10072/
+
+
+视频地址：https://www.bilibili.com/video/BV14TDQYoE6S/
+
 1、前端，本项目前端需要安装node。前端的配置文件，在`vite.config.js`中，更改后端的服务ip和端口。
 
-```plain
+```bash
 npm run dev
 ```
 
