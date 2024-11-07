@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, text, Table, MetaData, Column, String, eve
 from sqlalchemy.orm import sessionmaker
 from utility.models import Base  # 假设你的模型定义在这里
 from utility.config import INIT_DATABASE_INFO as INIT_DATABASE_INFO
-from utility.models import user_profile_view_sql, user_relation_location_view_sql
 db_url = (
     f"mysql+mysqlconnector://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}"
     f"@{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"

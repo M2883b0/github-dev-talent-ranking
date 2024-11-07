@@ -16,10 +16,10 @@ sys.path.insert(0, parent_dir)
 
 from utility.DatabaseManagerBackend import DatabaseManager
 
-# app = Flask(__name__, static_folder='/static/dist', static_url_path='/')
+app = Flask(__name__, static_folder='/static')
 app = Flask(__name__)
 # 配置redis的信息
-app.config['REDIS_URL'] = "redis://localhost:6379/0"
+# app.config['REDIS_URL'] = "redis://localhost:6379/0"
 # 初始化 Redis 客户端
 redis_client = FlaskRedis(app)
 # redis中数据的保留时间(秒)
@@ -31,12 +31,16 @@ user_github_url_template = "https://avatars.githubusercontent.com/u/{}?v=4"
 
 @app.route("/")
 def hello():  # 主页
-    return render_template("index.html")
+    # return render_template("index.html")
     # return "hello lyx"
-    # return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory('static/dist', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static_files(path):
+    return send_from_directory('static/dist', path)
 
 
-@app.route("/get_topics_page")
+@app.route("/api/get_topics_page")
 def get_topics_page():
     """
     #所有的page页面：一次性返回26个：A【9个】，B【9个】
@@ -86,7 +90,7 @@ def get_topics_page():
     return json.dumps(ret)
 
 
-@app.route("/get_topic")
+@app.route("/api/get_topic")
 def get_topic():
     """
   1、模糊查询，所有topic的列表，A只展示9个，点击A的所有topic。就需要模糊查询所有以A开头的topic，按仓库数量从大到小排序。
@@ -117,7 +121,7 @@ def get_topic():
     return json.dumps(ret)
 
 
-@app.route("/topic_rank")
+@app.route("/api/topic_rank")
 def topic_rank():
     """
   1、搜索框，搜索topic跳转过来，2、所有topic页面的点击某个topic跳转过来
@@ -176,7 +180,7 @@ def topic_rank():
     return json.dumps(ret)
 
 
-@app.route("/random_topic")
+@app.route("/api/random_topic")
 def random_topic():
     """
   :return:随机返回几个topic
@@ -232,7 +236,7 @@ def find_most_related_attributes(df, target_attribute, num=5):
 
         return related_attributes
 
-@app.route("/relate_topic")
+@app.route("/api/relate_topic")
 def relate_topic():
     """
   :return:这个topic的，相似的几个topic
@@ -293,7 +297,7 @@ def generate_user_info(user):
     return user
 
 
-@app.route("/search_users")
+@app.route("/api/search_users")
 def search_users():
     """
   :return:返回这个用户的页面信息【个人详细信息】

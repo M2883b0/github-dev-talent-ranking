@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, Text, Boolean, DECIMAL, ForeignK
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from utility.config import INIT_DATABASE_INFO_DATABASE3306 as INIT_DATABASE_INFO
+
 
 Base = declarative_base()
 metadata = MetaData()
@@ -22,7 +22,7 @@ class User(Base):
     company = Column(String(255))
     location = Column(String(255))
     nation = Column(String(255))
-    total_ability = Column(Integer)
+    total_ability = Column(DECIMAL(15, 2))
     # 索引
     __table_args__ = (
         Index('idx_total_ability', 'total_ability'),  # 添加索引
@@ -48,7 +48,7 @@ class Talent(Base):
     __tablename__ = 'talent'
     uid = Column(Integer, ForeignKey('users.id', onupdate='CASCADE', ondelete='CASCADE'))
     topic = Column(String(255))
-    ability = Column(Integer)
+    ability = Column(DECIMAL(15, 2))
     __table_args__ = (
         PrimaryKeyConstraint('uid', 'topic'),
     )
@@ -323,8 +323,4 @@ WHERE
     users.followers > 150  AND users.nation = ""
 """
 
-db_url = (
-    f"mysql+mysqlconnector://{INIT_DATABASE_INFO['user']}:{INIT_DATABASE_INFO['passwd']}"
-    f"@{INIT_DATABASE_INFO['host']}:{INIT_DATABASE_INFO['port']}/{INIT_DATABASE_INFO['database']}"
-)
-engine = create_engine(db_url, echo=True)
+

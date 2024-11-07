@@ -15,23 +15,6 @@ INIT_DATABASE_INFO = {
     'collations': 'utf8mb4_unicode_ci'
 }
 
-# 数据库相关连接信息
-INIT_DATABASE_INFO_DATABASE3306 = {
-    'host': '192.168.43.160',
-    'port': 3306,
-    'database': 'data',
-    'user': 'root',
-    'passwd': 'www.gzhu.edu.cn',
-    'charset': 'utf8mb4',
-    'collations': 'utf8mb4_unicode_ci'
-}
-
-# 数据库创建配置
-DATABASE_INFO = {
-
-}
-
-#
 # 表名
 
 
@@ -239,30 +222,6 @@ ALL_TABLE_FIELD = {
     REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_NAME: REPOS_PARTICIPANTS_CONTRIBUTIONS_TABLE_FIELD,
     REPOS_URL_TABLE_NAME: REPOS_URL_TABLE_FIELD
 }
-
-
-
-# 级联行为常量
-CASCADE = 'CASCADE'
-RESTRICT = 'RESTRICT'
-NO_ACTION = 'NO ACTION'
-SET_NULL = 'SET NULL'
-SET_DEFAULT = 'SET DEFAULT'
-# 主表-从表映射字典 用于添加外键约束
-MASTER_SLAVE_MAPPING_RULE = {
-    'master_table': ['', ''],
-    'slave_table': ['', ''],
-    'foreign_key_column': ['', ''],
-    'referenced_column': ['', ],
-    'on_delete_action': [''],
-    'on_update_action': ['']
-}
-
-# 获取各个列的值
-master_table_values = MASTER_SLAVE_MAPPING_RULE['master_table']
-slave_table_values = MASTER_SLAVE_MAPPING_RULE['slave_table']
-foreign_key_column_values = MASTER_SLAVE_MAPPING_RULE['foreign_key_column']
-referenced_column_values = MASTER_SLAVE_MAPPING_RULE['referenced_column']
 
 
 # 定义视图SQL查询

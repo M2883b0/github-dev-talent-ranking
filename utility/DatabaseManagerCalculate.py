@@ -113,7 +113,7 @@ class DatabaseManager:
                                ReposField.topics)
                  .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
                  .outerjoin(ReposField, ReposField.rid == ReposParticipantContribution.rid)
-                 .filter(User.followers > 5000)
+                 .filter(User.followers > 200)
                  .group_by(User.id, User.followers, ReposField.topics)
                  )
         topic_calculate_info = query.all()
@@ -135,7 +135,7 @@ class DatabaseManager:
                                cast(func.sum(ReposParticipantContribution.repos_ability), Integer).label('ability'),
                                )
                  .outerjoin(ReposParticipantContribution, ReposParticipantContribution.uid == User.id)
-                 .filter(User.followers > 5000)
+                 .filter(User.followers > 200)
                  .group_by(User.id, User.followers)
                  )
         calculate_info = query.all()
@@ -149,6 +149,62 @@ class DatabaseManager:
             calc_info_list.append(parse_info)
         return calc_info_list
 
+
+    def get_repos_importance(self):
+        """
+        获取所有项目重要度进行缩放
+        """
+        session = self.get_session()
+        query = session.query(ReposInfo.id,
+                              ReposInfo.importance)
+        min_value = session.query(func.min(ReposInfo.importance)).scalar()
+        max_value = session.query(func.max(ReposInfo.importance)).scalar()
+        repos_importance = query.all()
+        return repos_importance, min_value, max_value
+
+
+    def get_repos_ability(self):
+        """
+        获取所有repos_ability进行缩放
+        返回表类对象
+        """
+        session = self.get_session()
+        query = session.query(ReposParticipantContribution.rid,
+                              ReposParticipantContribution.uid,
+                              ReposParticipantContribution.repos_ability)
+        # 查询原始数据的最小值和最大值
+        min_value = session.query(func.min(ReposParticipantContribution.repos_ability)).scalar()
+        max_value = session.query(func.max(ReposParticipantContribution.repos_ability)).scalar()
+        repos_info = query.all()
+        return repos_info, min_value, max_value
+
+    def get_topic_ability(self):
+        """
+        获取所有topic_ability进行缩放
+        返回表类对象
+        """
+        session = self.get_session()
+        query = session.query(Talent.uid, Talent.topic, Talent.ability)
+        # 查询原始数据的最小值和最大值
+        min_value = session.query(func.min(Talent.ability)).scalar()
+        max_value = session.query(func.max(Talent.ability)).scalar()
+        topic_ability_list = query.all()
+        return topic_ability_list, min_value, max_value
+
+    def get_total_ability(self):
+        """
+        获取所有总能力进行缩放
+        返回表类对象
+        """
+        session = self.get_session()
+        query = (session.query(User.id, User.total_ability)
+                 .filter(User.total_ability != 0))
+        # 查询原始数据的最小值和最大值
+        min_value = session.query(func.min(User.total_ability)).scalar()
+        max_value = session.query(func.max(User.total_ability)).scalar()
+        ability_list = query.all()
+        return ability_list, min_value, max_value
+
     def update_repos_importance(self, new_values):
         """
         更新数据
@@ -159,7 +215,7 @@ class DatabaseManager:
             # 批量更新
             session.bulk_update_mappings(ReposInfo, new_values)
             session.commit()
-            print("gengxinchong")
+            print("更新repos_importance")
         except Exception as e:
             session.rollback()
             logging.error("更新记录失败：%s", e)
@@ -176,6 +232,27 @@ class DatabaseManager:
             # 批量更新
             session.bulk_update_mappings(ReposParticipantContribution, new_values)
             session.commit()
+            print("更新repos_ability")
+        except Exception as e:
+            session.rollback()
+            logging.error("更新记录失败：%s", e)
+        finally:
+            session.close()
+
+    def update_topic_ability(self, new_values):
+        """
+        更新topic能力值
+        """
+        """
+        更新数据
+        :param new_values: 新值，字典形式
+        """
+        session = self.get_session()
+        try:
+            # 批量更新
+            session.bulk_update_mappings(Talent, new_values)
+            session.commit()
+            print("更新topic_ability")
         except Exception as e:
             session.rollback()
             logging.error("更新记录失败：%s", e)
@@ -190,12 +267,10 @@ class DatabaseManager:
         session = self.get_session()
         try:
             # 批量更新
-            print(new_values)
             session.bulk_update_mappings(User, new_values)
-            print("ability更新")
             session.commit()
+            print("更新ability")
         except Exception as e:
-            print("错误")
             session.rollback()
             logging.error("更新记录失败：%s", e)
         finally:
