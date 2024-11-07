@@ -5,7 +5,7 @@ LABEL authors="zmzzmqa"
 COPY ./requirements.txt /app/requirements.txt
 
 # 复制应用代码到容器中
-COPY ./flask-backend /app
+COPY ./ /app
 
 # 安装依赖
 RUN apt upgrade &&\
