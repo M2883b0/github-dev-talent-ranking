@@ -5,7 +5,7 @@
 
 视频地址：https://www.bilibili.com/video/BV14TDQYoE6S/
 
-文档地址： https://github.com/M2883b0/github-dev-talent-ranking/blob/main/doc/%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84.md
+文档地址： [地址](./doc/%E9%A1%B9%E7%9B%AE%E6%9E%B6%E6%9E%84.md])
 
 1、前端，本项目前端需要安装node。前端的配置文件，在`vite.config.js`中，更改后端的服务ip和端口。
 
